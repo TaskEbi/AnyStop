@@ -1,0 +1,152 @@
+/* ── quick-add bar: a long paper label strip ─────────────────────────────── */
+
+.quick-add {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 50px;
+  padding: 0.3rem 0.4rem 0.3rem 0.9rem;
+  background-color: var(--paper);
+  background-image: var(--grain);
+  color: var(--ink);
+  box-shadow: var(--shadow-card);
+  rotate: -0.25deg;
+}
+.quick-add::before {
+  /* tape holding the label down */
+  content: '';
+  position: absolute;
+  top: -8px;
+  left: 18px;
+  width: 54px;
+  height: 18px;
+  rotate: -6deg;
+  background: color-mix(in srgb, var(--tape-mustard) 80%, transparent);
+  background-image: repeating-linear-gradient(-45deg, rgb(255 255 255 / 0.3) 0 4px, transparent 4px 9px);
+}
+.quick-add:focus-within {
+  box-shadow: var(--shadow-lift), 0 0 0 2px var(--focus);
+}
+.quick-add__label {
+  flex: none;
+  font-size: 1.25rem;
+  color: var(--thread);
+  padding-right: 0.6rem;
+  border-right: 1.5px dashed var(--panel-line);
+}
+.quick-add__input {
+  flex: 1;
+  min-width: 0;
+  height: 40px;
+  border: 0;
+  background: transparent;
+  font-family: var(--font-serif);
+  font-size: 1.02rem;
+  color: var(--ink);
+}
+.quick-add__input::placeholder {
+  color: var(--ink-faint);
+  font-style: italic;
+}
+.quick-add__input:focus-visible {
+  outline: none;
+}
+@media (max-width: 520px) {
+  .quick-add__label {
+    display: none;
+  }
+}
+
+/* ── add sheet form ──────────────────────────────────────────────────────── */
+
+.add-form {
+  display: grid;
+  gap: 1rem;
+}
+.add-form__row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.9rem;
+  align-items: start;
+}
+.add-form__row--status {
+  grid-template-columns: 1fr auto;
+  align-items: end;
+}
+@media (max-width: 560px) {
+  .add-form__row,
+  .add-form__row--status {
+    grid-template-columns: 1fr;
+  }
+}
+.add-form__fav {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 34px;
+  font-family: var(--font-type);
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+.add-form__fav input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--thread);
+}
+.add-form__star {
+  color: #d6a531;
+  font-size: 1.1rem;
+}
+
+.room-picker__new {
+  display: flex;
+  gap: 0.4rem;
+}
+
+/* ── tag input ───────────────────────────────────────────────────────────── */
+
+.tag-input__box {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  min-height: 40px;
+  padding: 0.3rem 0.4rem;
+  border: 1px solid var(--panel-line);
+  border-radius: var(--radius);
+  background: var(--paper);
+}
+.tag-input__box:focus-within {
+  outline: 2px solid var(--focus);
+}
+.tag-input__chip {
+  min-height: 26px;
+  padding-right: 0.25em;
+}
+.tag-input__remove {
+  border: 0;
+  background: transparent;
+  padding: 0 0.3em;
+  font-size: 1rem;
+  line-height: 1;
+  color: inherit;
+}
+.tag-input__field {
+  flex: 1;
+  min-width: 80px;
+  border: 0;
+  background: transparent;
+  font-family: var(--font-type);
+  font-size: 0.85rem;
+  color: var(--ink);
+}
+.tag-input__field:focus-visible {
+  outline: none;
+}
+.tag-input__suggest {
+  margin-top: 0.35rem;
+}
+.tag-input__suggest .chip {
+  min-height: 26px;
+  border-style: dashed;
+}

@@ -1,0 +1,90 @@
+.rooms-new {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.1rem;
+}
+.rooms-empty {
+  color: var(--ink-soft);
+  font-style: italic;
+}
+.rooms-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.8rem;
+}
+.room-row {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.75rem;
+  padding: 1rem 0.8rem 0.8rem;
+  background: var(--paper-warm);
+  box-shadow: 0 1px 3px rgb(60 40 20 / 0.18);
+}
+.room-row__tape {
+  position: absolute;
+  top: -7px;
+  left: 14px;
+  width: 64px;
+  height: 16px;
+  rotate: -3deg;
+  background: var(--swatch);
+  opacity: 0.9;
+}
+.room-row__main {
+  display: grid;
+  gap: 0.4rem;
+  min-width: 0;
+}
+.room-row__name {
+  font-size: 1.25rem;
+  padding-block: 0.2rem;
+}
+.room-row__desc {
+  font-size: 0.9rem;
+  min-height: 34px;
+}
+.room-row__colors {
+  display: flex;
+  gap: 0.35rem;
+}
+.room-row__color {
+  width: 28px;
+  height: 22px;
+  border: 2px solid transparent;
+  border-radius: 3px;
+  background: var(--c);
+}
+.room-row__color[aria-checked='true'] {
+  border-color: var(--ink);
+  box-shadow: 0 0 0 1px var(--paper) inset;
+}
+.room-row__side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.4rem;
+}
+.room-row__count {
+  font-size: 0.72rem;
+  color: var(--ink-faint);
+  white-space: nowrap;
+}
+.room-row__order {
+  display: flex;
+}
+.room-row .inline-confirm {
+  position: absolute;
+  inset: auto 0.5rem 0.5rem;
+  z-index: 2;
+  background: var(--paper);
+  justify-content: flex-end;
+}
+@media (max-width: 520px) {
+  .rooms-new {
+    flex-direction: column;
+  }
+}

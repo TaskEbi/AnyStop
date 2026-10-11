@@ -1,0 +1,35 @@
+.stamp {
+  --stamp-ink: var(--stamp-next);
+  position: absolute;
+  z-index: 4;
+  right: 10px;
+  bottom: 30px;
+  rotate: -9deg;
+  padding: 2px 7px 1px;
+  border: 2.5px solid var(--stamp-ink);
+  border-radius: 4px;
+  outline: 1px solid var(--stamp-ink);
+  outline-offset: 2px;
+  color: var(--stamp-ink);
+  background: color-mix(in srgb, var(--paper) 55%, transparent);
+  font-family: var(--font-type);
+  font-weight: 700;
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  line-height: 1.3;
+  opacity: 0.85;
+  pointer-events: none;
+  /* worn rubber: punch the grain texture out of the ink */
+  mask-image: var(--grain), linear-gradient(#000 0 0);
+  mask-size: 120px, auto;
+  mask-composite: exclude;
+}
+.stamp--in_progress {
+  --stamp-ink: var(--stamp-progress);
+  rotate: 6deg;
+}
+.stamp--done {
+  --stamp-ink: var(--stamp-done);
+  rotate: -4deg;
+}
