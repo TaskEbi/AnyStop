@@ -18,6 +18,10 @@ import { Toasts } from '../ui/Toasts';
 import { ExamplesNotice } from './ExamplesNotice';
 import { useShortcuts } from './useShortcuts';
 import { useTheme } from './useTheme';
+import { useCapture } from './useCapture';
+import { takeShare } from './share';
+import { enrichBacklog } from '../data/enrich';
+import { BackOffice } from '../features/backoffice/BackOffice';
 
 /** First visit to an empty cabinet: lay out the examples (only once per account). */
 function maybeSeed() {
@@ -43,9 +47,15 @@ function useSession(userId: string | null) {
       } else {
         maybeSeed();
       }
+      if (cancelled) return;
+      await takeShare(() => handle?.flush() ?? Promise.resolve());
+      void enrichBacklog();
     })();
+    const onOnline = () => void enrichBacklog();
+    window.addEventListener('online', onOnline);
     return () => {
       cancelled = true;
+      window.removeEventListener('online', onOnline);
       handle?.stop();
       closeSession();
     };
@@ -57,6 +67,7 @@ export function Museum({ userId }: { userId: string | null }) {
   const sync = useSession(userId);
   useShortcuts();
   useTheme();
+  const dragging = useCapture();
 
   const ready = useStore(data, (s) => s.ready);
   const itemsMap = useStore(data, (s) => s.items);
@@ -67,6 +78,7 @@ export function Museum({ userId }: { userId: string | null }) {
   const openItemId = useStore(ui, (s) => s.openItemId);
   const roomsOpen = useStore(ui, (s) => s.roomsOpen);
   const filterSheetOpen = useStore(ui, (s) => s.filterSheetOpen);
+  const backOfficeOpen = useStore(ui, (s) => s.backOfficeOpen);
 
   const items = liveItems(itemsMap);
   const rooms = liveRooms(roomsMap);
@@ -106,8 +118,14 @@ export function Museum({ userId }: { userId: string | null }) {
         </Sheet>
       )}
       {roomsOpen && <RoomsManager />}
+      {backOfficeOpen && <BackOffice />}
+      {dragging && (
+        <div className="drop-overlay" aria-hidden="true">
+          <p className="drop-overlay__label hand">Drop it in the cabinet</p>
+        </div>
+      )}
       {openItemId && <DetailDrawer id={openItemId} />}
-      {sheet && <AddSheet key={sheet.editId ?? 'new'} draft={sheet.draft} editId={sheet.editId} />}
+      {sheet && <AddSheet key={sheet.editId ?? 'new'} draft={sheet.draft} editId={sheet.editId} file={sheet.file} />}
       <Toasts />
     </div>
   );

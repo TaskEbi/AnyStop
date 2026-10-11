@@ -1,0 +1,50 @@
+.office__section {
+  display: grid;
+  gap: 0.5rem;
+  padding: 0.9rem 0;
+  border-bottom: 1px dashed var(--panel-line);
+  font-size: 0.95rem;
+  color: var(--ink-soft);
+}
+.office__section:last-child {
+  border-bottom: 0;
+}
+.office__heading {
+  font-size: 1.35rem;
+  color: var(--ink);
+}
+.office__bookmarklet {
+  padding: 0.4rem 0;
+}
+.office__tag {
+  display: inline-block;
+  padding: 0.45rem 1rem 0.45rem 1.4rem;
+  background: var(--tape-mustard);
+  color: var(--ink);
+  font-family: var(--font-hand);
+  font-size: 1.2rem;
+  font-weight: 700;
+  text-decoration: none;
+  clip-path: polygon(14px 0, 100% 0, 100% 100%, 14px 100%, 0 50%);
+  cursor: grab;
+  rotate: -2deg;
+}
+.office__list {
+  margin: 0;
+  padding-left: 1.1rem;
+  display: grid;
+  gap: 0.4rem;
+}
+.office__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+.office__actions label:focus-within {
+  outline: 2px dashed var(--focus);
+  outline-offset: 2px;
+}
+.office__busy {
+  font-size: 0.8rem;
+}

@@ -275,6 +275,14 @@
   font-style: italic;
   color: var(--ink-soft);
 }
+.clipping__photo {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  margin-top: 0.55rem;
+  object-fit: cover;
+  filter: grayscale(1) sepia(0.25) contrast(1.15);
+  mix-blend-mode: multiply;
+}
 .clipping__text {
   margin-top: 0.5rem;
   font-size: 0.8rem;

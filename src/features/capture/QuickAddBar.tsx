@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { createItem } from '../../data/actions';
 import { data } from '../../data/store';
+import { enrich } from '../../data/enrich';
 import { openAddSheet, toast, ui } from '../../data/ui';
 import { Icon } from '../../ui/Icon';
 import { KIND_LABEL } from '../../ui/labels';
@@ -26,6 +27,7 @@ export function QuickAddBar() {
     }
     const item = createItem(withTitle({ ...draftFromText(value), room_id: currentRoom() }));
     setText('');
+    if (item.url) void enrich(item.id);
     toast(`Acquired: ${item.title} (${KIND_LABEL[item.kind].toLowerCase()})`, {
       label: 'Open',
       run: () => ui.set({ openItemId: item.id }),

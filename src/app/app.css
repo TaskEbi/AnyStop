@@ -65,3 +65,24 @@
     display: none;
   }
 }
+
+.drop-overlay {
+  position: fixed;
+  inset: 10px;
+  z-index: 40;
+  display: grid;
+  place-items: center;
+  border: 3px dashed var(--thread);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--desk) 70%, transparent);
+  backdrop-filter: blur(2px);
+  pointer-events: none;
+}
+.drop-overlay__label {
+  padding: 0.6rem 1.4rem;
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 2rem;
+  box-shadow: var(--shadow-lift);
+  rotate: -2deg;
+}

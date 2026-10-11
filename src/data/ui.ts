@@ -15,9 +15,11 @@ export interface UiState {
   /** Item shown in the detail drawer. */
   openItemId: string | null;
   /** Add/edit sheet: a draft to start from, and the item being edited (if any). */
-  sheet: { draft: ItemDraft; editId: string | null } | null;
+  sheet: { draft: ItemDraft; editId: string | null; file?: File | null } | null;
   roomsOpen: boolean;
   filterSheetOpen: boolean;
+  /** Bookmarklet, install hints, export/import. */
+  backOfficeOpen: boolean;
   toasts: Toast[];
 }
 
@@ -28,6 +30,7 @@ export const ui = createStore<UiState>({
   sheet: null,
   roomsOpen: false,
   filterSheetOpen: false,
+  backOfficeOpen: false,
   toasts: [],
 });
 
@@ -46,6 +49,6 @@ export function dismissToast(id: number) {
   ui.set((s) => ({ ...s, toasts: s.toasts.filter((t) => t.id !== id) }));
 }
 
-export function openAddSheet(draft: ItemDraft = { kind: 'link' }) {
-  ui.set({ sheet: { draft, editId: null } });
+export function openAddSheet(draft: ItemDraft = { kind: 'link' }, file: File | null = null) {
+  ui.set({ sheet: { draft, editId: null, file } });
 }

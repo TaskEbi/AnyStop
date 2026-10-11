@@ -47,6 +47,7 @@ const emptyOutbox = (): Outbox => ({ rooms: {}, items: {}, connections: {}, sett
 
 interface Session {
   db: LocalDb;
+  userId: string | null;
   dbName: string;
   outbox: Outbox;
   onLocalChange: () => void;
@@ -163,7 +164,7 @@ export async function openSession(opts: { userId: string | null; onLocalChange: 
     db.getMeta<Settings>('settings'),
     db.getMeta<Outbox>('outbox'),
   ]);
-  session = { db, dbName, outbox: outbox ?? emptyOutbox(), onLocalChange: opts.onLocalChange };
+  session = { db, userId: opts.userId, dbName, outbox: outbox ?? emptyOutbox(), onLocalChange: opts.onLocalChange };
   data.set({
     ready: true,
     mode: opts.userId ? 'synced' : 'local',

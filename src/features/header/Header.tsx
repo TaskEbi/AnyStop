@@ -119,6 +119,9 @@ function Menu({ onSignOut }: { onSignOut?: () => void }) {
             </button>
           ))}
         </div>
+        <button type="button" className="menu__item" onClick={() => ui.set({ backOfficeOpen: true })} popoverTarget="main-menu" popoverTargetAction="hide">
+          Back office: bookmarklet, phone app, export
+        </button>
         {examples && (
           <div className="menu__group">
             <span className="menu__label type">Example exhibits</span>

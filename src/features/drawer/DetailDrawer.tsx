@@ -13,6 +13,7 @@ import { Sheet } from '../../ui/Sheet';
 import { RoomPicker } from '../capture/RoomPicker';
 import { TagInput } from '../capture/TagInput';
 import { Card } from '../shelves/Card';
+import { EmbedPlayer } from './EmbedPlayer';
 import './drawer.css';
 
 /** The "why I kept this" note, saved a moment after I stop typing. */
@@ -103,8 +104,8 @@ export function DetailDrawer({ id }: { id: string }) {
 
   function edit() {
     if (!item) return;
-    const { kind, title, url, creator, body, note, room_id, tags, status, favourite } = item;
-    ui.set({ sheet: { draft: { kind, title, url, creator, body, note, room_id, tags, status, favourite }, editId: item.id } });
+    const { kind, title, url, creator, body, note, room_id, tags, status, favourite, image_path } = item;
+    ui.set({ sheet: { draft: { kind, title, url, creator, body, note, room_id, tags, status, favourite, image_path }, editId: item.id } });
   }
 
   return (
@@ -147,6 +148,8 @@ export function DetailDrawer({ id }: { id: string }) {
           )}
         </dl>
       </div>
+
+      <EmbedPlayer key={item.id} item={item} />
 
       <section className="drawer__section drawer__controls">
         <div className="field">

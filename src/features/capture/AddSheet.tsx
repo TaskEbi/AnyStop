@@ -1,10 +1,12 @@
-import { useState, type FormEvent } from 'react';
+import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { createItem, updateItem, type ItemDraft } from '../../data/actions';
 import { allTags, data } from '../../data/store';
 import { toast, ui } from '../../data/ui';
 import { KINDS, STATUSES, type Kind } from '../../data/types';
 import { useStore } from '../../lib/createStore';
 import { detect } from '../../lib/detectKind';
+import { storePhoto, useImagePath } from '../../lib/photos';
+import { enrich } from '../../data/enrich';
 import { Icon } from '../../ui/Icon';
 import { KIND_LABEL, STATUS_LABEL } from '../../ui/labels';
 import { Sheet } from '../../ui/Sheet';
@@ -24,7 +26,12 @@ const CREATOR_LABEL: Record<Kind, string> = {
 };
 
 /** Full add / edit form. Opened by N, the + button, or "Edit" in the drawer. */
-export function AddSheet({ draft: initial, editId }: { draft: ItemDraft; editId: string | null }) {
+function titleFromFile(name: string): string {
+  const base = name.replace(/\.[a-z0-9]+$/i, '').replace(/[-_]+/g, ' ').trim();
+  return /^(img|dsc|pxl|image|photo|screenshot)?\s*\d/i.test(base) ? '' : base;
+}
+
+export function AddSheet({ draft: initial, editId, file }: { draft: ItemDraft; editId: string | null; file?: File | null }) {
   const [d, setD] = useState<ItemDraft>({ tags: [], status: 'none', favourite: false, ...initial });
   // Once I pick a kind or type a title myself, stop overwriting it from the URL.
   const [kindTouched, setKindTouched] = useState(!!editId);
@@ -33,6 +40,13 @@ export function AddSheet({ draft: initial, editId }: { draft: ItemDraft; editId:
   const set = (patch: Partial<ItemDraft>) => setD((prev) => ({ ...prev, ...patch }));
   const close = () => ui.set({ sheet: null });
   const textKind = d.kind === 'quote' || d.kind === 'note';
+  const [photo, setPhoto] = useState<File | null>(file ?? null);
+  const [removePhoto, setRemovePhoto] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const photoUrl = useMemo(() => (photo ? URL.createObjectURL(photo) : null), [photo]);
+  useEffect(() => () => void (photoUrl && URL.revokeObjectURL(photoUrl)), [photoUrl]);
+  const existing = useImagePath(removePhoto ? null : (d.image_path ?? null));
+  const shownPhoto = photoUrl ?? existing;
 
   function onUrl(url: string) {
     const patch: Partial<ItemDraft> = { url };
@@ -44,21 +58,38 @@ export function AddSheet({ draft: initial, editId }: { draft: ItemDraft; editId:
     set(patch);
   }
 
-  function submit(e: FormEvent) {
+  async function submit(e: FormEvent) {
     e.preventDefault();
+    if (busy) return;
+    setBusy(true);
+    let image_path = removePhoto ? null : (d.image_path ?? null);
+    if (photo) {
+      try {
+        image_path = await storePhoto(photo);
+      } catch {
+        setBusy(false);
+        toast("That image couldn't be read. Try a JPEG, PNG or WebP.");
+        return;
+      }
+    }
     const det = d.url?.trim() ? detect(d.url) : null;
     const clean = withTitle({
       ...d,
+      title: d.title?.trim() || (photo && !d.url ? titleFromFile(photo.name) : d.title),
+      image_path,
       url: det?.url ?? (d.url?.trim() || null),
       creator: d.creator?.trim() || null,
       body: textKind ? d.body?.trim() || null : null,
       note: d.note?.trim() || null,
     });
     if (editId) {
+      const urlChanged = data.get().items.get(editId)?.url !== clean.url;
       updateItem(editId, clean);
+      if (urlChanged && clean.url) void enrich(editId);
       toast('Saved');
     } else {
       const item = createItem(clean);
+      if (item.url) void enrich(item.id);
       toast(`Acquired: ${item.title}`, { label: 'Open', run: () => ui.set({ openItemId: item.id }) });
     }
     close();
@@ -73,7 +104,7 @@ export function AddSheet({ draft: initial, editId }: { draft: ItemDraft; editId:
           <button type="button" className="btn" onClick={close}>
             Cancel
           </button>
-          <button type="submit" form="add-sheet-form" className="btn btn--primary">
+          <button type="submit" form="add-sheet-form" className="btn btn--primary" disabled={busy}>
             {editId ? 'Save changes' : 'Add to the cabinet'}
           </button>
         </>
@@ -152,6 +183,40 @@ export function AddSheet({ draft: initial, editId }: { draft: ItemDraft; editId:
           <span>Why I kept this</span>
           <textarea className="textarea" value={d.note ?? ''} onChange={(e) => set({ note: e.target.value })} rows={2} />
         </label>
+
+        <div className="field">
+          <span>{d.kind === 'photo' ? 'Photo' : 'Photo or cover (optional)'}</span>
+          <div className="photo-field">
+            {shownPhoto && <img className="photo-field__thumb" src={shownPhoto} alt="" />}
+            <label className="btn">
+              <input
+                type="file"
+                accept="image/*"
+                className="visually-hidden"
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  if (f) {
+                    setPhoto(f);
+                    setRemovePhoto(false);
+                  }
+                }}
+              />
+              <Icon name="photo" size={16} /> {shownPhoto ? 'Replace' : 'Choose image'}
+            </label>
+            {shownPhoto && (
+              <button
+                type="button"
+                className="btn btn--ghost"
+                onClick={() => {
+                  setPhoto(null);
+                  setRemovePhoto(true);
+                }}
+              >
+                Remove
+              </button>
+            )}
+          </div>
+        </div>
 
         <div className="add-form__row">
           <div className="field">

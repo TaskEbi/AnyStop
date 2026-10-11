@@ -1,11 +1,14 @@
 /** Tiny promise wrapper around IndexedDB: three record stores plus a key/value "meta" store. */
 
-const STORES = ['rooms', 'items', 'connections', 'meta'] as const;
-type StoreName = (typeof STORES)[number];
+const STORES = ['rooms', 'items', 'connections', 'meta', 'blobs'] as const;
+
+type RecordStore = 'rooms' | 'items' | 'connections';
 
 export interface LocalDb {
-  getAll<T>(store: Exclude<StoreName, 'meta'>): Promise<T[]>;
-  putMany(store: Exclude<StoreName, 'meta'>, records: { id: string }[]): Promise<void>;
+  getAll<T>(store: RecordStore): Promise<T[]>;
+  putMany(store: RecordStore, records: { id: string }[]): Promise<void>;
+  getBlob(key: string): Promise<Blob | undefined>;
+  putBlob(key: string, blob: Blob): Promise<void>;
   getMeta<T>(key: string): Promise<T | undefined>;
   setMeta(key: string, value: unknown): Promise<void>;
   close(): void;
@@ -27,17 +30,17 @@ function done(tx: IDBTransaction): Promise<void> {
 }
 
 export async function openLocalDb(name: string): Promise<LocalDb> {
-  const open = indexedDB.open(name, 1);
+  const open = indexedDB.open(name, 2);
   open.onupgradeneeded = () => {
     const db = open.result;
     for (const s of STORES) {
-      if (!db.objectStoreNames.contains(s)) db.createObjectStore(s, s === 'meta' ? undefined : { keyPath: 'id' });
+      if (!db.objectStoreNames.contains(s)) db.createObjectStore(s, s === 'meta' || s === 'blobs' ? undefined : { keyPath: 'id' });
     }
   };
   const db = await req(open);
 
   return {
-    async getAll<T>(store: Exclude<StoreName, 'meta'>) {
+    async getAll<T>(store: RecordStore) {
       return (await req(db.transaction(store).objectStore(store).getAll())) as T[];
     },
     async putMany(store, records) {
@@ -53,6 +56,14 @@ export async function openLocalDb(name: string): Promise<LocalDb> {
     async setMeta(key, value) {
       const tx = db.transaction('meta', 'readwrite');
       tx.objectStore('meta').put(value, key);
+      await done(tx);
+    },
+    async getBlob(key) {
+      return (await req(db.transaction('blobs').objectStore('blobs').get(key))) as Blob | undefined;
+    },
+    async putBlob(key, blob) {
+      const tx = db.transaction('blobs', 'readwrite');
+      tx.objectStore('blobs').put(blob, key);
       await done(tx);
     },
     close: () => db.close(),

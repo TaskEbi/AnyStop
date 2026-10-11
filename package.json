@@ -6,24 +6,33 @@
   "scripts": {
     "dev": "vite",
     "dev:lan": "vite --host",
-    "build": "tsc --noEmit && vite build",
+    "build": "npm run typecheck && vite build",
     "preview": "vite preview",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.sw.json",
     "test": "vitest run",
     "db:push": "supabase db push"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.3",
+    "d3-force": "^3.0.0",
+    "fflate": "^0.8.3",
     "react": "^19.3.0",
     "react-dom": "^19.3.0"
   },
   "devDependencies": {
+    "@types/d3-force": "^3.0.10",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.1.2",
     "supabase": "^2.120.0",
     "typescript": "5.9",
     "vite": "^8.3.4",
-    "vitest": "^5.0.3"
+    "vite-plugin-pwa": "^2.0.0",
+    "vitest": "^5.0.3",
+    "workbox-core": "^7.4.1",
+    "workbox-expiration": "^7.4.1",
+    "workbox-precaching": "^7.4.1",
+    "workbox-routing": "^7.4.1",
+    "workbox-strategies": "^7.4.1"
   }
 }

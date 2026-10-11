@@ -7,6 +7,7 @@ import {
   data,
   setSyncState,
 } from './store';
+import { uploadPendingPhotos } from '../lib/photos';
 import { DEFAULT_SETTINGS, type RecordOf, type Settings, type TableName } from './types';
 
 /** Push order matters: rooms before the items that use them, items before strings. */
@@ -34,6 +35,8 @@ function isNetworkError(err: { code?: string; message?: string } | null): boolea
 
 export interface SyncHandle {
   request(): void;
+  /** Push now and wait (up to `timeout` ms) until nothing is waiting to be sent. */
+  flush(timeout?: number): Promise<void>;
   stop(): void;
   /** Resolves after the first full pull (or immediately if offline). */
   firstPull: Promise<void>;
@@ -141,6 +144,8 @@ export function startSync(sb: SupabaseClient, userId: string): SyncHandle {
     }
     setSyncState({ status: 'syncing' });
     try {
+      // Photos first, so items reach the server already pointing at the bucket copy.
+      await uploadPendingPhotos().catch((e) => console.warn('Curio: photo upload failed', e));
       const problem = await push();
       await pull();
       setSyncState({ status: problem ? 'error' : 'idle', error: problem });
@@ -182,6 +187,14 @@ export function startSync(sb: SupabaseClient, userId: string): SyncHandle {
   return {
     request: () => request(),
     firstPull,
+    async flush(timeout = 5000) {
+      request(0);
+      const start = Date.now();
+      while (Date.now() - start < timeout) {
+        await new Promise((r) => setTimeout(r, 250));
+        if (!running && data.get().sync.pending === 0) return;
+      }
+    },
     stop() {
       stopped = true;
       clearTimeout(timer);
