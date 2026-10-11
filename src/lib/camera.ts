@@ -46,6 +46,8 @@ export function useCamera(ref: RefObject<HTMLElement | null>, opts: Options): Ca
   const optsRef = useRef(opts);
   optsRef.current = opts;
   const anim = useRef(0);
+  /** Where an in-flight glide is heading, so repeated zoom clicks compound. */
+  const target = useRef<View | null>(null);
 
   const camera = useMemo<Camera>(() => {
     const clampK = (k: number) => Math.min(optsRef.current.max ?? 3, Math.max(optsRef.current.min ?? 0.08, k));
@@ -54,9 +56,13 @@ export function useCamera(ref: RefObject<HTMLElement | null>, opts: Options): Ca
       view.current = v;
       optsRef.current.onChange(v);
     };
-    const animateTo = (target: View) => {
+    const animateTo = (to: View) => {
       cancelAnimationFrame(anim.current);
-      if (reducedMotion()) return apply(target);
+      target.current = to;
+      if (reducedMotion()) {
+        target.current = null;
+        return apply(to);
+      }
       const from = view.current;
       const start = performance.now();
       const dur = 650;
@@ -64,15 +70,16 @@ export function useCamera(ref: RefObject<HTMLElement | null>, opts: Options): Ca
         const t = Math.min(1, (now - start) / dur);
         const e = ease(t);
         // Interpolate zoom geometrically so it feels even.
-        const k = from.k * (target.k / from.k) ** e;
+        const k = from.k * (to.k / from.k) ** e;
         // Keep the world point under the viewport centre moving on a straight line.
         const r = rect();
         const c0 = { x: (r.width / 2 - from.x) / from.k, y: (r.height / 2 - from.y) / from.k };
-        const c1 = { x: (r.width / 2 - target.x) / target.k, y: (r.height / 2 - target.y) / target.k };
+        const c1 = { x: (r.width / 2 - to.x) / to.k, y: (r.height / 2 - to.y) / to.k };
         const cx = c0.x + (c1.x - c0.x) * e;
         const cy = c0.y + (c1.y - c0.y) * e;
         apply({ k, x: r.width / 2 - cx * k, y: r.height / 2 - cy * k });
         if (t < 1) anim.current = requestAnimationFrame(step);
+        else target.current = null;
       };
       anim.current = requestAnimationFrame(step);
     };
@@ -80,13 +87,14 @@ export function useCamera(ref: RefObject<HTMLElement | null>, opts: Options): Ca
       get: () => view.current,
       set: (v) => {
         cancelAnimationFrame(anim.current);
+        target.current = null;
         apply(v);
       },
       zoomBy(factor, cx, cy) {
         const r = rect();
         const px = cx ?? r.width / 2;
         const py = cy ?? r.height / 2;
-        const v = view.current;
+        const v = target.current ?? view.current;
         const k = clampK(v.k * factor);
         animateTo({ k, x: px - ((px - v.x) / v.k) * k, y: py - ((py - v.y) / v.k) * k });
       },
@@ -146,6 +154,7 @@ export function useCamera(ref: RefObject<HTMLElement | null>, opts: Options): Ca
       const second = pointers.size === 1;
       if (!second && optsRef.current.canPan && !optsRef.current.canPan(e)) return;
       cancelAnimationFrame(anim.current);
+      target.current = null;
       pointers.set(e.pointerId, local(e));
       el!.setPointerCapture(e.pointerId);
       if (pointers.size === 2) {

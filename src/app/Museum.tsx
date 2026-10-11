@@ -14,6 +14,7 @@ import { Header } from '../features/header/Header';
 import { RoomsManager } from '../features/rooms/RoomsManager';
 import { ShelvesView } from '../features/shelves/ShelvesView';
 import { StringMap } from '../features/map/StringMap';
+import { Collage } from '../features/collage/Collage';
 import { Sheet } from '../ui/Sheet';
 import { Toasts } from '../ui/Toasts';
 import { ExamplesNotice } from './ExamplesNotice';
@@ -110,6 +111,7 @@ export function Museum({ userId }: { userId: string | null }) {
         <main className="app__main" id="main">
           {view === 'shelves' && <ExamplesNotice />}
           {view === 'shelves' && <ShelvesView items={visible} rooms={roomById} total={items.length} />}
+          {view === 'collage' && <Collage items={visible} rooms={roomById} />}
           {view === 'map' && <StringMap items={visible} rooms={roomById} />}
         </main>
       </div>

@@ -8,8 +8,6 @@ function isTyping(target: EventTarget | null): boolean {
   return el.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(el.tagName);
 }
 
-const VIEWS_READY = { collage: false };
-
 /** N add · / search · 1/2/3 views. Esc is handled by each dialog. */
 export function useShortcuts() {
   useEffect(() => {
@@ -30,7 +28,7 @@ export function useShortcuts() {
           ui.set({ view: 'shelves', tying: null });
           break;
         case '2':
-          if (VIEWS_READY.collage) ui.set({ view: 'collage', tying: null });
+          ui.set({ view: 'collage', tying: null });
           break;
         case '3':
           ui.set({ view: 'map', tying: null });

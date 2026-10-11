@@ -1,29 +1,10 @@
 import { useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import type { Item } from '../../data/types';
+import { estimateCardHeight as estimate } from '../../lib/cardSize';
 
 const MIN_COL = 230;
 const MIN_COL_NARROW = 150;
 const GAP = 28;
-
-/** Rough rendered height of a card, so columns come out even without measuring the DOM. */
-function estimate(item: Item, width: number): number {
-  const text = (item.body ?? '').length + (item.preview?.description ?? '').length * 0.6 + item.title.length;
-  const lines = (n: number) => (n / Math.max(20, width / 8.5)) * 20;
-  switch (item.kind) {
-    case 'video':
-      return width * 0.56 + 110 + lines(item.title.length);
-    case 'photo':
-      return width + 80;
-    case 'music':
-      return width / 1.42 + 40;
-    case 'quote':
-      return 110 + lines(text) * 1.3;
-    case 'note':
-      return Math.max(160, 70 + lines(text) * 1.2);
-    default:
-      return 110 + lines(text);
-  }
-}
 
 /** Masonry grid: items fill the shortest column, so the top row still reads newest-first. */
 export function Masonry({ items, render }: { items: Item[]; render: (item: Item, index: number) => ReactNode }) {

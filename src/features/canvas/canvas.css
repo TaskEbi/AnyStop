@@ -156,3 +156,20 @@
   flex: 1;
   min-width: 0;
 }
+
+@media (max-width: 720px) {
+  .canvas-tools {
+    gap: 0.25rem;
+  }
+  .canvas-tools .btn {
+    min-height: 30px;
+    min-width: 30px;
+    padding: 0.15rem 0.5rem;
+    font-size: 0.72rem;
+  }
+  .canvas-tools__search input {
+    width: 96px;
+    height: 30px;
+    font-size: 0.82rem;
+  }
+}

@@ -13,7 +13,7 @@ import './header.css';
 
 const VIEWS: { id: ViewName; label: string; icon: IconName; ready: boolean }[] = [
   { id: 'shelves', label: 'Shelves', icon: 'shelves', ready: true },
-  { id: 'collage', label: 'Collage', icon: 'collage', ready: false },
+  { id: 'collage', label: 'Collage', icon: 'collage', ready: true },
   { id: 'map', label: 'String Map', icon: 'map', ready: true },
 ];
 

@@ -163,3 +163,18 @@ export function cut(id: string) {
 export function updateSettings(patch: Partial<Omit<Settings, 'updated_at'>>) {
   commitSettings(patch);
 }
+
+// ─── collage ────────────────────────────────────────────────────────────────
+
+/** "Tidy up": forget hand-placed collage positions so the automatic layout takes over. */
+export function resetCollage(ids: string[]) {
+  const st = data.get();
+  const t = now();
+  commit(
+    'items',
+    ids.flatMap((id) => {
+      const i = st.items.get(id);
+      return i?.collage_pos ? [{ ...i, collage_pos: null, updated_at: t }] : [];
+    }),
+  );
+}
