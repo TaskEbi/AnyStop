@@ -28,8 +28,8 @@ export interface Camera {
   get(): View;
   set(v: View): void;
   zoomBy(factor: number, cx?: number, cy?: number): void;
-  /** Glide so the world point (wx, wy) sits in the middle of the viewport. */
-  flyTo(wx: number, wy: number, k?: number): void;
+  /** Glide so the world point (wx, wy) sits in the middle of the viewport (shifted left by `shiftX` px). */
+  flyTo(wx: number, wy: number, k?: number, shiftX?: number): void;
   fit(b: Bounds, padding?: number): void;
   toWorld(clientX: number, clientY: number): { x: number; y: number };
 }
@@ -98,10 +98,10 @@ export function useCamera(ref: RefObject<HTMLElement | null>, opts: Options): Ca
         const k = clampK(v.k * factor);
         animateTo({ k, x: px - ((px - v.x) / v.k) * k, y: py - ((py - v.y) / v.k) * k });
       },
-      flyTo(wx, wy, k) {
+      flyTo(wx, wy, k, shiftX = 0) {
         const r = rect();
         const kk = clampK(k ?? view.current.k);
-        animateTo({ k: kk, x: r.width / 2 - wx * kk, y: r.height / 2 - wy * kk });
+        animateTo({ k: kk, x: r.width / 2 - shiftX - wx * kk, y: r.height / 2 - wy * kk });
       },
       fit(b, padding = 60) {
         const r = rect();

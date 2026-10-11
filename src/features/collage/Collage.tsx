@@ -6,6 +6,7 @@ import type { Item, Room } from '../../data/types';
 import { useCamera, type View } from '../../lib/camera';
 import { estimateCardHeight } from '../../lib/cardSize';
 import { useStore } from '../../lib/createStore';
+import { drawerShift } from '../../lib/drawerOverlap';
 import { Icon } from '../../ui/Icon';
 import { InlineConfirm } from '../../ui/InlineConfirm';
 import { tapeVar } from '../../ui/labels';
@@ -133,7 +134,7 @@ export function Collage({ items, rooms }: Props) {
     if (!flight) return;
     const r = rects.get(flight.id);
     if (r) {
-      camera.flyTo(r.x + r.w / 2, r.y + r.h / 2, Math.max(camera.get().k, 0.95));
+      camera.flyTo(r.x + r.w / 2, r.y + r.h / 2, Math.max(camera.get().k, 0.95), drawerShift(wrapRef.current));
       setTimeout(() => ui.set({ openItemId: flight.id }), 620);
     } else ui.set({ openItemId: flight.id });
     // eslint-disable-next-line react-hooks/exhaustive-deps

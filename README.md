@@ -1,8 +1,8 @@
 # Curio Cabinet
 
-A private internet museum: save links, videos, articles, papers, photos, music, quotes and notes, then browse them on scrapbook shelves. Built in phases from the spec in `SPEC.md`. **Phase 1 (foundation) is done.**
+A private internet museum: save links, videos, articles, papers, photos, music, quotes and notes, then browse them on scrapbook shelves, a collage corkboard or a string map. Built in phases from the spec in `SPEC.md`. **Phases 1–5 are done.** Phase 6 (Claude-suggested connections) is optional and not started.
 
-React 19 + Vite + TypeScript, with Supabase for login, sync and storage.
+React 19 + Vite + TypeScript PWA, with Supabase for login, sync, storage and link previews.
 
 ## Run it
 
@@ -10,50 +10,88 @@ React 19 + Vite + TypeScript, with Supabase for login, sync and storage.
 npm install
 npm run dev          # http://localhost:5173
 npm run dev:lan      # also reachable from your phone on the same Wi-Fi
-npm test             # unit tests (kind detection, URL → title)
-npm run build        # type-check + production build
+npm test             # unit tests
+npm run build        # type-check + production build (with service worker)
+npx vite preview     # serve the production build at http://localhost:4173
 ```
 
-With no `.env.local` the app runs in **local-only mode**: everything is kept in this browser's IndexedDB and nothing syncs. The header badge says "Local only".
+With no `.env.local` the app runs in **local-only mode**: everything stays in this browser (IndexedDB) and nothing syncs. In dev, link previews still work through a local stand-in for the Edge Function (`/api/preview`).
 
 ## Connect Supabase (sync between laptop and phone)
 
 1. Create a free project at supabase.com.
 2. Copy `.env.example` to `.env.local` and fill in the **Project URL** and **anon / publishable key** (Project Settings → API). Never put the service-role key in this app.
-3. Push the schema:
+3. Push the schema and deploy the preview function (no Docker needed):
    ```bash
    npx supabase login
    npx supabase link --project-ref <your-project-ref>
    npm run db:push
+   npx supabase functions deploy preview --use-api
    ```
 4. In the Supabase dashboard:
-   - **Authentication → Emails → Magic Link template**: add `{{ .Token }}` so the email contains a 6-digit code. Example body: `<p>Your code: <strong>{{ .Token }}</strong></p><p>Or <a href="{{ .ConfirmationURL }}">open the cabinet</a>.</p>`
-   - **Authentication → URL Configuration**: set Site URL to `http://localhost:5173` for now. The deployed URL gets added in phase 2.
-5. Sign in once with your email, then go to **Authentication → Sign In / Providers** and turn off **Allow new users to sign up**. Your account then stays the only one.
+   - **Authentication → Emails → Magic Link template**: add `{{ .Token }}` so the email includes a 6-digit code. For example: `<p>Your code: <strong>{{ .Token }}</strong></p><p>Or <a href="{{ .ConfirmationURL }}">open the cabinet</a>.</p>`
+   - **Authentication → URL Configuration**: Site URL `http://localhost:5173`. Add your deployed URL once it exists.
+5. Sign in once, then turn off **Allow new users to sign up** (Authentication → Sign In / Providers). Your account then stays the only one.
 
-### Privacy
+### Deploy (Vercel)
 
-Every row has an `owner_id`. Row-level security only lets a signed-in user read or write their own rows, and the anonymous key alone can't read anything. Photos go in a private bucket under `<your user id>/…`.
+`vercel.json` holds the SPA rewrites, so `/share` (the phone share target and the bookmarklet) reaches the app. Import the repo in Vercel, add `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` as environment variables, and deploy. Then add the Vercel URL to Supabase's redirect URLs.
 
-## How sync works
+## Privacy
 
-- Every change is applied in memory immediately, written to IndexedDB, and added to an **outbox**. Saving never waits for the network.
-- The sync loop pushes the outbox (rooms, then items, then strings), then pulls anything changed on the server since the last sync.
-- Supabase Realtime tells the other device to pull straight away. The loop also runs when the app regains focus, when you come back online, and every 60 s.
-- Deletes are soft (`deleted_at`), so they reach devices that were offline.
-- Accession numbers (No. 0001…) are assigned by the database. Two offline devices therefore never hand out the same number. A new item shows "No. —" until it has synced.
+Every row has an `owner_id`. Row-level security lets a signed-in user read and write only their own rows, and the anon key alone can read nothing. Photos live in a private bucket under `<user id>/…` and are shown through short-lived signed URLs. The preview function requires a signed-in user and refuses private and internal addresses.
+
+## How it works
+
+- **Local-first sync.** Every change is applied in memory, written to IndexedDB and added to an outbox, so saving never waits for the network. The sync loop works in this order:
+  1. Upload any photos that are still only on this device.
+  2. Push the outbox: rooms first, then items, then strings.
+  3. Pull everything that changed since the last sync.
+
+  Supabase Realtime tells your other devices to pull straight away. Deletes are soft (`deleted_at`) so they reach devices that were offline.
+- **Accession numbers** (No. 0001…) are handed out by the database. Two offline devices can therefore never pick the same number.
+- **Previews.** `supabase/functions/_shared/preview.ts` combines several sources:
+  - oEmbed for YouTube, Vimeo, Spotify, SoundCloud and TikTok
+  - Crossref for DOIs
+  - The Wikipedia summary API
+  - Open Graph and citation meta tags for everything else
+
+  Items save immediately with a guessed title and fill in when the preview arrives.
+- **String Map.** `d3-force` (Barnes–Hut) drawn on canvas. Node positions are kept between visits so the layout doesn't jump.
+- **Collage.** DOM cards on a transformed layer with viewport culling. Far zoom switches to lightweight blocks. Positions sync through `collage_pos`.
+
+## Using it
+
+| | |
+|---|---|
+| Save | Paste into **Acquire** and press Enter · paste anywhere (Ctrl/Cmd+V) · drag a link or image onto the window · **+** or `N` for the full form |
+| Phone | Install the app (Android: share sheet → Curio Cabinet; iPhone: Add to Home Screen, then paste links) |
+| Desktop | Back office (☰ menu) → drag the bookmarklet to your bookmarks bar |
+| Strings | Drawer → **Connect to…**, or **Tie a string** in Collage / String Map (click A, click B, add a label) |
+| Wander | **Surprise me** or `R`: favours Up next and things you haven't opened lately |
+| Safety net | Back office → Export (zip with photos) / Import |
+| Keys | `N` add · `/` search · `R` wander · `1` `2` `3` views · `Esc` close |
+
+## Performance (headless Chromium, 1,000 fake items + 300 strings)
+
+| | |
+|---|---|
+| Shelves | First render 0.44 s, ~50 fps scrolling, search 0.15 s |
+| String Map | Opens in 0.13 s, 60 fps while settling and panning |
+| Collage | Opens in 0.27 s, 60 fps panning, 65–500 cards in the DOM thanks to culling |
+
+To repeat it in dev, run `curioDev.fake(1000)` in the console, then `curioDev.clearFake()`.
 
 ## Layout
 
 ```
-supabase/migrations/   schema, row-level security, triggers, storage policies
-src/lib/               detectKind, titleFromUrl, formatting, tiny store helper
-src/data/              types, local store + outbox, sync, filters, actions, seed examples
-src/ui/                Sheet (dialog), Tape, Stamp, Icon, InlineConfirm, Toasts
-src/features/          auth, capture (quick add, add sheet), filters, header, shelves (+ 8 card styles), drawer, rooms
-src/app/               App shell, session wiring, shortcuts, theme
+supabase/migrations/        schema, RLS, triggers, storage policies
+supabase/functions/         preview Edge Function + shared preview core
+src/lib/                    kind detection, camera (pan/zoom), photos, media/embeds
+src/data/                   types, local store + outbox, sync, filters, actions, seed, backup, wander
+src/ui/                     Sheet, Tape, Stamp, Icon, InlineConfirm, Toasts
+src/features/               auth, capture, filters, header, shelves (+8 card styles), drawer,
+                            rooms, backoffice, map (String Map), collage, canvas (shared)
+src/app/                    App shell, session wiring, shortcuts, capture, share, theme
+src/sw.ts                   service worker: offline shell, image cache, share target
 ```
-
-## Keyboard
-
-`N` add · `/` search · `Esc` close · `1` Shelves. `R`, `2` and `3` arrive with their phases.

@@ -15,7 +15,7 @@
 }
 .app-header__bar {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(180px, 300px);
+  grid-template-columns: minmax(0, 1fr) minmax(180px, 300px) auto;
   gap: 0.9rem;
   margin-top: 0.9rem;
   align-items: center;
@@ -220,9 +220,14 @@
   font-size: 0.7rem;
 }
 
+.surprise {
+  min-height: 42px;
+  border-radius: 999px;
+  rotate: 1deg;
+}
 @media (max-width: 900px) {
   .app-header__bar {
-    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-columns: minmax(0, 1fr) auto auto;
   }
   .app-header__bar .quick-add {
     grid-column: 1 / -1;
@@ -242,7 +247,8 @@
     justify-content: center;
     padding-inline: 0.4rem;
   }
-  .sync-badge__text {
+  .sync-badge__text,
+  .surprise__text {
     display: none;
   }
 }

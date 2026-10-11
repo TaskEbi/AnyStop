@@ -9,6 +9,7 @@ import { plural } from '../../lib/format';
 import { Icon, type IconName } from '../../ui/Icon';
 import { InlineConfirm } from '../../ui/InlineConfirm';
 import { QuickAddBar } from '../capture/QuickAddBar';
+import { surprise } from '../../app/surprise';
 import './header.css';
 
 const VIEWS: { id: ViewName; label: string; icon: IconName; ready: boolean }[] = [
@@ -194,6 +195,9 @@ export function Header({ onSignOut, filterCount }: { onSignOut?: () => void; fil
             autoComplete="off"
           />
         </div>
+        <button type="button" className="btn surprise" onClick={surprise} title="Surprise me (R)">
+          <Icon name="dice" size={17} /> <span className="surprise__text">Surprise me</span>
+        </button>
         <button type="button" className="btn filter-toggle" onClick={() => ui.set({ filterSheetOpen: true })}>
           <Icon name="filter" size={16} /> Filters{filterCount > 0 && <span className="filter-toggle__n">{filterCount}</span>}
         </button>

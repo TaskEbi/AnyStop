@@ -16,3 +16,5 @@ createRoot(document.getElementById('root')!).render(<App />);
 
 // Offline app shell + phone share target. Not in dev, where it would cache stale code.
 if (import.meta.env.PROD && 'serviceWorker' in navigator) registerSW({ immediate: true });
+
+if (import.meta.env.DEV) void import('./app/devTools');

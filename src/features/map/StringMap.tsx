@@ -5,6 +5,7 @@ import { ui } from '../../data/ui';
 import type { Item, Room } from '../../data/types';
 import { useCamera, type View } from '../../lib/camera';
 import { useStore } from '../../lib/createStore';
+import { drawerShift } from '../../lib/drawerOverlap';
 import { Icon } from '../../ui/Icon';
 import { TieHint, TiePrompt } from '../canvas/TiePrompt';
 import { drawMap, readPalette } from './draw';
@@ -45,6 +46,8 @@ export function StringMap({ items, rooms }: Props) {
   st.current.tieFrom = tying?.from ?? null;
 
   const sim = useMemo(() => forceSimulation<GNode, GLink>().stop(), []);
+  /** Re-frame once the first layout settles, unless I've already moved the view. */
+  const autoFit = useRef(!savedView);
   const raf = useRef(0);
   const cameraRef = useRef<ReturnType<typeof useCamera> | null>(null);
 
@@ -143,7 +146,12 @@ export function StringMap({ items, rooms }: Props) {
       .force('y', forceY(0).strength(0.025))
       .alphaDecay(0.03)
       .velocityDecay(0.38)
-      .on('tick', requestDraw);
+      .on('tick', requestDraw)
+      .on('end.fit', () => {
+        if (!autoFit.current) return;
+        autoFit.current = false;
+        cameraRef.current?.fit(bounds(st.current.nodes), 70);
+      });
     return () => {
       sim.stop();
       rememberPositions(st.current.nodes);
@@ -207,7 +215,7 @@ export function StringMap({ items, rooms }: Props) {
         if (open) ui.set({ openItemId: id });
         return;
       }
-      camera.flyTo(n.x ?? 0, n.y ?? 0, Math.max(camera.get().k, 1.3));
+      camera.flyTo(n.x ?? 0, n.y ?? 0, Math.max(camera.get().k, 1.3), open ? drawerShift(wrapRef.current) : 0);
       setFocus(id);
       if (open) setTimeout(() => ui.set({ openItemId: id }), 600);
     },
@@ -245,6 +253,7 @@ export function StringMap({ items, rooms }: Props) {
   }
 
   function onPointerDown(e: RPointerEvent) {
+    autoFit.current = false;
     const n = hit(e.clientX, e.clientY);
     if (n) {
       drag.current = { node: n, sx: e.clientX, sy: e.clientY, moved: false };
@@ -306,6 +315,7 @@ export function StringMap({ items, rooms }: Props) {
         ref={wrapRef}
         className={`canvas-view map-view ${tying ? 'is-tying' : ''}`}
         onPointerDown={onPointerDown}
+        onWheel={() => (autoFit.current = false)}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
         onPointerCancel={() => {
@@ -321,7 +331,7 @@ export function StringMap({ items, rooms }: Props) {
         <canvas ref={canvasRef} className="map-view__canvas" role="img" aria-label={`String map of ${items.length} exhibits. Use the search box to find one.`} />
       </div>
 
-      <div className="canvas-tools">
+      <div className="canvas-tools" onPointerDown={() => (autoFit.current = false)}>
         <form
           className="canvas-tools__search"
           onSubmit={(e) => {

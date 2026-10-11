@@ -199,19 +199,19 @@ export function drawMap(ctx: CanvasRenderingContext2D, nodes: GNode[], links: GL
       ctx.textBaseline = 'middle';
       ctx.fillText(n.label, x, y + 0.5);
     } else {
-      // a map pin: coloured head with the kind icon
-      ctx.shadowColor = 'rgba(40,25,10,.4)';
-      ctx.shadowBlur = 4;
-      ctx.shadowOffsetY = 2;
+      // a map pin: coloured head with the kind icon (offset disc for a shadow: blur is too slow for 1000s)
+      ctx.beginPath();
+      ctx.arc(x + 0.6, y + 2, n.r + 0.5, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(40,25,10,.28)';
+      ctx.fill();
       ctx.beginPath();
       ctx.arc(x, y, n.r, 0, Math.PI * 2);
       ctx.fillStyle = colour;
       ctx.fill();
-      ctx.shadowColor = 'transparent';
       ctx.lineWidth = 1;
       ctx.strokeStyle = 'rgba(40,25,10,.45)';
       ctx.stroke();
-      if (n.kind) {
+      if (n.kind && view.k > 0.35) {
         ctx.save();
         ctx.translate(x - 6, y - 6);
         ctx.scale(0.5, 0.5);

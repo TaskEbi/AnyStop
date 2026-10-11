@@ -5,6 +5,8 @@ import { openAddSheet, ui } from '../../data/ui';
 import { useStore } from '../../lib/createStore';
 import { Card } from './Card';
 import { Masonry } from './Masonry';
+import { OnThisDay } from './OnThisDay';
+import { data, liveItems } from '../../data/store';
 import './shelves.css';
 
 interface Props {
@@ -16,6 +18,7 @@ interface Props {
 export function ShelvesView({ items, rooms, total }: Props) {
   const filters = useStore(ui, (s) => s.filters);
   const open = useCallback((id: string) => ui.set({ openItemId: id }), []);
+  const everything = useStore(data, (s) => liveItems(s.items));
 
   if (!items.length) {
     const filtered = activeFilterCount(filters) > 0;
@@ -38,6 +41,7 @@ export function ShelvesView({ items, rooms, total }: Props) {
 
   return (
     <section className="shelves" aria-label={`Shelves, ${items.length} of ${total} exhibits`}>
+      <OnThisDay items={everything} />
       <Masonry
         items={items}
         render={(item, i) => (

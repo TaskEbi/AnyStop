@@ -30,3 +30,46 @@
   font-size: 1.8rem;
   color: var(--ink);
 }
+
+.on-this-day {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.3rem 0.9rem;
+  margin: 0 0 1.6rem;
+  padding: 0.55rem 0.9rem;
+  background: var(--paper);
+  background-image: var(--grain);
+  color: var(--ink);
+  box-shadow: var(--shadow-card);
+  rotate: 0.4deg;
+  border-left: 4px solid var(--thread);
+}
+.on-this-day__label {
+  font-size: 1.25rem;
+  color: var(--thread);
+}
+.on-this-day ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.2rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.on-this-day button {
+  padding: 0.15rem 0;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  font-size: 0.95rem;
+}
+.on-this-day button:hover {
+  text-decoration: underline;
+  text-decoration-color: var(--thread);
+}
+.on-this-day__when {
+  font-size: 0.72rem;
+  color: var(--ink-faint);
+  text-transform: uppercase;
+}

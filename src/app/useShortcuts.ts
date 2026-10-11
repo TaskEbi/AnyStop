@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { data } from '../data/store';
 import { openAddSheet, ui } from '../data/ui';
+import { surprise } from './surprise';
 
 function isTyping(target: EventTarget | null): boolean {
   const el = target as HTMLElement | null;
@@ -8,7 +9,7 @@ function isTyping(target: EventTarget | null): boolean {
   return el.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(el.tagName);
 }
 
-/** N add · / search · 1/2/3 views. Esc is handled by each dialog. */
+/** N add · / search · R wander · 1/2/3 views. Esc is handled by each dialog. */
 export function useShortcuts() {
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -23,6 +24,11 @@ export function useShortcuts() {
         case '/':
           e.preventDefault();
           document.getElementById('search')?.focus();
+          break;
+        case 'r':
+        case 'R':
+          e.preventDefault();
+          surprise();
           break;
         case '1':
           ui.set({ view: 'shelves', tying: null });
