@@ -8,12 +8,14 @@ function isTyping(target: EventTarget | null): boolean {
   return el.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(el.tagName);
 }
 
-/** N add · / search · 1 shelves. Esc is handled by each dialog. */
+const VIEWS_READY = { collage: false };
+
+/** N add · / search · 1/2/3 views. Esc is handled by each dialog. */
 export function useShortcuts() {
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.altKey || isTyping(e.target)) return;
-      if (document.querySelector('dialog[open]') || !data.get().ready) return;
+      if (document.querySelector('dialog:modal') || !data.get().ready) return;
       switch (e.key) {
         case 'n':
         case 'N':
@@ -25,7 +27,13 @@ export function useShortcuts() {
           document.getElementById('search')?.focus();
           break;
         case '1':
-          ui.set({ view: 'shelves' });
+          ui.set({ view: 'shelves', tying: null });
+          break;
+        case '2':
+          if (VIEWS_READY.collage) ui.set({ view: 'collage', tying: null });
+          break;
+        case '3':
+          ui.set({ view: 'map', tying: null });
           break;
       }
     }

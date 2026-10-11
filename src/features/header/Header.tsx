@@ -14,7 +14,7 @@ import './header.css';
 const VIEWS: { id: ViewName; label: string; icon: IconName; ready: boolean }[] = [
   { id: 'shelves', label: 'Shelves', icon: 'shelves', ready: true },
   { id: 'collage', label: 'Collage', icon: 'collage', ready: false },
-  { id: 'map', label: 'String Map', icon: 'map', ready: false },
+  { id: 'map', label: 'String Map', icon: 'map', ready: true },
 ];
 
 function MuseumName() {
@@ -143,7 +143,7 @@ function Menu({ onSignOut }: { onSignOut?: () => void }) {
           </button>
         )}
         <p className="menu__keys type">
-          N add · / search · Esc close · 1 shelves
+          N add · / search · R wander · Esc close · 1 2 3 views
         </p>
       </div>
     </>
@@ -167,7 +167,7 @@ export function Header({ onSignOut, filterCount }: { onSignOut?: () => void; fil
               aria-current={view === v.id ? 'page' : undefined}
               disabled={!v.ready}
               title={v.ready ? undefined : 'Opening in a later phase'}
-              onClick={() => ui.set({ view: v.id })}
+              onClick={() => ui.set({ view: v.id, tying: null })}
             >
               <Icon name={v.icon} size={16} />
               <span>{v.label}</span>

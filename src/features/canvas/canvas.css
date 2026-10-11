@@ -1,0 +1,158 @@
+/* Shared chrome for the Collage and String Map views. */
+
+.canvas-view {
+  --chrome: 200px;
+  position: relative;
+  height: max(440px, calc(100dvh - var(--chrome)));
+  margin: 1rem 0 1.25rem;
+  border-radius: 10px;
+  overflow: hidden;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  box-shadow: inset 0 0 0 1px rgb(60 40 20 / 0.15), inset 0 10px 30px -10px rgb(40 25 10 / 0.45);
+  cursor: grab;
+}
+.canvas-view.is-panning {
+  cursor: grabbing;
+}
+.canvas-view.is-tying {
+  cursor: crosshair;
+}
+@media (max-width: 900px) {
+  .canvas-view {
+    --chrome: 250px;
+  }
+}
+@media (max-width: 720px) {
+  .canvas-view {
+    --chrome: 290px;
+    margin-inline: calc(-1 * clamp(16px, 3vw, 32px) + 6px);
+    border-radius: 6px;
+  }
+}
+
+.canvas-tools {
+  position: absolute;
+  z-index: 5;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.35rem;
+  max-width: calc(100% - 20px);
+  pointer-events: none;
+}
+.canvas-tools > * {
+  pointer-events: auto;
+}
+.canvas-tools__group {
+  display: flex;
+  background: var(--paper);
+  border-radius: 6px;
+  box-shadow: var(--shadow-card);
+}
+.canvas-tools__group .btn {
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent;
+}
+.canvas-tools__group .btn:hover {
+  background: var(--paper-warm);
+}
+.canvas-tools__group .btn[aria-pressed='true'] {
+  background: var(--ink);
+  color: var(--paper);
+}
+.canvas-tools__search {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0 0.5rem;
+  background: var(--paper);
+  border-radius: 6px;
+  box-shadow: var(--shadow-card);
+  color: var(--ink);
+}
+.canvas-tools__search input {
+  width: 150px;
+  height: 36px;
+  border: 0;
+  background: transparent;
+  font-family: var(--font-serif);
+  font-size: 0.9rem;
+  color: var(--ink);
+}
+.canvas-tools__search input:focus-visible {
+  outline: none;
+}
+.canvas-tools__search:focus-within {
+  outline: 2px solid var(--focus);
+}
+
+.tie-hint {
+  position: absolute;
+  z-index: 6;
+  left: 12px;
+  bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  margin: 0;
+  padding: 0.35rem 0.4rem 0.35rem 0.9rem;
+  background: var(--thread);
+  color: #fff8ec;
+  font-size: 0.8rem;
+  border-radius: 999px;
+  box-shadow: var(--shadow-card);
+  white-space: nowrap;
+}
+
+.tie-prompt {
+  position: absolute;
+  z-index: 7;
+  left: 50%;
+  bottom: 16px;
+  translate: -50% 0;
+  width: min(460px, calc(100% - 24px));
+  padding: 0.8rem;
+  background: var(--paper);
+  background-image: var(--grain);
+  color: var(--ink);
+  box-shadow: var(--shadow-panel);
+  rotate: -0.5deg;
+  cursor: default;
+  user-select: text;
+}
+.tie-prompt__ends {
+  display: grid;
+  grid-template-columns: 1fr 40px 1fr;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.6rem;
+  font-size: 0.85rem;
+}
+.tie-prompt__ends span:first-child,
+.tie-prompt__ends span:last-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.tie-prompt__ends span:last-child {
+  text-align: right;
+}
+.tie-prompt__thread {
+  height: 2px;
+  background: var(--thread);
+  border-radius: 2px;
+}
+.tie-prompt__row {
+  display: flex;
+  gap: 0.4rem;
+}
+.tie-prompt__row .input {
+  flex: 1;
+  min-width: 0;
+}

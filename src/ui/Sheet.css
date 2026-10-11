@@ -1,5 +1,10 @@
-html:has(dialog[open]) {
+html:has(dialog:modal) {
   overflow: hidden;
+}
+.sheet--floating {
+  position: fixed;
+  inset: 0 0 0 auto;
+  z-index: 30;
 }
 
 .sheet {

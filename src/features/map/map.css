@@ -1,0 +1,21 @@
+.map-view-wrap {
+  position: relative;
+}
+.map-view {
+  background-color: color-mix(in srgb, var(--desk) 82%, #3a2716);
+  background-image:
+    radial-gradient(circle at 1px 1px, rgb(255 255 255 / 0.09) 1px, transparent 1.5px),
+    var(--grain);
+  background-size: 28px 28px, auto;
+}
+.map-view__canvas {
+  display: block;
+}
+.map-view-wrap .canvas-tools {
+  top: 26px;
+  right: 10px;
+}
+/* The canvas sits 1rem below the wrapper's top edge. */
+.map-view-wrap .tie-hint {
+  bottom: calc(1.25rem + 12px);
+}

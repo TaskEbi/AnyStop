@@ -44,7 +44,7 @@ export function useCapture(): boolean {
       const types = e.dataTransfer?.types ?? [];
       return types.includes('Files') || types.includes('text/uri-list') || types.includes('text/plain');
     };
-    const blocked = () => !!document.querySelector('dialog[open]') || !data.get().ready;
+    const blocked = () => !!document.querySelector('dialog:modal') || !data.get().ready;
 
     function onPaste(e: ClipboardEvent) {
       if (isTyping(e.target) || blocked()) return;

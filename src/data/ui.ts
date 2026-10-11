@@ -20,6 +20,10 @@ export interface UiState {
   filterSheetOpen: boolean;
   /** Bookmarklet, install hints, export/import. */
   backOfficeOpen: boolean;
+  /** Ask the current view to bring an item into view (canvas views glide to it first). */
+  flight: { id: string; nonce: number } | null;
+  /** Tie-a-string mode in the canvas views: the first end, once picked. */
+  tying: { from: string | null } | null;
   toasts: Toast[];
 }
 
@@ -31,6 +35,8 @@ export const ui = createStore<UiState>({
   roomsOpen: false,
   filterSheetOpen: false,
   backOfficeOpen: false,
+  flight: null,
+  tying: null,
   toasts: [],
 });
 
@@ -51,4 +57,12 @@ export function dismissToast(id: number) {
 
 export function openAddSheet(draft: ItemDraft = { kind: 'link' }, file: File | null = null) {
   ui.set({ sheet: { draft, editId: null, file } });
+}
+
+let flightSeq = 0;
+/** Jump to an item: canvas views glide the camera to it and then open the drawer; Shelves just opens it. */
+export function flyTo(id: string) {
+  const view = ui.get().view;
+  if (view === 'shelves') ui.set({ openItemId: id });
+  else ui.set({ flight: { id, nonce: ++flightSeq } });
 }

@@ -1,6 +1,6 @@
 import type { Kind } from '../data/types';
 
-const PATHS = {
+export const ICON_PATHS = {
   link: 'M10 14a4 4 0 0 0 5.66 0l3-3a4 4 0 0 0-5.66-5.66l-1 1M14 10a4 4 0 0 0-5.66 0l-3 3a4 4 0 0 0 5.66 5.66l1-1',
   video: 'M4 6h12v12H4zM16 10l4-2.5v9L16 14',
   article: 'M5 4h11l3 3v13H5zM8 9h8M8 13h8M8 17h5',
@@ -31,7 +31,7 @@ const PATHS = {
   door: 'M5 21V4h10v17M15 6h4v15M11 12h.01',
 } as const;
 
-export type IconName = keyof typeof PATHS;
+export type IconName = keyof typeof ICON_PATHS;
 
 export function Icon({ name, size = 18, filled = false, title }: { name: IconName | Kind; size?: number; filled?: boolean; title?: string }) {
   return (
@@ -48,7 +48,7 @@ export function Icon({ name, size = 18, filled = false, title }: { name: IconNam
       role={title ? 'img' : undefined}
     >
       {title && <title>{title}</title>}
-      <path d={PATHS[name]} />
+      <path d={ICON_PATHS[name]} />
     </svg>
   );
 }

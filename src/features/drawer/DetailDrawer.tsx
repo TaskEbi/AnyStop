@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { deleteItem, markOpened, updateItem } from '../../data/actions';
-import { allTags, data, liveConnections } from '../../data/store';
+import { allTags, data } from '../../data/store';
 import { toast, ui } from '../../data/ui';
 import { STATUSES, type Item } from '../../data/types';
 import { useStore } from '../../lib/createStore';
@@ -14,6 +14,7 @@ import { RoomPicker } from '../capture/RoomPicker';
 import { TagInput } from '../capture/TagInput';
 import { Card } from '../shelves/Card';
 import { EmbedPlayer } from './EmbedPlayer';
+import { Strings } from './Strings';
 import './drawer.css';
 
 /** The "why I kept this" note, saved a moment after I stop typing. */
@@ -58,37 +59,12 @@ function NoteEditor({ item }: { item: Item }) {
   );
 }
 
-function Connections({ item }: { item: Item }) {
-  const connections = useStore(data, (s) => liveConnections(s.connections));
-  const items = useStore(data, (s) => s.items);
-  const mine = connections.filter((c) => c.item_a === item.id || c.item_b === item.id);
-  if (!mine.length) return null;
-  return (
-    <section className="drawer__section">
-      <h3 className="drawer__heading hand">Strings</h3>
-      <ul className="drawer__strings">
-        {mine.map((c) => {
-          const other = items.get(c.item_a === item.id ? c.item_b : c.item_a);
-          if (!other || other.deleted_at) return null;
-          return (
-            <li key={c.id}>
-              <button type="button" className="drawer__string" onClick={() => ui.set({ openItemId: other.id })}>
-                <span className="drawer__string-label type">{c.label || 'tied to'}</span>
-                <span className="drawer__string-title">{other.title}</span>
-              </button>
-            </li>
-          );
-        })}
-      </ul>
-    </section>
-  );
-}
-
 export function DetailDrawer({ id }: { id: string }) {
   const item = useStore(data, (s) => s.items.get(id));
   const room = useStore(data, (s) => (item?.room_id ? s.rooms.get(item.room_id) : undefined));
   const tags = useStore(data, (s) => allTags(s.items));
   const close = () => ui.set({ openItemId: null });
+  const floating = useStore(ui, (s) => s.view !== 'shelves');
 
   useEffect(() => {
     markOpened(id);
@@ -109,7 +85,7 @@ export function DetailDrawer({ id }: { id: string }) {
   }
 
   return (
-    <Sheet title={item.title || 'Exhibit'} variant="side" onClose={close} hideTitle className="drawer">
+    <Sheet title={item.title || 'Exhibit'} variant="side" onClose={close} hideTitle className="drawer" modal={!floating} key={floating ? 'float' : 'modal'}>
       <div className="drawer__visual">
         <Card item={item} room={liveRoom} tilt={0} />
       </div>
@@ -181,7 +157,7 @@ export function DetailDrawer({ id }: { id: string }) {
         <NoteEditor key={item.id} item={item} />
       </section>
 
-      <Connections item={item} />
+      <Strings item={item} />
 
       <footer className="drawer__actions">
         <button type="button" className="btn" onClick={edit}>
