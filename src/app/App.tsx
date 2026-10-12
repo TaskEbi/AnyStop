@@ -7,6 +7,8 @@ import './app.css';
 
 function AuthGate({ sb }: { sb: SupabaseClient }) {
   const [session, setSession] = useState<Session | null | undefined>(undefined);
+  // True from a code sign-in until a password is chosen or skipped, so the entrance stays up meanwhile.
+  const [choosing, setChoosing] = useState(false);
 
   useEffect(() => {
     void sb.auth.getSession().then(({ data }) => setSession(data.session));
@@ -15,7 +17,7 @@ function AuthGate({ sb }: { sb: SupabaseClient }) {
   }, [sb]);
 
   if (session === undefined) return <p className="loading hand">Opening the cabinet…</p>;
-  if (!session) return <Login sb={sb} />;
+  if (!session || choosing) return <Login sb={sb} onChoosing={setChoosing} />;
   return <Museum key={session.user.id} userId={session.user.id} />;
 }
 
