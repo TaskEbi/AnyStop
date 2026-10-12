@@ -87,10 +87,10 @@ export function startSync(sb: SupabaseClient, userId: string): SyncHandle {
 
     const settingsRev = s.outbox.settings;
     if (settingsRev) {
-      const { museum_name, default_view, theme, examples_seeded } = data.get().settings;
+      const { museum_name, default_view, theme, palette, examples_seeded } = data.get().settings;
       const { error } = await sb
         .from('settings')
-        .upsert({ owner_id: userId, museum_name, default_view, theme, examples_seeded });
+        .upsert({ owner_id: userId, museum_name, default_view, theme, palette, examples_seeded });
       if (error) {
         if (isNetworkError(error)) throw error;
         problem = `Settings couldn't be saved (${error.message}).`;
@@ -124,8 +124,8 @@ export function startSync(sb: SupabaseClient, userId: string): SyncHandle {
     if (error) throw error;
     const r = rows[0] as Settings | undefined;
     if (r) {
-      const { museum_name, default_view, theme, examples_seeded, updated_at } = r;
-      applyRemoteSettings({ ...DEFAULT_SETTINGS, museum_name, default_view, theme, examples_seeded, updated_at });
+      const { museum_name, default_view, theme, palette, examples_seeded, updated_at } = r;
+      applyRemoteSettings({ ...DEFAULT_SETTINGS, museum_name, default_view, theme, palette: palette ?? DEFAULT_SETTINGS.palette, examples_seeded, updated_at });
     }
   }
 

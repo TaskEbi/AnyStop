@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { data } from '../data/store';
-import { openAddSheet, ui } from '../data/ui';
+import { openAddSheet, setView, ui } from '../data/ui';
 import { surprise } from './surprise';
 
 function isTyping(target: EventTarget | null): boolean {
@@ -9,10 +9,16 @@ function isTyping(target: EventTarget | null): boolean {
   return el.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(el.tagName);
 }
 
-/** N add · / search · R wander · 1/2/3 views. Esc is handled by each dialog. */
+/** Ctrl/⌘ K jump · N add · / search · R wander · 1/2/3/4 views. Esc is handled by each dialog. */
 export function useShortcuts() {
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
+      // Jump-to works from anywhere, even while typing.
+      if ((e.ctrlKey || e.metaKey) && !e.altKey && e.key.toLowerCase() === 'k' && data.get().ready) {
+        e.preventDefault();
+        ui.set((s) => ({ ...s, commandOpen: !s.commandOpen }));
+        return;
+      }
       if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.altKey || isTyping(e.target)) return;
       if (document.querySelector('dialog:modal') || !data.get().ready) return;
       switch (e.key) {
@@ -31,13 +37,16 @@ export function useShortcuts() {
           surprise();
           break;
         case '1':
-          ui.set({ view: 'shelves', tying: null });
+          setView('shelves');
           break;
         case '2':
-          ui.set({ view: 'collage', tying: null });
+          setView('collage');
           break;
         case '3':
-          ui.set({ view: 'map', tying: null });
+          setView('map');
+          break;
+        case '4':
+          setView('mind');
           break;
       }
     }

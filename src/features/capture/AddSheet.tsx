@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
-import { createItem, updateItem, type ItemDraft } from '../../data/actions';
+import { createItem, findByUrl, updateItem, type ItemDraft } from '../../data/actions';
 import { allTags, data } from '../../data/store';
-import { toast, ui } from '../../data/ui';
+import { flyTo, toast, ui } from '../../data/ui';
 import { KINDS, STATUSES, type Kind } from '../../data/types';
 import { useStore } from '../../lib/createStore';
 import { detect } from '../../lib/detectKind';
@@ -142,10 +142,12 @@ export function AddSheet({ draft: initial, editId, file }: { draft: ItemDraft; e
             onChange={(e) => onUrl(e.target.value)}
             placeholder="https://…"
             autoFocus={!editId && !textKind}
+            data-autofocus={(!editId && !textKind) || undefined}
             autoComplete="off"
             spellCheck={false}
           />
         </label>
+        <TwinNote url={d.url} editId={editId} />
 
         {textKind && (
           <label className="field">
@@ -156,6 +158,7 @@ export function AddSheet({ draft: initial, editId, file }: { draft: ItemDraft; e
               onChange={(e) => set({ body: e.target.value })}
               rows={d.kind === 'quote' ? 3 : 5}
               autoFocus={!editId}
+              data-autofocus={!editId || undefined}
             />
           </label>
         )}
@@ -247,5 +250,27 @@ export function AddSheet({ draft: initial, editId, file }: { draft: ItemDraft; e
         </div>
       </form>
     </Sheet>
+  );
+}
+
+/** "You already have this one", with a way to go and look. */
+function TwinNote({ url, editId }: { url: string | null | undefined; editId: string | null }) {
+  const det = url?.trim() ? detect(url) : null;
+  const twin = findByUrl(det?.url, editId);
+  if (!twin) return null;
+  return (
+    <p className="twin-note" role="status">
+      Already in the cabinet as <strong>{twin.title}</strong>.{' '}
+      <button
+        type="button"
+        className="twin-note__show"
+        onClick={() => {
+          ui.set({ sheet: null });
+          flyTo(twin.id);
+        }}
+      >
+        Show it
+      </button>
+    </p>
   );
 }

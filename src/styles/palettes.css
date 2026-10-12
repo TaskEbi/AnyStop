@@ -1,0 +1,172 @@
+/* ── Colour schemes ───────────────────────────────────────────────────────────
+   Kraft is the default, defined in tokens.css. Each other scheme re-tints the
+   desk, the paper and the thread. data-palette and data-mode (the resolved
+   light/dark) are set on <html> by useTheme, and before first paint in main.tsx.
+   Every scheme's night block must set the same tokens as its daylight block. */
+
+:root {
+  --wash: 255 255 255; /* light film laid on the desk behind tabs and search */
+  --on-thread: #fff8ec; /* text on thread-coloured buttons */
+
+  /* Mind Map 3D sky: a star chart on paper by day, a night sky after dark */
+  --sky: color-mix(in srgb, var(--paper-news) 58%, var(--desk));
+  --sky-edge: color-mix(in srgb, var(--paper-news) 18%, var(--desk-deep));
+}
+:root[data-mode='dark'] {
+  --sky: color-mix(in srgb, var(--desk-deep) 62%, #04060b);
+  --sky-edge: color-mix(in srgb, var(--desk-deep) 22%, #000);
+}
+
+/* Reading room: green baize and oxblood */
+:root[data-palette='reading-room'] {
+  --desk: #93a98c;
+  --desk-deep: #7b9474;
+  --desk-ink: #1b2a1c;
+  --desk-ink-soft: #3c5139;
+  --paper: #fbf8ee;
+  --paper-warm: #f2eedc;
+  --paper-news: #e9e6d2;
+  --paper-edge: #dcd8bf;
+  --thread: #9b2c2c;
+  --thread-soft: rgb(155 44 44 / 0.14);
+  --focus: #9b2c2c;
+  --panel: rgb(250 248 238 / 0.95);
+}
+:root[data-palette='reading-room'][data-mode='dark'] {
+  --desk: #1a291f;
+  --desk-deep: #111c15;
+  --desk-ink: #e2ead6;
+  --desk-ink-soft: #a7b99e;
+  --paper: #d3d2be;
+  --paper-warm: #c8c8b2;
+  --paper-news: #c2c1ab;
+  --paper-edge: #aeae96;
+  --thread: #e0574a;
+  --thread-soft: rgb(224 87 74 / 0.2);
+  --focus: #e3b85a;
+  --panel: rgb(29 43 33 / 0.96);
+}
+
+/* Blueprint: drafting-table blue and a red-orange pencil */
+:root[data-palette='blueprint'] {
+  --desk: #a6bbd0;
+  --desk-deep: #8ea6bf;
+  --desk-ink: #13233a;
+  --desk-ink-soft: #34496a;
+  --paper: #f9faf6;
+  --paper-warm: #eef1ec;
+  --paper-news: #e6e9e3;
+  --paper-edge: #d4dad5;
+  --thread: #c2410c;
+  --thread-soft: rgb(194 65 12 / 0.14);
+  --focus: #c2410c;
+  --panel: rgb(249 250 246 / 0.95);
+}
+:root[data-palette='blueprint'][data-mode='dark'] {
+  --desk: #12213a;
+  --desk-deep: #0b1628;
+  --desk-ink: #dbe6f5;
+  --desk-ink-soft: #9cb0cc;
+  --paper: #cfd5d9;
+  --paper-warm: #c4cbd0;
+  --paper-news: #bec5ca;
+  --paper-edge: #a9b2b9;
+  --thread: #ff7a45;
+  --thread-soft: rgb(255 122 69 / 0.2);
+  --focus: #ffb35c;
+  --panel: rgb(22 36 60 / 0.96);
+}
+
+/* Pressed rose: dusty pink blotting paper and crimson */
+:root[data-palette='pressed-rose'] {
+  --desk: #d6aea7;
+  --desk-deep: #c49790;
+  --desk-ink: #3b1d23;
+  --desk-ink-soft: #6b3f47;
+  --paper: #fdf8f4;
+  --paper-warm: #f7ece5;
+  --paper-news: #f0e3dc;
+  --paper-edge: #e6d3ca;
+  --thread: #8e1f3d;
+  --thread-soft: rgb(142 31 61 / 0.14);
+  --focus: #8e1f3d;
+  --panel: rgb(253 248 244 / 0.95);
+}
+:root[data-palette='pressed-rose'][data-mode='dark'] {
+  --desk: #2a181e;
+  --desk-deep: #1d1015;
+  --desk-ink: #f1dfe2;
+  --desk-ink-soft: #c6a3aa;
+  --paper: #ddd0ca;
+  --paper-warm: #d3c4be;
+  --paper-news: #cdbdb7;
+  --paper-edge: #baa8a1;
+  --thread: #f05d7e;
+  --thread-soft: rgb(240 93 126 / 0.2);
+  --focus: #f3a6b8;
+  --panel: rgb(52 31 39 / 0.96);
+}
+
+/* White cube: a modern gallery wall and a red dot */
+:root[data-palette='white-cube'] {
+  --desk: #e6e3dc;
+  --desk-deep: #d3cfc6;
+  --desk-ink: #1d1d1d;
+  --desk-ink-soft: #57534c;
+  --paper: #ffffff;
+  --paper-warm: #f5f3ef;
+  --paper-news: #efede8;
+  --paper-edge: #e1ded7;
+  --thread: #d0342c;
+  --thread-soft: rgb(208 52 44 / 0.12);
+  --focus: #d0342c;
+  --panel: rgb(255 255 255 / 0.96);
+  --wash: 110 100 85;
+}
+:root[data-palette='white-cube'][data-mode='dark'] {
+  --desk: #1c1c1e;
+  --desk-deep: #121214;
+  --desk-ink: #ececec;
+  --desk-ink-soft: #a3a3a7;
+  --paper: #dad8d3;
+  --paper-warm: #d0cec8;
+  --paper-news: #cac7c1;
+  --paper-edge: #b6b3ac;
+  --thread: #ff5a4f;
+  --thread-soft: rgb(255 90 79 / 0.2);
+  --focus: #ffd166;
+  --panel: rgb(38 38 40 / 0.96);
+  --wash: 255 255 255;
+}
+
+/* Observatory: dusk violet and polished brass */
+:root[data-palette='observatory'] {
+  --desk: #b4aecb;
+  --desk-deep: #9d96b8;
+  --desk-ink: #221c3a;
+  --desk-ink-soft: #4b4468;
+  --paper: #fbf9f3;
+  --paper-warm: #f1eee6;
+  --paper-news: #ebe8de;
+  --paper-edge: #dcd8cc;
+  --thread: #a8452a;
+  --thread-soft: rgb(168 69 42 / 0.14);
+  --focus: #a8452a;
+  --panel: rgb(251 249 243 / 0.95);
+  --on-thread: #fff8ec;
+}
+:root[data-palette='observatory'][data-mode='dark'] {
+  --desk: #16132b;
+  --desk-deep: #0c0a1c;
+  --desk-ink: #e7e3f6;
+  --desk-ink-soft: #aaa3ca;
+  --paper: #d8d3c6;
+  --paper-warm: #cdc8ba;
+  --paper-news: #c7c2b3;
+  --paper-edge: #b3ad9d;
+  --thread: #f2a541;
+  --thread-soft: rgb(242 165 65 / 0.22);
+  --focus: #f2a541;
+  --panel: rgb(33 29 60 / 0.96);
+  --on-thread: #1b1430;
+}

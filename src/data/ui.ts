@@ -20,6 +20,8 @@ export interface UiState {
   filterSheetOpen: boolean;
   /** Bookmarklet, install hints, export/import. */
   backOfficeOpen: boolean;
+  /** The Ctrl/⌘ K jump-to palette. */
+  commandOpen: boolean;
   /** Ask the current view to bring an item into view (canvas views glide to it first). */
   flight: { id: string; nonce: number } | null;
   /** Tie-a-string mode in the canvas views: the first end, once picked. */
@@ -35,6 +37,7 @@ export const ui = createStore<UiState>({
   roomsOpen: false,
   filterSheetOpen: false,
   backOfficeOpen: false,
+  commandOpen: false,
   flight: null,
   tying: null,
   toasts: [],
@@ -57,6 +60,11 @@ export function dismissToast(id: number) {
 
 export function openAddSheet(draft: ItemDraft = { kind: 'link' }, file: File | null = null) {
   ui.set({ sheet: { draft, editId: null, file } });
+}
+
+/** Switch views, dropping per-view modes and any stale fly-to request. */
+export function setView(view: ViewName) {
+  ui.set({ view, tying: null, flight: null });
 }
 
 let flightSeq = 0;

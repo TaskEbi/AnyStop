@@ -65,14 +65,49 @@ export function markOpened(id: string) {
   if (item) commit('items', [{ ...item, last_opened_at: now(), updated_at: now() }]);
 }
 
-export function deleteItem(id: string) {
+/** Deaccession an item and its strings. Returns the deletion time, which `restoreItem` needs. */
+export function deleteItem(id: string): string | null {
   const st = data.get();
   const item = st.items.get(id);
-  if (!item) return;
+  if (!item) return null;
   const t = now();
   const strings = liveConnections(st.connections).filter((c) => c.item_a === id || c.item_b === id);
   commit('items', [{ ...item, deleted_at: t, updated_at: t }]);
   commit('connections', strings.map((c) => ({ ...c, deleted_at: t, updated_at: t })));
+  return t;
+}
+
+/** Undo a delete: the item comes back with exactly the strings that went with it. */
+export function restoreItem(id: string, deletedAt: string) {
+  const st = data.get();
+  const item = st.items.get(id);
+  if (!item || item.deleted_at !== deletedAt) return;
+  const t = now();
+  const strings = [...st.connections.values()].filter((c) => c.deleted_at === deletedAt && (c.item_a === id || c.item_b === id));
+  commit('items', [{ ...item, deleted_at: null, updated_at: t }]);
+  commit('connections', strings.map((c) => ({ ...c, deleted_at: null, updated_at: t })));
+}
+
+/** A link reduced to what makes it the same page: no scheme, www, trailing slash, fragment or tracking. */
+export function sameLinkKey(url: string): string {
+  try {
+    const u = new URL(url);
+    for (const k of [...u.searchParams.keys()]) if (/^(utm_|fbclid$|gclid$|si$|igsh$)/.test(k)) u.searchParams.delete(k);
+    const host = u.hostname.replace(/^(www|m)\./, '');
+    return `${host}${u.pathname.replace(/\/+$/, '')}${u.search}`.toLowerCase();
+  } catch {
+    return url.trim().toLowerCase();
+  }
+}
+
+/** An exhibit already holding this link, if any. */
+export function findByUrl(url: string | null | undefined, exceptId?: string | null): Item | undefined {
+  if (!url) return undefined;
+  const key = sameLinkKey(url);
+  for (const i of data.get().items.values()) {
+    if (!i.deleted_at && i.url && i.id !== exceptId && sameLinkKey(i.url) === key) return i;
+  }
+  return undefined;
 }
 
 // ─── rooms ──────────────────────────────────────────────────────────────────
@@ -156,6 +191,14 @@ export function updateConnection(id: string, patch: Partial<Connection>) {
 export function cut(id: string) {
   const c = data.get().connections.get(id);
   if (c) commit('connections', [{ ...c, deleted_at: now(), updated_at: now() }]);
+}
+
+/** Undo a cut (unless either end has gone in the meantime). */
+export function uncut(id: string) {
+  const st = data.get();
+  const c = st.connections.get(id);
+  if (!c?.deleted_at || st.items.get(c.item_a)?.deleted_at || st.items.get(c.item_b)?.deleted_at) return;
+  commit('connections', [{ ...c, deleted_at: null, updated_at: now() }]);
 }
 
 // ─── settings ───────────────────────────────────────────────────────────────

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
-import { deleteItem, markOpened, updateItem } from '../../data/actions';
+import { deleteItem, markOpened, restoreItem, updateItem } from '../../data/actions';
 import { allTags, data } from '../../data/store';
-import { toast, ui } from '../../data/ui';
+import { flyTo, toast, ui } from '../../data/ui';
 import { STATUSES, type Item } from '../../data/types';
 import { useStore } from '../../lib/createStore';
 import { hostOf } from '../../lib/detectKind';
@@ -59,7 +59,58 @@ function NoteEditor({ item }: { item: Item }) {
   );
 }
 
-export function DetailDrawer({ id }: { id: string }) {
+function isTyping(target: EventTarget | null): boolean {
+  const el = target as HTMLElement | null;
+  return !!el && (el.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(el.tagName));
+}
+
+/** Step through the exhibits on show, in their current order: arrows in the drawer, or ← → / J K. */
+function Stepper({ id, sequence }: { id: string; sequence: string[] }) {
+  const i = sequence.indexOf(id);
+  const prev = i > 0 ? sequence[i - 1] : null;
+  const next = i >= 0 && i < sequence.length - 1 ? sequence[i + 1] : null;
+  const go = (to: string | null) => {
+    if (!to) return;
+    if (ui.get().view === 'shelves') ui.set({ openItemId: to });
+    else flyTo(to);
+  };
+  const latest = useRef({ prev, next, go });
+  latest.current = { prev, next, go };
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.altKey || isTyping(e.target)) return;
+      // The 3D map uses the arrow keys to turn the sky.
+      if ((e.target as HTMLElement | null)?.closest?.('.canvas-view')) return;
+      const modal = document.querySelector('dialog:modal');
+      if (modal && !modal.classList.contains('drawer')) return;
+      const { prev: p, next: n, go: g } = latest.current;
+      if (e.key === 'ArrowLeft' || e.key === 'k' || e.key === 'K') g(p);
+      else if (e.key === 'ArrowRight' || e.key === 'j' || e.key === 'J') g(n);
+      else return;
+      e.preventDefault();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
+
+  if (i < 0 || sequence.length < 2) return null;
+  return (
+    <span className="drawer__stepper">
+      <button type="button" className="btn btn--ghost btn--icon" disabled={!prev} onClick={() => go(prev)} aria-label="Previous exhibit" title="Previous (←)">
+        ‹
+      </button>
+      <span className="drawer__count type">
+        {i + 1}/{sequence.length}
+      </span>
+      <button type="button" className="btn btn--ghost btn--icon" disabled={!next} onClick={() => go(next)} aria-label="Next exhibit" title="Next (→)">
+        ›
+      </button>
+    </span>
+  );
+}
+
+export function DetailDrawer({ id, sequence = [] }: { id: string; sequence?: string[] }) {
   const item = useStore(data, (s) => s.items.get(id));
   const room = useStore(data, (s) => (item?.room_id ? s.rooms.get(item.room_id) : undefined));
   const tags = useStore(data, (s) => allTags(s.items));
@@ -85,7 +136,16 @@ export function DetailDrawer({ id }: { id: string }) {
   }
 
   return (
-    <Sheet title={item.title || 'Exhibit'} variant="side" onClose={close} hideTitle className="drawer" modal={!floating} key={floating ? 'float' : 'modal'}>
+    <Sheet
+      title={item.title || 'Exhibit'}
+      variant="side"
+      onClose={close}
+      hideTitle
+      className="drawer"
+      modal={!floating}
+      key={floating ? 'float' : 'modal'}
+      headerTools={<Stepper id={id} sequence={sequence} />}
+    >
       <div className="drawer__visual">
         <Card item={item} room={liveRoom} tilt={0} />
       </div>
@@ -172,9 +232,9 @@ export function DetailDrawer({ id }: { id: string }) {
           message="Remove this from the cabinet?"
           confirmLabel="Delete"
           onConfirm={() => {
-            deleteItem(item.id);
+            const at = deleteItem(item.id);
             close();
-            toast(`Deaccessioned: ${item.title}`);
+            toast(`Deaccessioned: ${item.title}`, at ? { label: 'Undo', run: () => restoreItem(item.id, at) } : undefined);
           }}
         />
       </footer>

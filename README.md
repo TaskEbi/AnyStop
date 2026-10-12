@@ -25,7 +25,7 @@ With no `.env.local` the app runs in **local-only mode**: everything stays in th
    ```bash
    npx supabase login
    npx supabase link --project-ref <your-project-ref>
-   npm run db:push
+   npm run db:push          # applies every file in supabase/migrations
    npx supabase functions deploy preview --use-api
    ```
 4. In the Supabase dashboard:
@@ -58,6 +58,8 @@ Every row has an `owner_id`. Row-level security lets a signed-in user read and w
 
   Items save immediately with a guessed title and fill in when the preview arrives.
 - **String Map.** `d3-force` (Barnes–Hut) drawn on canvas. Node positions are kept between visits so the layout doesn't jump.
+- **Mind Map 3D.** Rooms are planets on a wide ring and each room's exhibits form a cloud around it, drawn on canvas with real perspective. By day it looks like a star chart on paper; at night it's a sky with glowing stars. Colours come from the theme tokens. Selecting a star shows a placard where you can **follow its strings** from one exhibit to the next, and **Tour** follows the strings on its own. Hidden stars swing round to face you, and the camera remembers its position between views. 60 fps with 1,000 exhibits, using pre-rendered sprites and no React work per frame.
+- **Colour schemes.** Kraft, Reading room, Blueprint, Pressed rose, White cube and Observatory, each with a daylight and a night version (`src/styles/palettes.css`). The scheme syncs as `settings.palette`.
 - **Collage.** DOM cards on a transformed layer with viewport culling. Far zoom switches to lightweight blocks. Positions sync through `collage_pos`.
 
 ## Using it
@@ -70,7 +72,11 @@ Every row has an `owner_id`. Row-level security lets a signed-in user read and w
 | Strings | Drawer → **Connect to…**, or **Tie a string** in Collage / String Map (click A, click B, add a label) |
 | Wander | **Surprise me** or `R`: favours Up next and things you haven't opened lately |
 | Safety net | Back office → Export (zip with photos) / Import |
-| Keys | `N` add · `/` search · `R` wander · `1` `2` `3` views · `Esc` close |
+| Jump to | `Ctrl`/`⌘` `K`: any exhibit, room, tag, view, lighting or colour scheme |
+| Drawer | `←` `→` (or `J` `K`) step through the exhibits on show · deleting or cutting a string can be undone from the toast |
+| Duplicates | Acquiring a link you already have shows the existing exhibit instead of a second copy |
+| 3D map | Drag to turn · Shift-drag or two fingers to pan · scroll or pinch to zoom · double-click to open · arrows, `+` `−` and `0` when it has focus |
+| Keys | `N` add · `/` search · `R` wander · `1` `2` `3` `4` views · `Esc` close |
 
 ## Performance (headless Chromium, 1,000 fake items + 300 strings)
 
@@ -79,6 +85,7 @@ Every row has an `owner_id`. Row-level security lets a signed-in user read and w
 | Shelves | First render 0.44 s, ~50 fps scrolling, search 0.15 s |
 | String Map | Opens in 0.13 s, 60 fps while settling and panning |
 | Collage | Opens in 0.27 s, 60 fps panning, 65–500 cards in the DOM thanks to culling |
+| Mind Map 3D | Opens in 0.05 s, 60 fps orbiting and dragging (light and dark) |
 
 To repeat it in dev, run `curioDev.fake(1000)` in the console, then `curioDev.clearFake()`.
 
@@ -91,7 +98,8 @@ src/lib/                    kind detection, camera (pan/zoom), photos, media/emb
 src/data/                   types, local store + outbox, sync, filters, actions, seed, backup, wander
 src/ui/                     Sheet, Tape, Stamp, Icon, InlineConfirm, Toasts
 src/features/               auth, capture, filters, header, shelves (+8 card styles), drawer,
-                            rooms, backoffice, map (String Map), collage, canvas (shared)
+                            rooms, backoffice, map (String Map), mind (Mind Map 3D), collage,
+                            canvas (shared), command (Ctrl/⌘ K palette)
 src/app/                    App shell, session wiring, shortcuts, capture, share, theme
 src/sw.ts                   service worker: offline shell, image cache, share target
 ```

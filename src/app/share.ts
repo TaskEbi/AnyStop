@@ -1,4 +1,4 @@
-import { createItem } from '../data/actions';
+import { createItem, findByUrl } from '../data/actions';
 import { enrich } from '../data/enrich';
 import { data } from '../data/store';
 import { openAddSheet, toast, ui } from '../data/ui';
@@ -29,6 +29,14 @@ export async function takeShare(waitForSync: () => Promise<void>): Promise<void>
       await cache.delete('/shared-photo');
       draft = { kind: 'photo', title: title ?? '' };
     }
+  }
+
+  const twin = file ? undefined : findByUrl(draft.url);
+  if (twin) {
+    ui.set({ openItemId: twin.id });
+    toast(`Already in the cabinet: ${twin.title}`);
+    if (window.opener && q.get('save')) setTimeout(() => window.close(), 1500);
+    return;
   }
 
   if (q.get('save') && !file && (url || text)) {

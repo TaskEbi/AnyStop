@@ -34,12 +34,12 @@ export async function exportCollection(onProgress?: (done: number, total: number
     files[name] = [new Uint8Array(await blob.arrayBuffer()), { level: 0 }];
     photos[item.id] = name;
   }
-  const { museum_name, default_view, theme } = st.settings;
+  const { museum_name, default_view, theme, palette } = st.settings;
   const backup: Backup = {
     app: 'curio-cabinet',
     version: 1,
     exported_at: new Date().toISOString(),
-    settings: { museum_name, default_view, theme },
+    settings: { museum_name, default_view, theme, palette },
     rooms: liveRooms(st.rooms),
     items,
     connections: liveConnections(st.connections),

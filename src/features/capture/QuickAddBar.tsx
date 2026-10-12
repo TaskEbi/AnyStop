@@ -1,8 +1,8 @@
 import { useState, type FormEvent } from 'react';
-import { createItem } from '../../data/actions';
+import { createItem, findByUrl } from '../../data/actions';
 import { data } from '../../data/store';
 import { enrich } from '../../data/enrich';
-import { openAddSheet, toast, ui } from '../../data/ui';
+import { flyTo, openAddSheet, toast, ui } from '../../data/ui';
 import { Icon } from '../../ui/Icon';
 import { KIND_LABEL } from '../../ui/labels';
 import { draftFromText, withTitle } from './draft';
@@ -25,7 +25,14 @@ export function QuickAddBar() {
       openAddSheet({ kind: 'link', room_id: currentRoom() });
       return;
     }
-    const item = createItem(withTitle({ ...draftFromText(value), room_id: currentRoom() }));
+    const draft = draftFromText(value);
+    const twin = findByUrl(draft.url);
+    if (twin) {
+      setText('');
+      toast(`Already in the cabinet: ${twin.title}`, { label: 'Show', run: () => flyTo(twin.id) });
+      return;
+    }
+    const item = createItem(withTitle({ ...draft, room_id: currentRoom() }));
     setText('');
     if (item.url) void enrich(item.id);
     toast(`Acquired: ${item.title} (${KIND_LABEL[item.kind].toLowerCase()})`, {

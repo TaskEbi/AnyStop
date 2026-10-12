@@ -14,6 +14,7 @@ import { Header } from '../features/header/Header';
 import { RoomsManager } from '../features/rooms/RoomsManager';
 import { ShelvesView } from '../features/shelves/ShelvesView';
 import { StringMap } from '../features/map/StringMap';
+import { MindMap } from '../features/mind/MindMap';
 import { Collage } from '../features/collage/Collage';
 import { Sheet } from '../ui/Sheet';
 import { Toasts } from '../ui/Toasts';
@@ -24,6 +25,7 @@ import { useCapture } from './useCapture';
 import { takeShare } from './share';
 import { enrichBacklog } from '../data/enrich';
 import { BackOffice } from '../features/backoffice/BackOffice';
+import { CommandPalette } from '../features/command/CommandPalette';
 
 /** First visit to an empty cabinet: lay out the examples (only once per account). */
 function maybeSeed() {
@@ -81,12 +83,14 @@ export function Museum({ userId }: { userId: string | null }) {
   const roomsOpen = useStore(ui, (s) => s.roomsOpen);
   const filterSheetOpen = useStore(ui, (s) => s.filterSheetOpen);
   const backOfficeOpen = useStore(ui, (s) => s.backOfficeOpen);
+  const commandOpen = useStore(ui, (s) => s.commandOpen);
 
   const items = liveItems(itemsMap);
   const rooms = liveRooms(roomsMap);
   const tags = allTags(itemsMap);
   const roomById = useMemo(() => new Map(rooms.map((r) => [r.id, r])), [rooms]);
   const visible = useMemo(() => applyFilters(items, filters, roomById), [items, filters, roomById]);
+  const sequence = useMemo(() => visible.map((i) => i.id), [visible]);
   const counts = useMemo(() => facetCounts(items, filters, roomById), [items, filters, roomById]);
   const filterCount = activeFilterCount(filters);
 
@@ -113,6 +117,7 @@ export function Museum({ userId }: { userId: string | null }) {
           {view === 'shelves' && <ShelvesView items={visible} rooms={roomById} total={items.length} />}
           {view === 'collage' && <Collage items={visible} rooms={roomById} />}
           {view === 'map' && <StringMap items={visible} rooms={roomById} />}
+          {view === 'mind' && <MindMap items={visible} rooms={roomById} />}
         </main>
       </div>
 
@@ -128,7 +133,8 @@ export function Museum({ userId }: { userId: string | null }) {
           <p className="drop-overlay__label hand">Drop it in the cabinet</p>
         </div>
       )}
-      {openItemId && <DetailDrawer id={openItemId} />}
+      {openItemId && <DetailDrawer id={openItemId} sequence={sequence} />}
+      {commandOpen && <CommandPalette />}
       {sheet && <AddSheet key={sheet.editId ?? 'new'} draft={sheet.draft} editId={sheet.editId} file={sheet.file} />}
       <Toasts />
     </div>

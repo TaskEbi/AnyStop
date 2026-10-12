@@ -1,6 +1,7 @@
 import type { Kind } from '../data/types';
 
 export const ICON_PATHS = {
+  orbit: 'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18M3 12h18M12 3c-6 5-6 13 0 18 6-5 6-13 0-18',
   link: 'M10 14a4 4 0 0 0 5.66 0l3-3a4 4 0 0 0-5.66-5.66l-1 1M14 10a4 4 0 0 0-5.66 0l-3 3a4 4 0 0 0 5.66 5.66l1-1',
   video: 'M4 6h12v12H4zM16 10l4-2.5v9L16 14',
   article: 'M5 4h11l3 3v13H5zM8 9h8M8 13h8M8 17h5',

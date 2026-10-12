@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { cut, tie, updateConnection } from '../../data/actions';
+import { cut, uncut, tie, updateConnection } from '../../data/actions';
 import { data, liveConnections, liveItems } from '../../data/store';
 import { flyTo, toast } from '../../data/ui';
 import type { Connection, Item } from '../../data/types';
@@ -48,7 +48,11 @@ function StringRow({ conn, other }: { conn: Connection; other: Item }) {
         <Icon name={other.kind} size={14} />
         <span>{other.title}</span>
       </button>
-      <button type="button" className="btn btn--ghost btn--icon string-row__cut" aria-label={`Cut the string to ${other.title}`} title="Cut string" onClick={() => cut(conn.id)}>
+      <button type="button" className="btn btn--ghost btn--icon string-row__cut" aria-label={`Cut the string to ${other.title}`} title="Cut string" onClick={() => {
+          cut(conn.id);
+          toast(`String cut from ${other.title}`, { label: 'Undo', run: () => uncut(conn.id) });
+        }}
+      >
         <Icon name="close" size={14} />
       </button>
     </li>

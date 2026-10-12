@@ -7,8 +7,11 @@ export type Status = (typeof STATUSES)[number];
 export const ROOM_COLORS = ['mustard', 'sage', 'blue', 'rose', 'lavender', 'apricot'] as const;
 export type RoomColor = (typeof ROOM_COLORS)[number];
 
-export type ViewName = 'shelves' | 'collage' | 'map';
+export type ViewName = 'shelves' | 'collage' | 'map' | 'mind';
 export type Theme = 'system' | 'light' | 'dark';
+/** Colour schemes for the whole cabinet; each has a daylight and a night version. */
+export const PALETTES = ['kraft', 'reading-room', 'blueprint', 'pressed-rose', 'white-cube', 'observatory'] as const;
+export type Palette = (typeof PALETTES)[number];
 
 /** Metadata cached from the link-preview function (or filled in by hand for examples). */
 export interface Preview {
@@ -71,6 +74,7 @@ export interface Settings {
   museum_name: string;
   default_view: ViewName;
   theme: Theme;
+  palette: Palette;
   examples_seeded: boolean;
   updated_at: string;
 }
@@ -82,6 +86,7 @@ export const DEFAULT_SETTINGS: Settings = {
   museum_name: 'Curio Cabinet',
   default_view: 'shelves',
   theme: 'system',
+  palette: 'kraft',
   examples_seeded: false,
   updated_at: new Date(0).toISOString(),
 };

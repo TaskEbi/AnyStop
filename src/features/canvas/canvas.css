@@ -103,7 +103,7 @@
   margin: 0;
   padding: 0.35rem 0.4rem 0.35rem 0.9rem;
   background: var(--thread);
-  color: #fff8ec;
+  color: var(--on-thread);
   font-size: 0.8rem;
   border-radius: 999px;
   box-shadow: var(--shadow-card);

@@ -1,0 +1,231 @@
+/* Mind Map 3D: a star chart on paper by day, the night sky after dark. */
+
+.mind-wrap {
+  position: relative;
+}
+.mind-view {
+  background:
+    radial-gradient(120% 90% at 50% 45%, transparent 35%, var(--sky-edge) 100%),
+    var(--sky);
+  outline-offset: -3px;
+}
+:root[data-mode='light'] .mind-view {
+  background-image:
+    radial-gradient(120% 90% at 50% 45%, transparent 35%, var(--sky-edge) 100%),
+    var(--grain);
+}
+.mind-view__canvas {
+  display: block;
+}
+.mind-wrap .canvas-tools {
+  top: 26px;
+  right: 10px;
+}
+
+/* the chart's title, like the cartouche on an old star atlas */
+.mind-cartouche {
+  position: absolute;
+  top: 14px;
+  left: 16px;
+  max-width: 40%;
+  pointer-events: none;
+  color: var(--desk-ink);
+}
+.mind-cartouche__title {
+  font-size: 1.35rem;
+  font-weight: 700;
+  line-height: 1.1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.mind-cartouche__sub {
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--desk-ink-soft);
+}
+
+.mind-hint {
+  position: absolute;
+  right: 14px;
+  bottom: 10px;
+  margin: 0;
+  pointer-events: none;
+  font-size: 0.68rem;
+  color: var(--desk-ink-soft);
+  opacity: 0.85;
+}
+.mind-hint--touch {
+  display: none;
+}
+@media (hover: none) {
+  .mind-hint--mouse {
+    display: none;
+  }
+  .mind-hint--touch {
+    display: inline;
+  }
+}
+
+.mind-empty {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  text-align: center;
+  pointer-events: none;
+  color: var(--desk-ink);
+}
+.mind-empty .hand {
+  font-size: 1.8rem;
+}
+
+.mind-match {
+  font-size: 0.7rem;
+  color: var(--ink-faint);
+  white-space: nowrap;
+}
+
+/* the selected star's museum label */
+.mind-placard {
+  position: absolute;
+  z-index: 6;
+  left: 14px;
+  bottom: calc(1.25rem + 14px);
+  width: min(320px, calc(100% - 28px));
+  max-height: calc(100% - 120px);
+  overflow-y: auto;
+  padding: 0.85rem 0.9rem 0.8rem;
+  background: var(--paper);
+  background-image: var(--grain);
+  color: var(--ink);
+  border-top: 5px solid var(--tape);
+  box-shadow: var(--shadow-panel);
+  rotate: -0.6deg;
+  animation: placard-in 0.25s var(--ease-settle);
+}
+@keyframes placard-in {
+  from {
+    opacity: 0;
+    translate: 0 10px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mind-placard {
+    animation: none;
+  }
+}
+.mind-placard__close {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+}
+.mind-placard__kind {
+  padding-right: 2rem;
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.mind-placard__title {
+  margin-top: 0.25rem;
+  font-size: 1.15rem;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+.mind-placard__creator {
+  margin-top: 0.15rem;
+  font-style: italic;
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+}
+.mind-placard__threads {
+  margin-top: 0.6rem;
+  padding-top: 0.5rem;
+  border-top: 1px dashed var(--panel-line);
+}
+.mind-placard__label {
+  font-size: 0.66rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.mind-placard__threads ul {
+  margin: 0.2rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+.mind-placard__thread {
+  display: flex;
+  align-items: baseline;
+  gap: 0.45rem;
+  width: 100%;
+  padding: 0.3rem 0.35rem;
+  border: 0;
+  border-radius: var(--radius);
+  background: transparent;
+  text-align: left;
+  font-size: 0.9rem;
+}
+.mind-placard__thread:hover {
+  background: var(--thread-soft);
+}
+.mind-placard__knot {
+  flex: none;
+  width: 14px;
+  height: 2px;
+  translate: 0 -0.25em;
+  background: var(--thread);
+  border-radius: 2px;
+}
+.mind-placard__to {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.mind-placard__thread em {
+  margin-left: auto;
+  flex: none;
+  max-width: 40%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-style: normal;
+  font-size: 0.72rem;
+  color: var(--thread);
+}
+.mind-placard__none,
+.mind-placard__more {
+  font-size: 0.8rem;
+  color: var(--ink-faint);
+}
+.mind-placard__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-top: 0.7rem;
+}
+
+/* The toolbar needs the top edge on narrower screens. */
+@media (max-width: 1240px) {
+  .mind-cartouche {
+    display: none;
+  }
+}
+@media (max-width: 720px) {
+  .mind-cartouche,
+  .mind-hint--mouse,
+  .mind-hint--touch {
+    display: none;
+  }
+  .mind-placard {
+    left: 8px;
+    right: 8px;
+    width: auto;
+    bottom: calc(1.25rem + 8px);
+    max-height: 46%;
+    rotate: none;
+  }
+}

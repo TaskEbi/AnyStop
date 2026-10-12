@@ -253,3 +253,21 @@
   height: 100%;
   border: 0;
 }
+
+.drawer__stepper {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  background: var(--panel);
+  box-shadow: var(--shadow-card);
+}
+.drawer__stepper .btn {
+  font-size: 1.3rem;
+  line-height: 1;
+}
+.drawer__count {
+  min-width: 3.2em;
+  text-align: center;
+  font-size: 0.72rem;
+  color: var(--ink-soft);
+}

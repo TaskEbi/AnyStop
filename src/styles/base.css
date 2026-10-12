@@ -107,7 +107,7 @@ img {
 .btn--primary {
   background: var(--thread);
   border-color: transparent;
-  color: #fff8ec;
+  color: var(--on-thread);
 }
 .btn--primary:hover {
   background: color-mix(in srgb, var(--thread) 88%, black);

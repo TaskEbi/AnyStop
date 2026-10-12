@@ -169,3 +169,18 @@
   outline: 2px dashed var(--focus);
   outline-offset: 2px;
 }
+
+.twin-note {
+  margin-top: -0.4rem;
+  padding: 0.35rem 0.6rem;
+  border-left: 3px solid var(--thread);
+  background: var(--thread-soft);
+  font-size: 0.85rem;
+}
+.twin-note__show {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--thread);
+  text-decoration: underline;
+}

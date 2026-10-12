@@ -2,12 +2,13 @@ import { useState } from 'react';
 import { updateSettings } from '../../data/actions';
 import { clearExamples, hasExamples } from '../../data/seed';
 import { data, liveItems } from '../../data/store';
-import { setFilters, toast, ui } from '../../data/ui';
-import type { Theme, ViewName } from '../../data/types';
+import { setFilters, setView, toast, ui } from '../../data/ui';
+import { PALETTES, type Theme, type ViewName } from '../../data/types';
 import { useStore } from '../../lib/createStore';
 import { plural } from '../../lib/format';
 import { Icon, type IconName } from '../../ui/Icon';
 import { InlineConfirm } from '../../ui/InlineConfirm';
+import { PALETTE_INFO } from '../../ui/labels';
 import { QuickAddBar } from '../capture/QuickAddBar';
 import { surprise } from '../../app/surprise';
 import './header.css';
@@ -16,6 +17,7 @@ const VIEWS: { id: ViewName; label: string; icon: IconName; ready: boolean }[] =
   { id: 'shelves', label: 'Shelves', icon: 'shelves', ready: true },
   { id: 'collage', label: 'Collage', icon: 'collage', ready: true },
   { id: 'map', label: 'String Map', icon: 'map', ready: true },
+  { id: 'mind', label: 'Mind Map 3D', icon: 'orbit', ready: true },
 ];
 
 function MuseumName() {
@@ -94,11 +96,42 @@ function SyncBadge() {
   );
 }
 
+const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
+
 const THEMES: { id: Theme; label: string }[] = [
   { id: 'system', label: 'Follow system' },
   { id: 'light', label: 'Daylight' },
   { id: 'dark', label: 'Cabinet at night' },
 ];
+
+/** Colour scheme swatches: each shows the daylight desk, the night desk, a slip of paper and the thread. */
+function PalettePicker() {
+  const palette = useStore(data, (s) => s.settings.palette);
+  return (
+    <div className="menu__group" role="radiogroup" aria-label="Colours">
+      <span className="menu__label type">Colours</span>
+      <div className="palettes">
+        {PALETTES.map((p) => {
+          const c = PALETTE_INFO[p];
+          return (
+            <button key={p} type="button" role="radio" aria-checked={palette === p} className="palette" onClick={() => updateSettings({ palette: p })}>
+              <span
+                className="palette__swatch"
+                aria-hidden="true"
+                style={{ background: `linear-gradient(135deg, ${c.desk} 0 55%, ${c.night} 55%)` }}
+              >
+                <span className="palette__paper" style={{ background: c.paper }}>
+                  <span className="palette__thread" style={{ background: c.thread }} />
+                </span>
+              </span>
+              <span className="palette__name">{c.label}</span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
 
 function Menu({ onSignOut }: { onSignOut?: () => void }) {
   const theme = useStore(data, (s) => s.settings.theme);
@@ -109,6 +142,9 @@ function Menu({ onSignOut }: { onSignOut?: () => void }) {
         <Icon name="menu" />
       </button>
       <div id="main-menu" popover="auto" className="menu">
+        <button type="button" className="menu__item" onClick={() => ui.set({ commandOpen: true })} popoverTarget="main-menu" popoverTargetAction="hide">
+          <Icon name="search" size={15} /> Jump to… <kbd className="menu__kbd type">{isMac ? '⌘K' : 'Ctrl K'}</kbd>
+        </button>
         <button type="button" className="menu__item" onClick={() => ui.set({ roomsOpen: true })} popoverTarget="main-menu" popoverTargetAction="hide">
           Manage rooms
         </button>
@@ -120,6 +156,7 @@ function Menu({ onSignOut }: { onSignOut?: () => void }) {
             </button>
           ))}
         </div>
+        <PalettePicker />
         <button type="button" className="menu__item" onClick={() => ui.set({ backOfficeOpen: true })} popoverTarget="main-menu" popoverTargetAction="hide">
           Back office: bookmarklet, phone app, export
         </button>
@@ -144,7 +181,7 @@ function Menu({ onSignOut }: { onSignOut?: () => void }) {
           </button>
         )}
         <p className="menu__keys type">
-          N add · / search · R wander · Esc close · 1 2 3 views
+          N add · / search · R wander · Esc close · 1 2 3 4 views · ← → step through exhibits
         </p>
       </div>
     </>
@@ -168,7 +205,7 @@ export function Header({ onSignOut, filterCount }: { onSignOut?: () => void; fil
               aria-current={view === v.id ? 'page' : undefined}
               disabled={!v.ready}
               title={v.ready ? undefined : 'Opening in a later phase'}
-              onClick={() => ui.set({ view: v.id, tying: null })}
+              onClick={() => setView(v.id)}
             >
               <Icon name={v.icon} size={16} />
               <span>{v.label}</span>
