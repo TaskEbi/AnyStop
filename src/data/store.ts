@@ -47,7 +47,7 @@ const emptyOutbox = (): Outbox => ({ rooms: {}, items: {}, connections: {}, sett
 
 interface Session {
   db: LocalDb;
-  userId: string | null;
+  cloud: boolean;
   dbName: string;
   outbox: Outbox;
   onLocalChange: () => void;
@@ -153,9 +153,9 @@ export function setSyncState(patch: Partial<DataState['sync']>) {
 
 // ─── session lifecycle ──────────────────────────────────────────────────────
 
-/** Load this user's local copy from IndexedDB and make it the live state. */
-export async function openSession(opts: { userId: string | null; onLocalChange: () => void }) {
-  const dbName = `curio-${opts.userId ?? 'local'}`;
+/** Load the local copy from IndexedDB and make it the live state. */
+export async function openSession(opts: { cloud: boolean; onLocalChange: () => void }) {
+  const dbName = opts.cloud ? 'curio-cloud' : 'curio-local';
   const db = await openLocalDb(dbName);
   const [items, rooms, connections, settings, outbox] = await Promise.all([
     db.getAll<Item>('items'),
@@ -164,15 +164,15 @@ export async function openSession(opts: { userId: string | null; onLocalChange: 
     db.getMeta<Settings>('settings'),
     db.getMeta<Outbox>('outbox'),
   ]);
-  session = { db, userId: opts.userId, dbName, outbox: outbox ?? emptyOutbox(), onLocalChange: opts.onLocalChange };
+  session = { db, cloud: opts.cloud, dbName, outbox: outbox ?? emptyOutbox(), onLocalChange: opts.onLocalChange };
   data.set({
     ready: true,
-    mode: opts.userId ? 'synced' : 'local',
+    mode: opts.cloud ? 'synced' : 'local',
     items: new Map(items.map((r) => [r.id, r])),
     rooms: new Map(rooms.map((r) => [r.id, r])),
     connections: new Map(connections.map((r) => [r.id, r])),
     settings: { ...DEFAULT_SETTINGS, ...settings },
-    sync: { status: opts.userId ? 'idle' : 'local', pending: countPending(session.outbox), error: null },
+    sync: { status: opts.cloud ? 'idle' : 'local', pending: countPending(session.outbox), error: null },
   });
   return session;
 }

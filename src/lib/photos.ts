@@ -6,7 +6,7 @@ import { uuid } from './random';
 
 /**
  * Photos live in IndexedDB first (image_path "local:<id>") so saving works offline,
- * then get uploaded to the private Supabase bucket ("<user id>/<id>.webp") when synced.
+ * then get uploaded to the Supabase bucket ("shared/<id>.webp") when synced.
  * A copy stays in IndexedDB under the remote path, so this device never re-downloads it.
  */
 
@@ -43,14 +43,14 @@ export async function storePhoto(file: Blob): Promise<string> {
 /** Upload photos still only on this device, then point their items at the bucket copy. */
 export async function uploadPendingPhotos(): Promise<void> {
   const s = currentSession();
-  if (!s || !s.userId || !supabase) return;
+  if (!s || !s.cloud || !supabase) return;
   const pending = [...data.get().items.values()].filter((i) => i.image_path?.startsWith('local:') && !i.deleted_at);
   for (const item of pending) {
     const localPath = item.image_path!;
     const blob = await s.db.getBlob(localPath);
     if (!blob) continue;
     const ext = blob.type === 'image/webp' ? 'webp' : 'jpg';
-    const remote = `${s.userId}/${uuid()}.${ext}`;
+    const remote = `shared/${uuid()}.${ext}`;
     const { error } = await supabase.storage.from(BUCKET).upload(remote, blob, { contentType: blob.type, upsert: false });
     if (error) throw error;
     await s.db.putBlob(remote, blob);

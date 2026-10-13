@@ -2,7 +2,7 @@
 
 A private internet museum: save links, videos, articles, papers, photos, music, quotes and notes, then browse them on scrapbook shelves, a collage corkboard or a string map. Built in phases from the spec in `SPEC.md`. **Phases 1–5 are done.** Phase 6 (Claude-suggested connections) is optional and not started.
 
-React 19 + Vite + TypeScript PWA, with Supabase for login, sync, storage and link previews.
+React 19 + Vite + TypeScript PWA, with Supabase for sync, storage and link previews. There is no login.
 
 ## Run it
 
@@ -28,18 +28,14 @@ With no `.env.local` the app runs in **local-only mode**: everything stays in th
    npm run db:push          # applies every file in supabase/migrations
    npx supabase functions deploy preview --use-api
    ```
-4. In the Supabase dashboard:
-   - **Authentication → Emails → Magic Link template**: add `{{ .Token }}` so the email includes a 6-digit code. For example: `<p>Your code: <strong>{{ .Token }}</strong></p><p>Or <a href="{{ .ConfirmationURL }}">open the cabinet</a>.</p>`
-   - **Authentication → URL Configuration**: Site URL `http://localhost:5173`. Add your deployed URL once it exists.
-5. Sign in once, then turn off **Allow new users to sign up** (Authentication → Sign In / Providers). Your account then stays the only one.
 
 ### Deploy (Vercel)
 
-`vercel.json` holds the SPA rewrites, so `/share` (the phone share target and the bookmarklet) reaches the app. Import the repo in Vercel, add `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` as environment variables, and deploy. Then add the Vercel URL to Supabase's redirect URLs.
+`vercel.json` holds the SPA rewrites, so `/share` (the phone share target and the bookmarklet) reaches the app. Import the repo in Vercel, add `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` as environment variables, and deploy.
 
 ## Privacy
 
-Every row has an `owner_id`. Row-level security lets a signed-in user read and write only their own rows, and the anon key alone can read nothing. Photos live in a private bucket under `<user id>/…` and are shown through short-lived signed URLs. The preview function requires a signed-in user and refuses private and internal addresses.
+**The cabinet is open.** There is no sign-in: every device that opens the app shares one cabinet, and the publishable key in the app's JavaScript can read, change and delete every exhibit and photo. Anyone who finds the deployed URL can do the same, so keep it to yourself. Photos live in the `photos` bucket and are shown through short-lived signed URLs. The preview function refuses private and internal addresses.
 
 ## How it works
 
@@ -97,7 +93,7 @@ supabase/functions/         preview Edge Function + shared preview core
 src/lib/                    kind detection, camera (pan/zoom), photos, media/embeds
 src/data/                   types, local store + outbox, sync, filters, actions, seed, backup, wander
 src/ui/                     Sheet, Tape, Stamp, Icon, InlineConfirm, Toasts
-src/features/               auth, capture, filters, header, shelves (+8 card styles), drawer,
+src/features/               capture, filters, header, shelves (+8 card styles), drawer,
                             rooms, backoffice, map (String Map), mind (Mind Map 3D), collage,
                             canvas (shared), command (Ctrl/⌘ K palette)
 src/app/                    App shell, session wiring, shortcuts, capture, share, theme

@@ -1,10 +1,9 @@
-import { useDeferredValue, useEffect, useMemo, useState } from 'react';
+import { useDeferredValue, useEffect, useMemo } from 'react';
 import { activeFilterCount, applyFilters, facetCounts } from '../data/filter';
 import { seedExamples } from '../data/seed';
 import { allTags, closeSession, data, liveItems, liveRooms, openSession } from '../data/store';
 import { startSync, type SyncHandle } from '../data/sync';
 import { ui } from '../data/ui';
-import { deleteLocalDb } from '../data/idb';
 import { useStore } from '../lib/createStore';
 import { supabase } from '../lib/supabase';
 import { AddSheet } from '../features/capture/AddSheet';
@@ -27,24 +26,22 @@ import { enrichBacklog } from '../data/enrich';
 import { BackOffice } from '../features/backoffice/BackOffice';
 import { CommandPalette } from '../features/command/CommandPalette';
 
-/** First visit to an empty cabinet: lay out the examples (only once per account). */
+/** First visit to an empty cabinet: lay out the examples (only once). */
 function maybeSeed() {
   const st = data.get();
   if (!st.settings.examples_seeded && st.items.size === 0 && st.rooms.size === 0) seedExamples();
 }
 
-/** Open this user's local copy, start syncing, and keep both alive while mounted. */
-function useSession(userId: string | null) {
-  const [sync, setSync] = useState<SyncHandle | null>(null);
+/** Open the local copy, start syncing, and keep both alive while mounted. */
+function useSession(cloud: boolean) {
   useEffect(() => {
     let handle: SyncHandle | null = null;
     let cancelled = false;
     void (async () => {
-      await openSession({ userId, onLocalChange: () => handle?.request() });
+      await openSession({ cloud, onLocalChange: () => handle?.request() });
       if (cancelled) return;
-      if (userId && supabase) {
-        handle = startSync(supabase, userId);
-        setSync(handle);
+      if (cloud && supabase) {
+        handle = startSync(supabase);
         await handle.firstPull;
         // Only seed after a successful pull, so an offline first launch can't duplicate examples.
         if (!cancelled && data.get().sync.status === 'idle') maybeSeed();
@@ -63,12 +60,11 @@ function useSession(userId: string | null) {
       handle?.stop();
       closeSession();
     };
-  }, [userId]);
-  return sync;
+  }, [cloud]);
 }
 
-export function Museum({ userId }: { userId: string | null }) {
-  const sync = useSession(userId);
+export function Museum({ cloud }: { cloud: boolean }) {
+  useSession(cloud);
   useShortcuts();
   useTheme();
   const dragging = useCapture();
@@ -94,20 +90,13 @@ export function Museum({ userId }: { userId: string | null }) {
   const counts = useMemo(() => facetCounts(items, filters, roomById), [items, filters, roomById]);
   const filterCount = activeFilterCount(filters);
 
-  async function signOut() {
-    sync?.stop();
-    const name = closeSession();
-    if (name) await deleteLocalDb(name);
-    await supabase?.auth.signOut();
-  }
-
   if (!ready) return <p className="loading hand">Opening the cabinet…</p>;
 
   const filtersPanel = <Filters counts={counts} rooms={rooms} tags={tags} />;
 
   return (
     <div className="app">
-      <Header onSignOut={userId ? signOut : undefined} filterCount={filterCount} />
+      <Header filterCount={filterCount} />
       <div className="app__body">
         <aside className="sidebar" aria-label="Filters">
           {filtersPanel}

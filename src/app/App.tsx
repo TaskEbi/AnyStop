@@ -1,27 +1,8 @@
-import { useEffect, useState } from 'react';
-import type { Session, SupabaseClient } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
-import { Login } from '../features/auth/Login';
 import { Museum } from './Museum';
 import './app.css';
 
-function AuthGate({ sb }: { sb: SupabaseClient }) {
-  const [session, setSession] = useState<Session | null | undefined>(undefined);
-  // True from a code sign-in until a password is chosen or skipped, so the entrance stays up meanwhile.
-  const [choosing, setChoosing] = useState(false);
-
-  useEffect(() => {
-    void sb.auth.getSession().then(({ data }) => setSession(data.session));
-    const { data } = sb.auth.onAuthStateChange((_event, s) => setSession(s));
-    return () => data.subscription.unsubscribe();
-  }, [sb]);
-
-  if (session === undefined) return <p className="loading hand">Opening the cabinet…</p>;
-  if (!session || choosing) return <Login sb={sb} onChoosing={setChoosing} />;
-  return <Museum key={session.user.id} userId={session.user.id} />;
-}
-
-/** With a Supabase project configured you sign in and sync; without one it runs locally in this browser. */
+/** With a Supabase project configured everything syncs to the shared cloud cabinet; without one it stays in this browser. */
 export function App() {
-  return supabase ? <AuthGate sb={supabase} /> : <Museum userId={null} />;
+  return <Museum cloud={!!supabase} />;
 }

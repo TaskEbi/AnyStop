@@ -29,7 +29,6 @@ export const ICON_PATHS = {
   dice: 'M5 5h14v14H5zM9 9h.01M15 15h.01M15 9h.01M9 15h.01M12 12h.01',
   cloud: 'M7 18h10a4 4 0 0 0 .5-7.97A6 6 0 0 0 6 9.5 4.25 4.25 0 0 0 7 18',
   offline: 'M7 18h10a4 4 0 0 0 .5-7.97A6 6 0 0 0 6 9.5 4.25 4.25 0 0 0 7 18M4 4l16 16',
-  door: 'M5 21V4h10v17M15 6h4v15M11 12h.01',
 } as const;
 
 export type IconName = keyof typeof ICON_PATHS;
