@@ -69,10 +69,3 @@ export async function openLocalDb(name: string): Promise<LocalDb> {
     close: () => db.close(),
   };
 }
-
-export function deleteLocalDb(name: string): Promise<void> {
-  return new Promise((resolve) => {
-    const r = indexedDB.deleteDatabase(name);
-    r.onsuccess = r.onerror = r.onblocked = () => resolve();
-  });
-}

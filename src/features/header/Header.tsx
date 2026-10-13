@@ -133,7 +133,7 @@ function PalettePicker() {
   );
 }
 
-function Menu({ onSignOut }: { onSignOut?: () => void }) {
+function Menu() {
   const theme = useStore(data, (s) => s.settings.theme);
   const examples = useStore(data, (s) => (s.items.size ? hasExamples() : false));
   return (
@@ -175,11 +175,6 @@ function Menu({ onSignOut }: { onSignOut?: () => void }) {
             />
           </div>
         )}
-        {onSignOut && (
-          <button type="button" className="menu__item" onClick={onSignOut}>
-            <Icon name="door" size={15} /> Sign out
-          </button>
-        )}
         <p className="menu__keys type">
           N add · / search · R wander · Esc close · 1 2 3 4 views · ← → step through exhibits
         </p>
@@ -188,7 +183,7 @@ function Menu({ onSignOut }: { onSignOut?: () => void }) {
   );
 }
 
-export function Header({ onSignOut, filterCount }: { onSignOut?: () => void; filterCount: number }) {
+export function Header({ filterCount }: { filterCount: number }) {
   const view = useStore(ui, (s) => s.view);
   const q = useStore(ui, (s) => s.filters.q);
 
@@ -214,7 +209,7 @@ export function Header({ onSignOut, filterCount }: { onSignOut?: () => void; fil
         </nav>
         <div className="app-header__tools">
           <SyncBadge />
-          <Menu onSignOut={onSignOut} />
+          <Menu />
         </div>
       </div>
       <div className="app-header__bar">
