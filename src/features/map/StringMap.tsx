@@ -26,6 +26,8 @@ export function StringMap({ items, rooms }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const connections = useStore(data, (s) => liveConnections(s.connections));
   const theme = useStore(data, (s) => s.settings.theme);
+  const palette = useStore(data, (s) => s.settings.palette);
+  const design = useStore(data, (s) => s.settings.design);
   const tying = useStore(ui, (s) => s.tying);
   const flight = useStore(ui, (s) => s.flight);
   const [showTags, setShowTags] = useState(false);
@@ -206,7 +208,7 @@ export function StringMap({ items, rooms }: Props) {
     };
   }, [requestDraw]);
 
-  useEffect(requestDraw, [theme, tying, requestDraw]);
+  useEffect(requestDraw, [theme, palette, design, tying, requestDraw]);
 
   const goTo = useCallback(
     (id: string, open: boolean) => {

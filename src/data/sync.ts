@@ -89,10 +89,10 @@ export function startSync(sb: SupabaseClient): SyncHandle {
 
     const settingsRev = s.outbox.settings;
     if (settingsRev) {
-      const { museum_name, default_view, theme, palette, examples_seeded } = data.get().settings;
+      const { museum_name, default_view, theme, palette, design, examples_seeded } = data.get().settings;
       const { error } = await sb
         .from('settings')
-        .upsert({ owner_id: SHARED_OWNER, museum_name, default_view, theme, palette, examples_seeded });
+        .upsert({ owner_id: SHARED_OWNER, museum_name, default_view, theme, palette, design, examples_seeded });
       if (error) {
         if (isNetworkError(error)) throw error;
         problem = `Settings couldn't be saved (${error.message}).`;
@@ -126,8 +126,17 @@ export function startSync(sb: SupabaseClient): SyncHandle {
     if (error) throw error;
     const r = rows[0] as Settings | undefined;
     if (r) {
-      const { museum_name, default_view, theme, palette, examples_seeded, updated_at } = r;
-      applyRemoteSettings({ ...DEFAULT_SETTINGS, museum_name, default_view, theme, palette: palette ?? DEFAULT_SETTINGS.palette, examples_seeded, updated_at });
+      const { museum_name, default_view, theme, palette, design, examples_seeded, updated_at } = r;
+      applyRemoteSettings({
+        ...DEFAULT_SETTINGS,
+        museum_name,
+        default_view,
+        theme,
+        palette: palette ?? DEFAULT_SETTINGS.palette,
+        design: design ?? DEFAULT_SETTINGS.design,
+        examples_seeded,
+        updated_at,
+      });
     }
   }
 

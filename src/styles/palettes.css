@@ -170,3 +170,190 @@
   --panel: rgb(33 29 60 / 0.96);
   --on-thread: #1b1430;
 }
+
+/* Sea glass: frosted aqua and a coral float */
+:root[data-palette='sea-glass'] {
+  --desk: #9cc5bd;
+  --desk-deep: #84b2a9;
+  --desk-ink: #10302d;
+  --desk-ink-soft: #2f5852;
+  --paper: #f8fbf8;
+  --paper-warm: #ecf3ef;
+  --paper-news: #e4ece7;
+  --paper-edge: #d0ddd6;
+  --thread: #c2442f;
+  --thread-soft: rgb(194 68 47 / 0.14);
+  --focus: #c2442f;
+  --panel: rgb(248 251 248 / 0.95);
+}
+:root[data-palette='sea-glass'][data-mode='dark'] {
+  --desk: #0f2826;
+  --desk-deep: #091b1a;
+  --desk-ink: #d8efe9;
+  --desk-ink-soft: #95bcb3;
+  --paper: #cdd8d3;
+  --paper-warm: #c2cfca;
+  --paper-news: #bcc9c3;
+  --paper-edge: #a6b6af;
+  --thread: #ff7a5c;
+  --thread-soft: rgb(255 122 92 / 0.2);
+  --focus: #7fe0cf;
+  --panel: rgb(20 48 45 / 0.96);
+}
+
+/* Terracotta: sun-baked clay and indigo dye */
+:root[data-palette='terracotta'] {
+  --desk: #cf9473;
+  --desk-deep: #bd7f5d;
+  --desk-ink: #3a1a0e;
+  --desk-ink-soft: #66372a;
+  --paper: #fdf7f1;
+  --paper-warm: #f6ebe0;
+  --paper-news: #efe2d6;
+  --paper-edge: #e3d0c0;
+  --thread: #2f4f7f;
+  --thread-soft: rgb(47 79 127 / 0.14);
+  --focus: #2f4f7f;
+  --panel: rgb(253 247 241 / 0.95);
+}
+:root[data-palette='terracotta'][data-mode='dark'] {
+  --desk: #2b1811;
+  --desk-deep: #1e100b;
+  --desk-ink: #f3dccd;
+  --desk-ink-soft: #c99f88;
+  --paper: #dccdc2;
+  --paper-warm: #d2c1b5;
+  --paper-news: #cbbaae;
+  --paper-edge: #b8a598;
+  --thread: #7ea6e0;
+  --thread-soft: rgb(126 166 224 / 0.22);
+  --focus: #e8925f;
+  --panel: rgb(54 32 23 / 0.96);
+  --on-thread: #14213a;
+}
+
+/* Citrus: lemon peel and a deep teal pen */
+:root[data-palette='citrus'] {
+  --desk: #e2cd72;
+  --desk-deep: #d3bb5a;
+  --desk-ink: #2f2a08;
+  --desk-ink-soft: #5c5420;
+  --paper: #fffdf2;
+  --paper-warm: #f8f3dc;
+  --paper-news: #f1ecd2;
+  --paper-edge: #e4dcb8;
+  --thread: #0f766e;
+  --thread-soft: rgb(15 118 110 / 0.14);
+  --focus: #0f766e;
+  --panel: rgb(255 253 242 / 0.95);
+}
+:root[data-palette='citrus'][data-mode='dark'] {
+  --desk: #232110;
+  --desk-deep: #17160a;
+  --desk-ink: #f1ebc4;
+  --desk-ink-soft: #bfb682;
+  --paper: #dad6bf;
+  --paper-warm: #d0cbb2;
+  --paper-news: #c9c4aa;
+  --paper-edge: #b5af93;
+  --thread: #2dd4bf;
+  --thread-soft: rgb(45 212 191 / 0.2);
+  --focus: #f5d742;
+  --panel: rgb(44 41 22 / 0.96);
+  --on-thread: #062a26;
+}
+
+/* Graphite: poured concrete and safety yellow */
+:root[data-palette='graphite'] {
+  --desk: #b8b6b2;
+  --desk-deep: #a3a19c;
+  --desk-ink: #161616;
+  --desk-ink-soft: #46443f;
+  --paper: #fafafa;
+  --paper-warm: #f0f0ee;
+  --paper-news: #e9e9e6;
+  --paper-edge: #d8d8d4;
+  --thread: #a86f00;
+  --thread-soft: rgb(197 139 0 / 0.16);
+  --focus: #161616;
+  --panel: rgb(250 250 250 / 0.96);
+  --on-thread: #111;
+  --wash: 255 255 255;
+}
+:root[data-palette='graphite'][data-mode='dark'] {
+  --desk: #141414;
+  --desk-deep: #0a0a0a;
+  --desk-ink: #ededed;
+  --desk-ink-soft: #a5a5a5;
+  --paper: #d6d6d4;
+  --paper-warm: #cbcbc9;
+  --paper-news: #c4c4c2;
+  --paper-edge: #afafac;
+  --thread: #f5c518;
+  --thread-soft: rgb(245 197 24 / 0.2);
+  --focus: #f5c518;
+  --panel: rgb(30 30 30 / 0.96);
+  --on-thread: #111;
+}
+
+/* Candy: bubblegum paper and cobalt ink */
+:root[data-palette='candy'] {
+  --desk: #f1b9cb;
+  --desk-deep: #e7a2b8;
+  --desk-ink: #3a0f2a;
+  --desk-ink-soft: #6e2f55;
+  --paper: #fffafc;
+  --paper-warm: #fbedf2;
+  --paper-news: #f6e5ec;
+  --paper-edge: #ecd2dd;
+  --thread: #2b59c3;
+  --thread-soft: rgb(43 89 195 / 0.14);
+  --focus: #2b59c3;
+  --panel: rgb(255 250 252 / 0.95);
+}
+:root[data-palette='candy'][data-mode='dark'] {
+  --desk: #2a1630;
+  --desk-deep: #1c0e21;
+  --desk-ink: #f6dcef;
+  --desk-ink-soft: #c79bbd;
+  --paper: #dccfd8;
+  --paper-warm: #d2c3cd;
+  --paper-news: #cbbcc7;
+  --paper-edge: #b8a7b3;
+  --thread: #7aa2ff;
+  --thread-soft: rgb(122 162 255 / 0.22);
+  --focus: #ff8fc8;
+  --panel: rgb(52 30 59 / 0.96);
+  --on-thread: #0d1a3d;
+}
+
+/* Sunset: apricot sky and a violet horizon */
+:root[data-palette='sunset'] {
+  --desk: #eeaa80;
+  --desk-deep: #e39468;
+  --desk-ink: #3b1530;
+  --desk-ink-soft: #6c3550;
+  --paper: #fff8f0;
+  --paper-warm: #fbecdf;
+  --paper-news: #f5e3d4;
+  --paper-edge: #ead0bd;
+  --thread: #6b2a8f;
+  --thread-soft: rgb(107 42 143 / 0.14);
+  --focus: #6b2a8f;
+  --panel: rgb(255 248 240 / 0.95);
+}
+:root[data-palette='sunset'][data-mode='dark'] {
+  --desk: #26142e;
+  --desk-deep: #190b20;
+  --desk-ink: #fbe0d4;
+  --desk-ink-soft: #d29fa5;
+  --paper: #dfcfc8;
+  --paper-warm: #d5c3bc;
+  --paper-news: #cebcb4;
+  --paper-edge: #bba79f;
+  --thread: #ff9a5a;
+  --thread-soft: rgb(255 154 90 / 0.22);
+  --focus: #d39bff;
+  --panel: rgb(50 28 60 / 0.96);
+  --on-thread: #2a0f33;
+}

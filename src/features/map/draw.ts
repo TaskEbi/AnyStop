@@ -1,4 +1,4 @@
-import type { Kind } from '../../data/types';
+import { ROOM_COLORS, type Kind } from '../../data/types';
 import type { View } from '../../lib/camera';
 import { ICON_PATHS } from '../../ui/Icon';
 import type { GLink, GNode } from './graph';
@@ -11,20 +11,23 @@ export interface Palette {
   inkFaint: string;
   thread: string;
   deskInk: string;
+  /** Font families from the design theme. */
+  fonts: { hand: string; serif: string; type: string };
 }
 
-/** Colours come from the CSS tokens, so the map follows light/dark like everything else. */
+/** Colours (and fonts) come from the CSS tokens, so the map follows light/dark like everything else. */
 export function readPalette(): Palette {
   const css = getComputedStyle(document.documentElement);
   const v = (name: string) => css.getPropertyValue(name).trim();
   return {
-    tape: Object.fromEntries(['mustard', 'sage', 'blue', 'rose', 'lavender', 'apricot', 'none'].map((c) => [c, v(`--tape-${c}`)])),
+    tape: Object.fromEntries([...ROOM_COLORS, 'none'].map((c) => [c, v(`--tape-${c}`)])),
     paper: v('--paper'),
     ink: v('--ink'),
     inkSoft: v('--ink-soft'),
     inkFaint: v('--ink-faint'),
     thread: v('--thread'),
     deskInk: v('--desk-ink'),
+    fonts: { hand: v('--font-hand'), serif: v('--font-serif'), type: v('--font-type') },
   };
 }
 
@@ -117,7 +120,7 @@ export function drawMap(ctx: CanvasRenderingContext2D, nodes: GNode[], links: GL
 
   // string labels on little paper tags
   if (view.k > 0.55) {
-    ctx.font = `${10}px "Courier Prime", monospace`;
+    ctx.font = `10px ${pal.fonts.type}`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     for (const l of links) {
@@ -178,14 +181,14 @@ export function drawMap(ctx: CanvasRenderingContext2D, nodes: GNode[], links: GL
       ctx.arc(x, y, n.r - 3.5, 0, Math.PI * 2);
       ctx.stroke();
       ctx.fillStyle = pal.ink;
-      ctx.font = `700 ${Math.max(13, Math.min(20, n.r / 2.4))}px Kalam, cursive`;
+      ctx.font = `700 ${Math.max(13, Math.min(20, n.r / 2.4))}px ${pal.fonts.hand}`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       const lines = wrap(ctx, n.label, n.r * 1.6);
       const lh = Math.max(13, Math.min(20, n.r / 2.4)) * 1.05;
       lines.forEach((line, i) => ctx.fillText(line, x, y + (i - (lines.length - 1) / 2) * lh + 1));
     } else if (n.type === 'tag') {
-      ctx.font = `11px "Courier Prime", monospace`;
+      ctx.font = `11px ${pal.fonts.type}`;
       const w = ctx.measureText(n.label).width + 12;
       ctx.fillStyle = pal.paper;
       ctx.strokeStyle = pal.inkFaint;
@@ -230,7 +233,7 @@ export function drawMap(ctx: CanvasRenderingContext2D, nodes: GNode[], links: GL
       }
       const emphasised = s.hovered === n || (s.focus?.has(n.id) ?? false);
       if (showLabels || emphasised) {
-        ctx.font = `${emphasised ? 600 : 400} 11px Literata, Georgia, serif`;
+        ctx.font = `${emphasised ? 600 : 400} 11px ${pal.fonts.serif}`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'top';
         const text = short(n.label);

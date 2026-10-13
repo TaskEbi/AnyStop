@@ -37,13 +37,25 @@
   --stamp-progress: #2f5d8a;
   --stamp-done: #3f6b3a;
 
-  /* room tapes (mustard, sage, dusty blue, rose, lavender, apricot) */
+  /* room tapes */
   --tape-mustard: #d8a93c;
   --tape-sage: #98ae8b;
   --tape-blue: #89a6c3;
   --tape-rose: #d59a9a;
   --tape-lavender: #a998c4;
   --tape-apricot: #e3a676;
+  --tape-teal: #5fa3a0;
+  --tape-forest: #5b8a5e;
+  --tape-olive: #a7a45c;
+  --tape-lemon: #e9d55e;
+  --tape-coral: #e5826c;
+  --tape-cherry: #cc5250;
+  --tape-magenta: #c55c9e;
+  --tape-plum: #9a6a91;
+  --tape-sky: #8fc6e5;
+  --tape-navy: #46618c;
+  --tape-slate: #7f8c9a;
+  --tape-charcoal: #5d5853;
   --tape-none: #cfc3ab;
 
   /* surfaces for UI chrome */
@@ -103,6 +115,18 @@
     --tape-rose: #bd8584;
     --tape-lavender: #9282ad;
     --tape-apricot: #c98f61;
+    --tape-teal: #4e8986;
+    --tape-forest: #4c7550;
+    --tape-olive: #8d8a4c;
+    --tape-lemon: #c8b74e;
+    --tape-coral: #c86e5b;
+    --tape-cherry: #b04745;
+    --tape-magenta: #a95087;
+    --tape-plum: #85597c;
+    --tape-sky: #76a7c4;
+    --tape-navy: #56719c;
+    --tape-slate: #6d7987;
+    --tape-charcoal: #7a746e;
     --tape-none: #a99c84;
     --shadow-card: 0 1px 1px rgb(0 0 0 / 0.4), 0 4px 8px -2px rgb(0 0 0 / 0.45), 0 16px 26px -14px rgb(0 0 0 / 0.8);
     --shadow-lift: 0 2px 4px rgb(0 0 0 / 0.4), 0 14px 22px -6px rgb(0 0 0 / 0.55), 0 30px 40px -18px rgb(0 0 0 / 0.8);
@@ -141,6 +165,18 @@
   --tape-rose: #bd8584;
   --tape-lavender: #9282ad;
   --tape-apricot: #c98f61;
+  --tape-teal: #4e8986;
+  --tape-forest: #4c7550;
+  --tape-olive: #8d8a4c;
+  --tape-lemon: #c8b74e;
+  --tape-coral: #c86e5b;
+  --tape-cherry: #b04745;
+  --tape-magenta: #a95087;
+  --tape-plum: #85597c;
+  --tape-sky: #76a7c4;
+  --tape-navy: #56719c;
+  --tape-slate: #6d7987;
+  --tape-charcoal: #7a746e;
   --tape-none: #a99c84;
   --shadow-card: 0 1px 1px rgb(0 0 0 / 0.4), 0 4px 8px -2px rgb(0 0 0 / 0.45), 0 16px 26px -14px rgb(0 0 0 / 0.8);
   --shadow-lift: 0 2px 4px rgb(0 0 0 / 0.4), 0 14px 22px -6px rgb(0 0 0 / 0.55), 0 30px 40px -18px rgb(0 0 0 / 0.8);

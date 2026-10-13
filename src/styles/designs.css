@@ -1,0 +1,903 @@
+/* ── Design themes ────────────────────────────────────────────────────────────
+   A design restyles the whole layout: type, cards, header, sidebar, buttons.
+   It sits on top of the colour scheme (palettes.css), so any design works with
+   any colours, by day and by night. data-design is set on <html> by useTheme,
+   and before first paint in main.tsx. Cabinet is the default and needs no rules.
+   Selectors start with :root[data-design] so they outrank the component sheets. */
+
+/* ── shared: designs that lay everything straight ─────────────────────────── */
+
+:root:is([data-design='gallery'], [data-design='archive'], [data-design='soft']) {
+  --fibres: none;
+  --grain: none;
+}
+:root:is([data-design='gallery'], [data-design='archive'], [data-design='soft']) .card {
+  --tilt: 0deg !important;
+}
+:root:is([data-design='gallery'], [data-design='archive'], [data-design='soft'])
+  :is(
+    .stamp, .postmark, .surprise, .on-this-day, .shelves-empty, .quick-add, .filter-opt__swatch,
+    .room-row__tape, .drop-overlay__label, .palette__paper, .toast, .login__card, .office__tag,
+    .tie-prompt, .photo-field__thumb, .mat, .mat__label, .collage-legend, .collage-legend__swatch,
+    .mind-placard, .card__star
+  ) {
+  rotate: none;
+}
+/* Every design except Cabinet drops the paper cut-outs: perforations, torn edges, taped labels. */
+:root[data-design]:not([data-design='cabinet']) :is(.ticket, .clipping, .mat__label) {
+  mask: none;
+}
+:root[data-design]:not([data-design='cabinet']) .quick-add::before,
+:root[data-design]:not([data-design='cabinet']) .login__tape {
+  display: none;
+}
+:root[data-design]:not([data-design='cabinet']) .clipping {
+  padding-bottom: 0.95rem;
+}
+/* the quote scrap's torn outline is an inline clip-path */
+:root[data-design]:not([data-design='cabinet']) .scrap {
+  clip-path: none !important;
+}
+
+/* ═══ Gallery: a clean modern gallery ═════════════════════════════════════
+   Sans-serif type, flat rounded cards with a coloured top edge, a centred
+   header with underlined tabs, and the filters hung on the right wall. */
+
+:root[data-design='gallery'] {
+  --font-hand: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-serif: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-type: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --radius: 8px;
+  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.06), 0 10px 24px -14px rgb(0 0 0 / 0.25);
+  --shadow-lift: 0 2px 4px rgb(0 0 0 / 0.08), 0 20px 40px -18px rgb(0 0 0 / 0.35);
+  --shadow-panel: 0 24px 60px -20px rgb(0 0 0 / 0.4);
+}
+:root[data-design='gallery'] body {
+  background-image: none;
+}
+:root[data-design='gallery'][data-mode='light'] body {
+  background-color: color-mix(in srgb, var(--desk) 28%, var(--paper));
+}
+
+/* header: name and tabs centred, tools in the corner */
+:root[data-design='gallery'] .app-header {
+  position: relative;
+  padding-bottom: 1.2rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--desk-ink) 12%, transparent);
+}
+:root[data-design='gallery'] .app-header__top {
+  flex-direction: column;
+  gap: 0.9rem;
+  padding-top: 0.6rem;
+}
+:root[data-design='gallery'] .app-header__tools {
+  position: absolute;
+  top: max(14px, env(safe-area-inset-top));
+  right: clamp(16px, 3vw, 32px);
+}
+:root[data-design='gallery'] .museum-name {
+  max-width: 100%;
+  padding-inline: clamp(84px, 12vw, 150px);
+  text-align: center;
+}
+:root[data-design='gallery'] :is(.museum-name__button, .museum-name__input) {
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  text-align: center;
+}
+:root[data-design='gallery'] .museum-name__sub {
+  letter-spacing: 0.22em;
+}
+:root[data-design='gallery'] .view-tabs {
+  margin-left: 0;
+  gap: 1.4rem;
+}
+:root[data-design='gallery'] .view-tab {
+  padding-inline: 0.1rem;
+  border-radius: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+:root[data-design='gallery'] .view-tab:hover:not(:disabled) {
+  background: transparent;
+  border-bottom-color: color-mix(in srgb, var(--desk-ink) 30%, transparent);
+}
+:root[data-design='gallery'] .view-tab[aria-current='page'] {
+  background: transparent;
+  color: var(--desk-ink);
+  border-bottom-color: var(--thread);
+  box-shadow: none;
+  font-weight: 700;
+}
+:root[data-design='gallery'] .app-header__bar {
+  max-width: 1100px;
+  margin-inline: auto;
+}
+:root[data-design='gallery'] .quick-add {
+  border-radius: 12px;
+}
+:root[data-design='gallery'] .search {
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: inset 0 0 0 1px var(--panel-line);
+}
+@media (max-width: 720px) {
+  :root[data-design='gallery'] .view-tabs {
+    gap: 0.4rem;
+    justify-content: center;
+  }
+  :root[data-design='gallery'] .view-tab {
+    flex: 0 1 auto;
+  }
+  :root[data-design='gallery'] .app-header__top {
+    align-items: stretch;
+  }
+}
+
+/* filters on the right */
+@media (min-width: 901px) {
+  :root[data-design='gallery'] .app__body {
+    grid-template-columns: minmax(0, 1fr) 236px;
+    padding-top: 0.5rem;
+  }
+  :root[data-design='gallery'] .sidebar {
+    order: 2;
+    padding: 1rem 0 2rem 1.25rem;
+    border-left: 1px solid color-mix(in srgb, var(--desk-ink) 12%, transparent);
+  }
+}
+
+/* cards: flat, rounded, with the room as a coloured top edge */
+:root[data-design='gallery'] .card.card {
+  --drop: drop-shadow(0 1px 1px rgb(0 0 0 / 0.07)) drop-shadow(0 8px 12px rgb(0 0 0 / 0.1));
+}
+:root[data-design='gallery'] .card > :is(.ticket, .film, .clipping, .index-card, .polaroid, .scrap, .sticky) {
+  border-radius: 10px;
+  overflow: hidden;
+}
+:root[data-design='gallery'] .tape {
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 5px;
+  translate: none;
+  rotate: none;
+  mask: none;
+  background-image: none;
+  background-color: var(--tape);
+  border-radius: 10px 10px 0 0;
+  box-shadow: none;
+}
+:root[data-design='gallery'] .ticket__stub {
+  border-right: 1px solid var(--panel-line);
+}
+:root[data-design='gallery'] .sticky {
+  background: var(--sticky);
+}
+:root[data-design='gallery'] .stamp {
+  outline: none;
+  border-width: 1.5px;
+  border-radius: 999px;
+  mask: none;
+  padding: 2px 9px;
+  background: var(--paper);
+  opacity: 1;
+  font-size: 0.62rem;
+}
+:root[data-design='gallery'] .card__star {
+  top: 10px;
+  right: 10px;
+  font-size: 1.05rem;
+  text-shadow: none;
+}
+:root[data-design='gallery'] .on-this-day {
+  border-radius: 10px;
+}
+:root[data-design='gallery'] .menu {
+  border-radius: 14px;
+}
+:root[data-design='gallery'] .chip {
+  font-weight: 500;
+}
+
+/* ═══ Zine: a photocopied, risograph-printed zine ═════════════════════════
+   Grotesque type, thick ink outlines, hard offset shadows, halftone dots on
+   the desk and an inverted masthead across the top. */
+
+:root[data-design='zine'] {
+  --font-hand: 'Space Grotesk', 'Arial Black', system-ui, sans-serif;
+  --font-serif: 'Space Grotesk', system-ui, sans-serif;
+  --font-type: 'IBM Plex Mono', 'Courier New', ui-monospace, monospace;
+  --radius: 0;
+  --fibres: none;
+  --grain: none;
+  --zine-line: var(--ink);
+  --zine-hard: var(--desk-ink);
+  --shadow-card: 5px 5px 0 var(--zine-hard);
+  --shadow-lift: 8px 8px 0 var(--zine-hard);
+  --shadow-panel: 10px 10px 0 var(--zine-hard);
+}
+:root[data-design='zine'] body {
+  background-image: radial-gradient(color-mix(in srgb, var(--desk-ink) 16%, transparent) 1.1px, transparent 1.5px);
+  background-size: 9px 9px;
+}
+
+/* masthead: the header printed in reverse */
+:root[data-design='zine'] .app-header {
+  margin-bottom: 0.6rem;
+  padding-bottom: 1rem;
+  background: var(--desk-ink);
+  color: var(--desk);
+  border-bottom: 4px solid var(--thread);
+}
+:root[data-design='zine'] .app-header :is(.museum-name__button, .museum-name__input, .museum-name__sub, .view-tab, .sync-badge) {
+  color: var(--desk);
+}
+:root[data-design='zine'] :is(.museum-name__button, .museum-name__input) {
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: -0.03em;
+  font-size: clamp(2rem, 5vw, 3.2rem);
+}
+:root[data-design='zine'] .view-tab {
+  border: 2px solid var(--desk);
+  border-radius: 0;
+  background: transparent;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+:root[data-design='zine'] .view-tab:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--desk) 18%, transparent);
+}
+:root[data-design='zine'] .view-tab[aria-current='page'] {
+  background: var(--thread);
+  border-color: var(--thread);
+  color: var(--on-thread);
+  box-shadow: 3px 3px 0 var(--desk);
+}
+:root[data-design='zine'] .sync-badge {
+  border: 1.5px solid currentColor;
+  border-radius: 0;
+  background: transparent;
+}
+:root[data-design='zine'] .search {
+  border: 2px solid var(--desk);
+  border-radius: 0;
+  background: var(--paper);
+  color: var(--ink);
+}
+:root[data-design='zine'] .quick-add {
+  border: 2px solid var(--desk);
+  box-shadow: 4px 4px 0 var(--thread);
+  rotate: -0.6deg;
+}
+:root[data-design='zine'] .app-header .btn--ghost {
+  color: var(--desk);
+}
+:root[data-design='zine'] .surprise {
+  rotate: 2deg;
+}
+
+/* buttons, fields and chips: ink outlines */
+:root[data-design='zine'] .btn {
+  border: 2px solid var(--zine-line);
+  box-shadow: 3px 3px 0 var(--zine-line);
+  font-weight: 600;
+  text-transform: uppercase;
+}
+:root[data-design='zine'] .btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 var(--zine-line);
+}
+:root[data-design='zine'] .btn--ghost {
+  border-color: transparent;
+  box-shadow: none;
+}
+:root[data-design='zine'] :is(.input, .textarea, .select) {
+  border: 2px solid var(--zine-line);
+}
+:root[data-design='zine'] .chip {
+  border: 2px solid var(--zine-line);
+  border-radius: 0;
+  font-weight: 600;
+}
+
+/* filters in a boxed column */
+@media (min-width: 901px) {
+  :root[data-design='zine'] .sidebar {
+    top: 16px;
+    margin-top: 0.9rem;
+    padding: 1rem 0.8rem 1.2rem;
+    background: var(--paper);
+    color: var(--ink);
+    border: 2.5px solid var(--zine-line);
+    box-shadow: var(--shadow-card);
+    max-height: calc(100dvh - 32px);
+  }
+}
+:root[data-design='zine'] .filters__title {
+  font-weight: 700;
+  text-transform: uppercase;
+}
+:root[data-design='zine'] .filter-opt[aria-pressed='true'] {
+  background: var(--ink);
+  color: var(--paper);
+  box-shadow: none;
+}
+
+/* cards: outlined, with a hard shadow; tape becomes a printed block */
+:root[data-design='zine'] .card.card {
+  --drop: none;
+}
+:root[data-design='zine'] .card > :is(.ticket, .film, .clipping, .index-card, .polaroid, .scrap, .sticky, .vinyl) {
+  border: 2.5px solid var(--zine-line);
+  box-shadow: 5px 5px 0 var(--zine-hard);
+  transition: box-shadow 160ms ease;
+}
+:root[data-design='zine'] .vinyl {
+  background: var(--paper);
+}
+:root[data-design='zine'] .vinyl .card-meta {
+  color: var(--ink-faint);
+}
+:root[data-design='zine'] .card--interactive:hover > * {
+  box-shadow: 9px 9px 0 var(--thread);
+}
+:root[data-design='zine'] .tape {
+  mask: none;
+  height: 18px;
+  width: 70px;
+  border: 2px solid var(--zine-line);
+  background-image: none;
+  background-color: var(--tape);
+  box-shadow: none;
+}
+:root[data-design='zine'] :is(.card-title, .clipping__headline, .sticky__title, .vinyl__title) {
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+:root[data-design='zine'] .clipping__photo {
+  filter: grayscale(1) contrast(1.6);
+}
+:root[data-design='zine'] .polaroid__img,
+:root[data-design='zine'] .film__img {
+  filter: contrast(1.15) saturate(1.3);
+}
+:root[data-design='zine'] .stamp {
+  outline: none;
+  mask: none;
+  border: 2px solid var(--zine-line);
+  background: var(--stamp-ink);
+  color: var(--paper);
+  opacity: 1;
+}
+:root[data-design='zine'] :is(.on-this-day, .shelves-empty, .menu, .toast, .login__card, .examples-notice .inline-confirm) {
+  border: 2.5px solid var(--zine-line);
+}
+:root[data-design='zine'] .on-this-day {
+  border-left-width: 10px;
+  border-left-color: var(--thread);
+}
+:root[data-design='zine'] .examples-notice {
+  border: 2.5px dashed var(--desk-ink);
+  border-radius: 0;
+}
+:root[data-design='zine'] .sheet__paper {
+  border: 2.5px solid var(--zine-line);
+}
+:root[data-design='zine'] .sheet__title {
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+/* ═══ Archive: a typewritten card catalogue ═══════════════════════════════
+   Monospace throughout, a ruled desk, cards squared off with the room as a
+   coloured spine, a compact one-line header and a dense grid. */
+
+:root[data-design='archive'] {
+  --font-hand: 'IBM Plex Mono', 'Courier New', ui-monospace, monospace;
+  --font-serif: 'IBM Plex Mono', 'Courier New', ui-monospace, monospace;
+  --font-type: 'IBM Plex Mono', 'Courier New', ui-monospace, monospace;
+  --radius: 2px;
+  --shadow-card: 0 1px 0 rgb(0 0 0 / 0.12);
+  --shadow-lift: 0 1px 0 rgb(0 0 0 / 0.12), 0 6px 14px -8px rgb(0 0 0 / 0.35);
+  --shadow-panel: 0 0 0 1px var(--panel-line), 0 18px 40px -16px rgb(0 0 0 / 0.45);
+}
+:root[data-design='archive'] body {
+  font-size: 15px;
+  background-image: repeating-linear-gradient(transparent 0 31px, color-mix(in srgb, var(--desk-ink) 9%, transparent) 31px 32px);
+  background-attachment: scroll;
+}
+
+/* header: one tight row */
+:root[data-design='archive'] .app-header {
+  padding-bottom: 0.6rem;
+  border-bottom: 1px dashed color-mix(in srgb, var(--desk-ink) 40%, transparent);
+}
+:root[data-design='archive'] :is(.museum-name__button, .museum-name__input) {
+  font-size: clamp(1.2rem, 2.4vw, 1.5rem);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+:root[data-design='archive'] .museum-name__sub::before {
+  content: 'Cat. ' / '';
+}
+:root[data-design='archive'] .view-tab {
+  min-height: 30px;
+  border-radius: 0;
+  background: transparent;
+  border-bottom: 2px solid transparent;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 0.74rem;
+}
+:root[data-design='archive'] .view-tab::before {
+  content: '[' / '';
+  opacity: 0.5;
+}
+:root[data-design='archive'] .view-tab::after {
+  content: ']' / '';
+  opacity: 0.5;
+}
+:root[data-design='archive'] .view-tab:hover:not(:disabled) {
+  background: rgb(var(--wash) / 0.2);
+}
+:root[data-design='archive'] .view-tab[aria-current='page'] {
+  background: transparent;
+  color: var(--desk-ink);
+  border-bottom-color: var(--thread);
+  box-shadow: none;
+  font-weight: 600;
+}
+:root[data-design='archive'] .app-header__bar {
+  margin-top: 0.6rem;
+}
+:root[data-design='archive'] .quick-add {
+  min-height: 44px;
+  border: 1px solid var(--panel-line);
+}
+:root[data-design='archive'] :is(.search, .surprise, .sync-badge, .chip) {
+  border-radius: 2px;
+}
+:root[data-design='archive'] .search {
+  min-height: 38px;
+  border: 1px dashed color-mix(in srgb, var(--desk-ink) 45%, transparent);
+  background: transparent;
+}
+:root[data-design='archive'] .surprise {
+  min-height: 38px;
+}
+:root[data-design='archive'] .btn {
+  text-transform: uppercase;
+  font-size: 0.76rem;
+  box-shadow: none;
+}
+
+/* narrow filter column with a ruled edge */
+@media (min-width: 901px) {
+  :root[data-design='archive'] .app__body {
+    grid-template-columns: 200px minmax(0, 1fr);
+    gap: 1.25rem;
+  }
+  :root[data-design='archive'] .sidebar {
+    padding-right: 1rem;
+    border-right: 1px dashed color-mix(in srgb, var(--desk-ink) 40%, transparent);
+  }
+}
+:root[data-design='archive'] .filters__title {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+:root[data-design='archive'] .filter-opt {
+  min-height: 28px;
+  font-size: 0.82rem;
+}
+
+/* cards: squared catalogue cards, room colour down the left edge */
+:root[data-design='archive'] .card.card {
+  --drop: none;
+}
+:root[data-design='archive'] .card {
+  animation-duration: 200ms;
+}
+:root[data-design='archive'] .card > :is(.ticket, .film, .clipping, .index-card, .polaroid, .scrap, .sticky, .vinyl) {
+  border: 1px solid color-mix(in srgb, var(--ink) 22%, transparent);
+  border-radius: 2px;
+  box-shadow: var(--shadow-card);
+}
+:root[data-design='archive'] .vinyl {
+  background: var(--paper-warm);
+}
+:root[data-design='archive'] .vinyl .card-meta {
+  color: var(--ink-faint);
+}
+:root[data-design='archive'] .card--interactive:hover > * {
+  box-shadow: var(--shadow-lift);
+}
+:root[data-design='archive'] .tape {
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 6px;
+  height: auto;
+  translate: none;
+  rotate: none;
+  mask: none;
+  background-image: none;
+  background-color: var(--tape);
+  box-shadow: none;
+  z-index: 6;
+}
+:root[data-design='archive'] .ticket {
+  grid-template-columns: 26px 1fr;
+}
+:root[data-design='archive'] .ticket__stub {
+  border-right: 1px dashed var(--panel-line);
+}
+:root[data-design='archive'] .ticket__main {
+  padding: 0.75rem 0.75rem 0.65rem;
+}
+:root[data-design='archive'] .card-title {
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+:root[data-design='archive'] .clipping__headline {
+  font-size: 1rem;
+  font-weight: 600;
+}
+:root[data-design='archive'] .clipping__photo {
+  aspect-ratio: 2.4;
+}
+:root[data-design='archive'] :is(.card-desc, .clipping__text, .sticky__text, .index-card__lines) {
+  font-size: 0.78rem;
+}
+:root[data-design='archive'] .scrap__text--l {
+  font-size: 1.1rem;
+}
+:root[data-design='archive'] .scrap__text--m {
+  font-size: 0.98rem;
+}
+:root[data-design='archive'] .sticky {
+  min-height: 0;
+  border-radius: 0;
+  background: color-mix(in srgb, var(--sticky) 70%, var(--paper));
+}
+:root[data-design='archive'] .stamp {
+  rotate: none;
+  outline: none;
+  border-width: 1.5px;
+  border-radius: 0;
+  mask: none;
+  font-size: 0.6rem;
+  opacity: 1;
+}
+:root[data-design='archive'] .card__star {
+  top: 6px;
+  right: 6px;
+  font-size: 0.95rem;
+  text-shadow: none;
+}
+:root[data-design='archive'] .menu {
+  border: 1px solid var(--panel-line);
+  border-radius: 2px;
+}
+
+/* ═══ Soft: rounded and airy ══════════════════════════════════════════════
+   A friendly rounded face, pill-shaped controls, soft deep shadows, a gentle
+   glow behind everything and a frosted header that floats as you scroll. */
+
+:root[data-design='soft'] {
+  --font-hand: 'Nunito', ui-rounded, system-ui, sans-serif;
+  --font-serif: 'Nunito', ui-rounded, system-ui, sans-serif;
+  --font-type: 'Nunito', ui-rounded, system-ui, sans-serif;
+  --radius: 14px;
+  --shadow-card: 0 2px 6px rgb(0 0 0 / 0.05), 0 16px 32px -18px rgb(0 0 0 / 0.3);
+  --shadow-lift: 0 4px 10px rgb(0 0 0 / 0.06), 0 26px 44px -20px rgb(0 0 0 / 0.4);
+  --shadow-panel: 0 30px 70px -24px rgb(0 0 0 / 0.45);
+  --frost: color-mix(in srgb, var(--paper) 58%, transparent);
+}
+:root[data-design='soft'][data-mode='dark'] {
+  --frost: color-mix(in srgb, var(--desk-deep) 62%, transparent);
+}
+:root[data-design='soft'] body {
+  background-image:
+    radial-gradient(50% 40% at 8% 0%, color-mix(in srgb, var(--thread) 22%, transparent), transparent),
+    radial-gradient(45% 45% at 100% 25%, color-mix(in srgb, var(--paper) 40%, transparent), transparent),
+    radial-gradient(60% 50% at 50% 100%, color-mix(in srgb, var(--desk-deep) 80%, transparent), transparent);
+}
+
+/* frosted floating header */
+:root[data-design='soft'] .app-header {
+  margin: max(10px, env(safe-area-inset-top)) clamp(8px, 2vw, 20px) 0.6rem;
+  padding: 14px clamp(14px, 2.5vw, 26px) 16px;
+  border-radius: 24px;
+  background: var(--frost);
+  backdrop-filter: blur(16px) saturate(1.4);
+  -webkit-backdrop-filter: blur(16px) saturate(1.4);
+  box-shadow: 0 1px 0 rgb(255 255 255 / 0.25) inset, var(--shadow-card);
+}
+@media (min-width: 901px) {
+  :root[data-design='soft'] .app-header {
+    position: sticky;
+    top: 10px;
+    z-index: 20;
+  }
+}
+:root[data-design='soft'] :is(.museum-name__button, .museum-name__input) {
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+:root[data-design='soft'] .museum-name__sub {
+  text-transform: none;
+  letter-spacing: 0.02em;
+  font-size: 0.8rem;
+}
+:root[data-design='soft'] .view-tabs {
+  padding: 4px;
+  gap: 2px;
+  border-radius: 999px;
+  background: rgb(var(--wash) / 0.22);
+}
+:root[data-design='soft'] .view-tab {
+  border-radius: 999px;
+  background: transparent;
+  font-weight: 700;
+}
+:root[data-design='soft'] .view-tab:hover:not(:disabled) {
+  background: rgb(var(--wash) / 0.3);
+}
+:root[data-design='soft'] .view-tab[aria-current='page'] {
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: 0 2px 8px rgb(0 0 0 / 0.14);
+}
+:root[data-design='soft'] .quick-add {
+  border-radius: 999px;
+  padding-left: 1.2rem;
+}
+:root[data-design='soft'] .quick-add__label {
+  border-right: 0;
+}
+:root[data-design='soft'] .btn {
+  border-radius: 999px;
+  font-weight: 700;
+  letter-spacing: 0;
+  box-shadow: 0 2px 6px rgb(0 0 0 / 0.08);
+}
+:root[data-design='soft'] .btn--ghost {
+  box-shadow: none;
+}
+:root[data-design='soft'] .btn--icon {
+  border-radius: 50%;
+}
+:root[data-design='soft'] :is(.input, .textarea, .select) {
+  border-radius: 12px;
+}
+:root[data-design='soft'] .chip {
+  font-weight: 700;
+}
+
+/* filters on a frosted card */
+@media (min-width: 901px) {
+  :root[data-design='soft'] .sidebar {
+    top: 176px;
+    margin-top: 0.5rem;
+    max-height: calc(100dvh - 196px);
+    padding: 1rem 0.8rem 1.4rem;
+    border-radius: 22px;
+    background: var(--frost);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: var(--shadow-card);
+  }
+}
+:root[data-design='soft'] .filter-opt {
+  border-radius: 999px;
+  padding-inline: 0.7rem;
+}
+:root[data-design='soft'] .filters__title {
+  font-weight: 800;
+}
+
+/* cards: big round corners, a little colour pill for the room */
+:root[data-design='soft'] .card.card {
+  --drop: drop-shadow(0 2px 3px rgb(0 0 0 / 0.06)) drop-shadow(0 12px 16px rgb(0 0 0 / 0.14));
+}
+:root[data-design='soft'] .card > :is(.ticket, .film, .clipping, .index-card, .polaroid, .scrap, .sticky) {
+  border-radius: 22px;
+  overflow: hidden;
+}
+:root[data-design='soft'] .card--interactive:hover {
+  translate: 0 -5px;
+}
+:root[data-design='soft'] .tape {
+  top: 9px;
+  width: 34px;
+  height: 7px;
+  rotate: none;
+  mask: none;
+  border-radius: 999px;
+  background-image: none;
+  background-color: var(--tape);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--paper) 80%, transparent);
+  z-index: 6;
+}
+:root[data-design='soft'] .ticket__stub {
+  border-right: 0;
+}
+:root[data-design='soft'] .film {
+  padding-inline: 10px;
+}
+:root[data-design='soft'] .film__frame {
+  border-radius: 14px;
+}
+:root[data-design='soft'] .polaroid__window {
+  border-radius: 14px;
+}
+:root[data-design='soft'] .vinyl__sleeve {
+  border-radius: 18px;
+}
+:root[data-design='soft'] .clipping__masthead {
+  border-bottom: 2px solid color-mix(in srgb, var(--ink) 18%, transparent);
+}
+:root[data-design='soft'] .index-card__head {
+  border-bottom-width: 2px;
+}
+:root[data-design='soft'] .sticky {
+  background: var(--sticky);
+}
+:root[data-design='soft'] .stamp {
+  outline: none;
+  border: 0;
+  border-radius: 999px;
+  mask: none;
+  padding: 3px 10px;
+  background: color-mix(in srgb, var(--stamp-ink) 16%, var(--paper));
+  font-family: var(--font-type);
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  opacity: 1;
+}
+:root[data-design='soft'] .card__star {
+  top: 8px;
+  right: 10px;
+  font-size: 1.1rem;
+  text-shadow: none;
+}
+:root[data-design='soft'] :is(.on-this-day, .shelves-empty, .room-row, .toast, .login__card, .mind-placard, .collage-legend, .tie-prompt) {
+  border-radius: 20px;
+}
+:root[data-design='soft'] .on-this-day {
+  border-left: 0;
+  box-shadow: inset 4px 0 0 var(--thread), var(--shadow-card);
+}
+:root[data-design='soft'] .menu {
+  border-radius: 20px;
+}
+:root[data-design='soft'] .sheet--centre .sheet__paper {
+  border-radius: 24px;
+}
+:root[data-design='soft'] .sheet--side .sheet__paper {
+  border-radius: 24px 0 0 24px;
+}
+:root[data-design='soft'] .sheet--bottom .sheet__paper {
+  border-radius: 24px 24px 0 0;
+}
+@media (max-width: 640px) {
+  :root[data-design='soft'] :is(.sheet--centre, .sheet--side) .sheet__paper {
+    border-radius: 0;
+  }
+}
+:root[data-design='soft'] .mat {
+  border-radius: 40px;
+}
+:root[data-design='soft'] .mat__label {
+  border-radius: 999px;
+}
+:root[data-design='gallery'] .mat {
+  border-radius: 14px;
+}
+
+/* ── menu: the design picker's little sketches ────────────────────────────── */
+
+.design-opt {
+  align-items: center;
+  gap: 0.6rem;
+  min-height: 44px;
+}
+.design-opt__text {
+  display: grid;
+  min-width: 0;
+  line-height: 1.2;
+}
+.design-opt__name {
+  font-size: 0.92rem;
+}
+.design-opt__blurb {
+  font-size: 0.7rem;
+  color: var(--ink-faint);
+  font-weight: 400;
+}
+.design-thumb {
+  position: relative;
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 32px;
+  border-radius: 4px;
+  background: var(--desk);
+  box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.1);
+  overflow: hidden;
+}
+.design-thumb > span {
+  position: relative;
+  width: 22px;
+  height: 18px;
+  background: var(--paper);
+}
+.design-thumb--cabinet > span {
+  rotate: -5deg;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.3);
+}
+.design-thumb--cabinet > span::before {
+  content: '';
+  position: absolute;
+  top: -3px;
+  left: 6px;
+  width: 11px;
+  height: 5px;
+  rotate: 4deg;
+  background: color-mix(in srgb, var(--tape-mustard) 85%, transparent);
+}
+.design-thumb--gallery {
+  background: color-mix(in srgb, var(--desk) 30%, var(--paper));
+}
+.design-thumb--gallery > span {
+  border-radius: 3px;
+  border-top: 3px solid var(--thread);
+  box-shadow: 0 2px 4px rgb(0 0 0 / 0.15);
+}
+.design-thumb--zine {
+  background-image: radial-gradient(color-mix(in srgb, var(--desk-ink) 30%, transparent) 0.8px, transparent 1px);
+  background-size: 4px 4px;
+}
+.design-thumb--zine > span {
+  border: 2px solid var(--ink);
+  box-shadow: 3px 3px 0 var(--desk-ink);
+  translate: -1px -1px;
+}
+.design-thumb--archive {
+  background-image: repeating-linear-gradient(transparent 0 5px, color-mix(in srgb, var(--desk-ink) 18%, transparent) 5px 6px);
+}
+.design-thumb--archive > span {
+  border: 1px solid color-mix(in srgb, var(--ink) 30%, transparent);
+  border-left: 4px solid var(--thread);
+  border-radius: 1px;
+}
+.design-thumb--soft {
+  border-radius: 10px;
+  background:
+    radial-gradient(circle at 10% 0%, color-mix(in srgb, var(--thread) 35%, transparent), transparent 70%),
+    var(--desk);
+}
+.design-thumb--soft > span {
+  border-radius: 7px;
+  box-shadow: 0 3px 6px rgb(0 0 0 / 0.18);
+}
+.design-thumb--soft > span::before {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 50%;
+  width: 8px;
+  height: 3px;
+  translate: -50% 0;
+  border-radius: 9px;
+  background: var(--thread);
+}

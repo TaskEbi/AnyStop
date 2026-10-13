@@ -158,7 +158,7 @@ export function MindMap({ items, rooms }: { items: Item[]; rooms: Map<string, Ro
   useEffect(() => {
     s.palette = null;
     kick();
-  }, [s, kick, settings.theme, settings.palette]);
+  }, [s, kick, settings.theme, settings.palette, settings.design]);
   useEffect(() => {
     const mq = window.matchMedia('(prefers-color-scheme: dark)');
     // useTheme updates data-mode in its own listener; read colours after it has run.

@@ -4,14 +4,23 @@ export type Kind = (typeof KINDS)[number];
 export const STATUSES = ['none', 'up_next', 'in_progress', 'done'] as const;
 export type Status = (typeof STATUSES)[number];
 
-export const ROOM_COLORS = ['mustard', 'sage', 'blue', 'rose', 'lavender', 'apricot'] as const;
+export const ROOM_COLORS = [
+  'mustard', 'sage', 'blue', 'rose', 'lavender', 'apricot',
+  'teal', 'forest', 'olive', 'lemon', 'coral', 'cherry', 'magenta', 'plum', 'sky', 'navy', 'slate', 'charcoal',
+] as const;
 export type RoomColor = (typeof ROOM_COLORS)[number];
 
 export type ViewName = 'shelves' | 'collage' | 'map' | 'mind';
 export type Theme = 'system' | 'light' | 'dark';
 /** Colour schemes for the whole cabinet; each has a daylight and a night version. */
-export const PALETTES = ['kraft', 'reading-room', 'blueprint', 'pressed-rose', 'white-cube', 'observatory'] as const;
+export const PALETTES = [
+  'kraft', 'reading-room', 'blueprint', 'pressed-rose', 'white-cube', 'observatory',
+  'sea-glass', 'terracotta', 'citrus', 'graphite', 'candy', 'sunset',
+] as const;
 export type Palette = (typeof PALETTES)[number];
+/** Design themes: each restyles the whole layout (type, cards, header, sidebar), independent of the colours. */
+export const DESIGNS = ['cabinet', 'gallery', 'zine', 'archive', 'soft'] as const;
+export type Design = (typeof DESIGNS)[number];
 
 /** Metadata cached from the link-preview function (or filled in by hand for examples). */
 export interface Preview {
@@ -75,6 +84,7 @@ export interface Settings {
   default_view: ViewName;
   theme: Theme;
   palette: Palette;
+  design: Design;
   examples_seeded: boolean;
   updated_at: string;
 }
@@ -87,6 +97,7 @@ export const DEFAULT_SETTINGS: Settings = {
   default_view: 'shelves',
   theme: 'system',
   palette: 'kraft',
+  design: 'cabinet',
   examples_seeded: false,
   updated_at: new Date(0).toISOString(),
 };

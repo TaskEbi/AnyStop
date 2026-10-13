@@ -3,11 +3,11 @@ import { updateSettings } from '../../data/actions';
 import { EMPTY_FILTERS } from '../../data/filter';
 import { allTags, data, liveItems, liveRooms } from '../../data/store';
 import { flyTo, openAddSheet, setFilters, setView, ui } from '../../data/ui';
-import { PALETTES, type Kind } from '../../data/types';
+import { DESIGNS, PALETTES, type Kind } from '../../data/types';
 import { useStore } from '../../lib/createStore';
 import { accession } from '../../lib/format';
 import { Icon, type IconName } from '../../ui/Icon';
-import { KIND_LABEL, PALETTE_INFO } from '../../ui/labels';
+import { DESIGN_INFO, KIND_LABEL, PALETTE_INFO } from '../../ui/labels';
 import { Sheet } from '../../ui/Sheet';
 import { surprise } from '../../app/surprise';
 import { rankMatches } from './match';
@@ -53,6 +53,7 @@ export function CommandPalette() {
       { id: 'do:dark', label: 'Lighting: cabinet at night', keywords: 'theme dark mode', group: 'Do', icon: 'moon', run: () => updateSettings({ theme: 'dark' }) },
       { id: 'do:system', label: 'Lighting: follow system', keywords: 'theme auto', group: 'Do', icon: 'sun', run: () => updateSettings({ theme: 'system' }) },
       ...PALETTES.map((p): Entry => ({ id: `palette:${p}`, label: `Colours: ${PALETTE_INFO[p].label}`, keywords: 'palette theme scheme', group: 'Do', icon: 'collage', run: () => updateSettings({ palette: p }) })),
+      ...DESIGNS.map((d): Entry => ({ id: `design:${d}`, label: `Design: ${DESIGN_INFO[d].label}`, keywords: `layout style look ${DESIGN_INFO[d].blurb}`, group: 'Do', icon: 'shelves', run: () => updateSettings({ design: d }) })),
       { id: 'do:rooms', label: 'Manage rooms', keywords: 'rename colour reorder', group: 'Do', icon: 'shelves', run: () => ui.set({ roomsOpen: true }) },
       { id: 'do:backoffice', label: 'Back office: export, import, bookmarklet', keywords: 'backup zip phone install', group: 'Do', icon: 'menu', run: () => ui.set({ backOfficeOpen: true }) },
       ...rooms.map((r): Entry => ({ id: `room:${r.id}`, label: r.name, keywords: 'room', hint: 'room', group: 'Rooms', icon: 'shelves', run: () => setFilters({ room: r.id }) })),

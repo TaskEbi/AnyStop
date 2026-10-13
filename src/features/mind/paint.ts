@@ -1,6 +1,6 @@
 import { alpha, mix } from '../../lib/color';
 import { ICON_PATHS } from '../../ui/Icon';
-import type { Kind } from '../../data/types';
+import { ROOM_COLORS, type Kind } from '../../data/types';
 import { projector, type Camera, type Projected, type Space, type SpaceNode } from './space';
 
 /** Colours from the CSS tokens, so the sky follows the lighting and the colour scheme. */
@@ -14,6 +14,8 @@ export interface SkyPalette {
   deskInkSoft: string;
   /** Behind-the-text halo: the sky colour. */
   halo: string;
+  /** Font families from the design theme. */
+  fonts: { hand: string; serif: string; type: string };
   key: string;
 }
 
@@ -22,10 +24,10 @@ export function readSkyPalette(): SkyPalette {
   const css = getComputedStyle(root);
   const v = (name: string) => css.getPropertyValue(name).trim();
   const dark = root.dataset.mode === 'dark';
-  const tape = Object.fromEntries(['mustard', 'sage', 'blue', 'rose', 'lavender', 'apricot', 'none'].map((c) => [c, v(`--tape-${c}`)]));
+  const tape = Object.fromEntries([...ROOM_COLORS, 'none'].map((c) => [c, v(`--tape-${c}`)]));
   // Same mix as --sky in palettes.css.
   const halo = dark ? mix(v('--desk-deep'), '#04060b', 0.62) : mix(v('--paper-news'), v('--desk'), 0.42);
-  const p = { dark, tape, ink: v('--ink'), paper: v('--paper'), thread: v('--thread'), deskInk: v('--desk-ink'), deskInkSoft: v('--desk-ink-soft'), halo };
+  const p = { dark, tape, ink: v('--ink'), paper: v('--paper'), thread: v('--thread'), deskInk: v('--desk-ink'), deskInkSoft: v('--desk-ink-soft'), halo, fonts: { hand: v('--font-hand'), serif: v('--font-serif'), type: v('--font-type') } };
   return { ...p, key: JSON.stringify(p) };
 }
 
@@ -257,7 +259,7 @@ export function paint(ctx: CanvasRenderingContext2D, space: Space, cam: Camera, 
     if (lit && l.label) {
       const tx = (a.x + 2 * mid.x + b.x) / 4;
       const ty = (a.y + 2 * mid.y + b.y) / 4;
-      ctx.font = '11px "Courier Prime", monospace';
+      ctx.font = `11px ${pal.fonts.type}`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       const tw = ctx.measureText(l.label).width + 10;
@@ -355,7 +357,7 @@ export function paint(ctx: CanvasRenderingContext2D, space: Space, cam: Camera, 
   for (const { n, p, rank } of candidates) {
     if (p.x < -40 || p.y < -40 || p.x > w + 40 || p.y > h + 40) continue;
     const loud = rank === 0;
-    ctx.font = n.room ? `700 ${Math.round(Math.min(19, 13 + p.s * 3))}px Kalam, cursive` : `${loud ? 600 : 400} 12px Literata, Georgia, serif`;
+    ctx.font = n.room ? `700 ${Math.round(Math.min(19, 13 + p.s * 3))}px ${pal.fonts.hand}` : `${loud ? 600 : 400} 12px ${pal.fonts.serif}`;
     const text = n.room ? n.label : short(n.label, loud ? 60 : 28);
     const tw = ctx.measureText(text).width;
     const y = p.y + p.r + (n.room ? 6 : 4);

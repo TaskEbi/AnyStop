@@ -3,12 +3,12 @@ import { updateSettings } from '../../data/actions';
 import { clearExamples, hasExamples } from '../../data/seed';
 import { data, liveItems } from '../../data/store';
 import { setFilters, setView, toast, ui } from '../../data/ui';
-import { PALETTES, type Theme, type ViewName } from '../../data/types';
+import { DESIGNS, PALETTES, type Theme, type ViewName } from '../../data/types';
 import { useStore } from '../../lib/createStore';
 import { plural } from '../../lib/format';
 import { Icon, type IconName } from '../../ui/Icon';
 import { InlineConfirm } from '../../ui/InlineConfirm';
-import { PALETTE_INFO } from '../../ui/labels';
+import { DESIGN_INFO, PALETTE_INFO } from '../../ui/labels';
 import { QuickAddBar } from '../capture/QuickAddBar';
 import { surprise } from '../../app/surprise';
 import './header.css';
@@ -133,6 +133,27 @@ function PalettePicker() {
   );
 }
 
+/** Design themes: each a little sketch of its card, with a name and a line about it. */
+function DesignPicker() {
+  const design = useStore(data, (s) => s.settings.design);
+  return (
+    <div className="menu__group" role="radiogroup" aria-label="Design">
+      <span className="menu__label type">Design</span>
+      {DESIGNS.map((d) => (
+        <button key={d} type="button" role="radio" aria-checked={design === d} className="menu__item design-opt" onClick={() => updateSettings({ design: d })}>
+          <span className={`design-thumb design-thumb--${d}`} aria-hidden="true">
+            <span />
+          </span>
+          <span className="design-opt__text">
+            <span className="design-opt__name">{DESIGN_INFO[d].label}</span>
+            <span className="design-opt__blurb">{DESIGN_INFO[d].blurb}</span>
+          </span>
+        </button>
+      ))}
+    </div>
+  );
+}
+
 function Menu() {
   const theme = useStore(data, (s) => s.settings.theme);
   const examples = useStore(data, (s) => (s.items.size ? hasExamples() : false));
@@ -156,6 +177,7 @@ function Menu() {
             </button>
           ))}
         </div>
+        <DesignPicker />
         <PalettePicker />
         <button type="button" className="menu__item" onClick={() => ui.set({ backOfficeOpen: true })} popoverTarget="main-menu" popoverTargetAction="hide">
           Back office: bookmarklet, phone app, export
