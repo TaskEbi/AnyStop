@@ -2,9 +2,8 @@
 import { hash, uuid } from '../lib/random';
 import { todayIn } from '../features/daily-log/dates';
 import { childrenOf, topLevel } from '../features/daily-log/stats';
-import { checkEntry, checkTopicName, MAX_GOAL_MINUTES, type EntryDraft } from '../features/daily-log/validate';
+import { checkEntry, checkTopicName, MAX_GOAL_MINUTES, metricMax, type EntryDraft } from '../features/daily-log/validate';
 import { commit, commitSettings, data } from './store';
-import { MAX_ENTRY_MINUTES } from '../features/daily-log/duration';
 import { ROOM_COLORS, type LogDayMetric, type LogEntry, type LogGoal, type LogMetric, type LogTopic, type RoomColor } from './types';
 
 const now = () => new Date().toISOString();
@@ -179,10 +178,12 @@ export function setGoal(topicId: string, minutes: number | null, monday: string)
 /** One row per metric per day, named by the pair, so a second device's change replaces rather than duplicates. */
 export const metricId = (metric: LogMetric, date: string) => pairId(`metric:${metric}`, date);
 
-/** Set a day's sleep or screen time (0 – 24 hr), or clear it with null. */
+/** Set a day's sleep or screen time (0 – 24 hr) or sleep score (0 – 100), or clear it with null. */
 export function setMetric(metric: LogMetric, date: string, minutes: number | null): string | null {
   if (date > logToday()) return "That day hasn't happened yet.";
-  if (minutes != null && (!Number.isInteger(minutes) || minutes < 0 || minutes > MAX_ENTRY_MINUTES)) return 'Enter between 0 and 24 hours.';
+  if (minutes != null && (!Number.isInteger(minutes) || minutes < 0 || minutes > metricMax(metric))) {
+    return metric === 'sleep_score' ? 'A sleep score is a whole number from 0 to 100.' : 'Enter between 0 and 24 hours.';
+  }
   const id = metricId(metric, date);
   const existing = data.get().log_metrics.get(id);
   const t = now();

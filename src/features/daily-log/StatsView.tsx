@@ -57,7 +57,7 @@ function Tile({ label, value, sub, hero }: { label: string; value: string; sub?:
   );
 }
 
-/** Totals, charts, topic breakdowns, weekly goals, sleep and screen time for a week, month or year. */
+/** Totals, charts, topic breakdowns, weekly goals, sleep (and its score) and screen time for a week, month or year. */
 export function StatsView() {
   const today = useToday();
   const topics = useTopics();
@@ -71,6 +71,7 @@ export function StatsView() {
   const isCurrent = anchor === current;
 
   const sleep = useMetricPeriod('sleep', from, to).summary;
+  const sleepScore = useMetricPeriod('sleep_score', from, to).summary;
   const screen = useMetricPeriod('screen', from, to).summary;
 
   const inPeriod = useMemo(() => inRange(entries.values(), from, to), [entries, from, to]);
@@ -191,6 +192,7 @@ export function StatsView() {
         />
         {summary.best && <Tile label="Biggest day" value={formatMinutes(summary.best.minutes)} sub={shortDay(summary.best.date, today)} />}
         {sleep.average != null && <Tile label="Average sleep" value={formatMinutes(sleep.average)} sub={`over ${sleep.days} ${sleep.days === 1 ? 'night' : 'nights'}`} />}
+        {sleepScore.average != null && <Tile label="Average sleep score" value={`${sleepScore.average} / 100`} sub={`over ${sleepScore.days} ${sleepScore.days === 1 ? 'night' : 'nights'}`} />}
         {screen.average != null && <Tile label="Average screen time" value={formatMinutes(screen.average)} sub={`over ${screen.days} ${screen.days === 1 ? 'day' : 'days'}`} />}
       </div>
 
@@ -240,6 +242,7 @@ export function StatsView() {
 
       <div className="log-grid">
         <MetricCard metric="sleep" period={period} from={from} to={to} today={today} />
+        <MetricCard metric="sleep_score" period={period} from={from} to={to} today={today} />
         <MetricCard metric="screen" period={period} from={from} to={to} today={today} />
       </div>
 

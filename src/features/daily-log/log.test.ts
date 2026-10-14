@@ -7,7 +7,7 @@ import { formatMinutes, parseDuration, splitMinutes } from './duration';
 import {
   dayBuckets, goalFor, goalProgress, heatLevel, inRange, metricByDay, metricMonthly, metricSummary, monthBuckets, periodSummary, sumMinutes, topicTotals, weekBuckets,
 } from './stats';
-import { checkEntry, checkTopicName } from './validate';
+import { checkEntry, checkTopicName, metricMax } from './validate';
 
 const T = '2026-10-14T00:00:00Z';
 const topic = (id: string, name: string, parent_id: string | null = null, extra: Partial<LogTopic> = {}): LogTopic => ({
@@ -234,6 +234,15 @@ describe('sleep and screen time', () => {
     expect(months[10]).toEqual({ key: '2026-11-01', average: null, days: 0 });
   });
 
+  it('keeps sleep scores apart from sleep time, out of 100', () => {
+    const scored = [...rows, metric('2026-10-14', 'sleep_score', 82), metric('2026-10-13', 'sleep_score', 74)];
+    expect(metricSummary(metricByDay(scored, 'sleep_score', '2026-10-12', '2026-10-18')).average).toBe(78);
+    expect(metricSummary(metricByDay(scored, 'sleep', '2026-10-12', '2026-10-18')).average).toBe(450);
+    expect(metricMax('sleep_score')).toBe(100);
+    expect(metricMax('sleep')).toBe(1440);
+    expect(metricId('sleep_score', '2026-10-14')).not.toBe(metricId('sleep', '2026-10-14'));
+  });
+
   it('names one row per metric per day', () => {
     expect(metricId('sleep', '2026-10-14')).toBe(metricId('sleep', '2026-10-14'));
     expect(metricId('sleep', '2026-10-14')).not.toBe(metricId('screen', '2026-10-14'));
@@ -260,12 +269,14 @@ describe('backup', () => {
         metric('2026-10-14', 'steps' as LogDayMetric['metric'], 30), // not a metric
         metric('2026-10-14', 'sleep', 1441), // more than a day
         metric('2026-10-14', 'sleep', 7.5), // not whole minutes
+        metric('2026-10-14', 'sleep_score', 88),
+        metric('2026-10-13', 'sleep_score', 101), // over 100
       ],
     });
     expect(out.topics.map((t) => t.id)).toEqual(['school', 'maths', 'violin']);
     expect(out.entries).toHaveLength(1);
     expect(out.goals).toHaveLength(1);
-    expect(out.metrics.map((m) => m.minutes)).toEqual([450, 0]);
+    expect(out.metrics.map((m) => m.minutes)).toEqual([450, 0, 88]);
   });
 
   it('treats an old cabinet-only backup as having no log at all', () => {

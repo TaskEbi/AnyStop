@@ -121,8 +121,11 @@ export interface LogGoal {
   deleted_at: string | null;
 }
 
-export const LOG_METRICS = ['sleep', 'screen'] as const;
-/** Sleep (the night before `date`, counted on the morning you wake) and screen time that day. */
+export const LOG_METRICS = ['sleep', 'screen', 'sleep_score'] as const;
+/**
+ * Sleep (the night before `date`, counted on the morning you wake), that night's sleep
+ * score out of 100, and screen time that day.
+ */
 export type LogMetric = (typeof LOG_METRICS)[number];
 
 /**
@@ -133,6 +136,7 @@ export interface LogDayMetric {
   id: string;
   date: string;
   metric: LogMetric;
+  /** Minutes for sleep and screen time; for sleep_score, the score (0–100). */
   minutes: number;
   created_at: string;
   updated_at: string;

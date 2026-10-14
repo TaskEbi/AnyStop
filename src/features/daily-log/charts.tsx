@@ -25,6 +25,17 @@ interface Series {
   nameOf: (id: string) => string;
 }
 
+/** How a chart reads its numbers: durations by default, or e.g. a score with fixed ticks. */
+export interface Scale {
+  /** Fixed gridlines; otherwise clean time steps up to the tallest bar. */
+  ticks?: number[];
+  /** Axis ticks and table cells: "1h 30m". */
+  short: (n: number) => string;
+  /** Readouts: "1 hr 30 min". */
+  long: (n: number) => string;
+}
+export const MINUTES: Scale = { short: shortMinutes, long: formatMinutes };
+
 const H = 210;
 const PAD = { top: 12, right: 6, bottom: 26, left: 40 };
 const GAP = 2;
@@ -61,12 +72,12 @@ function useWidth(ref: RefObject<HTMLElement | null>, fallback: number): number 
   return width;
 }
 
-export function ColumnChart({ columns, series, label }: { columns: Column[]; series: Series; label: string }) {
+export function ColumnChart({ columns, series, label, scale = MINUTES }: { columns: Column[]; series: Series; label: string; scale?: Scale }) {
   const [hover, setHover] = useState<number | null>(null);
   const box = useRef<HTMLDivElement>(null);
   const W = useWidth(box, 640);
   const totals = columns.map((c) => c.segments.reduce((n, s) => n + s.minutes, 0));
-  const ticks = niceTicks(Math.max(30, ...totals));
+  const ticks = scale.ticks ?? niceTicks(Math.max(30, ...totals));
   const top = ticks[ticks.length - 1];
   const plotW = W - PAD.left - PAD.right;
   const plotH = H - PAD.top - PAD.bottom;
@@ -87,7 +98,7 @@ export function ColumnChart({ columns, series, label }: { columns: Column[]; ser
           <g key={t}>
             <line x1={PAD.left} x2={W - PAD.right} y1={y(t)} y2={y(t)} className="chart__grid" />
             <text x={PAD.left - 6} y={y(t)} dy="0.32em" textAnchor="end" className="chart__tick">
-              {t === 0 ? '0' : shortMinutes(t)}
+              {t === 0 ? '0' : scale.short(t)}
             </text>
           </g>
         ))}
@@ -102,7 +113,7 @@ export function ColumnChart({ columns, series, label }: { columns: Column[]; ser
               className={`chart__col ${hover === i ? 'is-hover' : ''} ${c.future ? 'is-future' : ''}`}
               tabIndex={0}
               role="img"
-              aria-label={`${c.title}: ${totals[i] ? formatMinutes(totals[i]) : 'nothing logged'}`}
+              aria-label={`${c.title}: ${totals[i] ? scale.long(totals[i]) : 'nothing logged'}`}
               onPointerEnter={() => setHover(i)}
               onFocus={() => setHover(i)}
               onBlur={() => setHover(null)}
@@ -134,14 +145,14 @@ export function ColumnChart({ columns, series, label }: { columns: Column[]; ser
           role="status"
         >
           <span className="chart__tip-title type">{active.title}</span>
-          <strong className="chart__tip-total">{activeTotal ? formatMinutes(activeTotal) : 'Nothing logged'}</strong>
+          <strong className="chart__tip-total">{activeTotal ? scale.long(activeTotal) : 'Nothing logged'}</strong>
           {active.segments
             .filter((s) => s.minutes > 0)
             .sort((a, b) => b.minutes - a.minutes)
             .map((s) => (
               <span key={s.id} className="chart__tip-row">
                 <span className="chart__key" style={{ background: series.colourOf(s.id) }} aria-hidden="true" />
-                <strong>{formatMinutes(s.minutes)}</strong> {series.nameOf(s.id)}
+                <strong>{scale.long(s.minutes)}</strong> {series.nameOf(s.id)}
               </span>
             ))}
         </div>
@@ -166,7 +177,7 @@ export function Legend({ ids, series }: { ids: string[]; series: Series }) {
 }
 
 /** The numbers behind a column chart, for anyone who'd rather read than hover. */
-export function ChartTable({ columns, ids, series, caption }: { columns: Column[]; ids: string[]; series: Series; caption: string }) {
+export function ChartTable({ columns, ids, series, caption, scale = MINUTES }: { columns: Column[]; ids: string[]; series: Series; caption: string; scale?: Scale }) {
   return (
     <details className="chart-table">
       <summary className="type">Show as a table</summary>
@@ -194,9 +205,9 @@ export function ChartTable({ columns, ids, series, caption }: { columns: Column[
                   <tr key={c.key}>
                     <th scope="row">{c.title}</th>
                     {ids.map((id) => (
-                      <td key={id}>{by.get(id) ? shortMinutes(by.get(id)!) : '–'}</td>
+                      <td key={id}>{by.get(id) ? scale.short(by.get(id)!) : '–'}</td>
                     ))}
-                    <td>{total ? shortMinutes(total) : '–'}</td>
+                    <td>{total ? scale.short(total) : '–'}</td>
                   </tr>
                 );
               })}

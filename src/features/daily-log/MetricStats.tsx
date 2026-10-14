@@ -2,7 +2,6 @@ import { useMemo } from 'react';
 import type { LogMetric } from '../../data/types';
 import { ChartTable, ColumnChart, type Column } from './charts';
 import { dayOfMonth, daysBetween, monthName, shortDay, weekdayLetter } from './dates';
-import { formatMinutes } from './duration';
 import { METRICS } from './DayMetrics';
 import { metricByDay, metricMonthly, metricSummary, type MetricSummary } from './stats';
 import { useMetrics } from './useLog';
@@ -16,12 +15,13 @@ export function useMetricPeriod(metric: LogMetric, from: string, to: string): { 
   }, [metrics, metric, from, to]);
 }
 
-/** Sleep or screen time, day by day (or, over a year, each month's average). */
+/** Sleep, sleep score or screen time, day by day (or, over a year, each month's average). */
 export function MetricCard({ metric, period, from, to, today }: { metric: LogMetric; period: 'week' | 'month' | 'year'; from: string; to: string; today: string }) {
   const info = METRICS[metric];
   const year = period === 'year';
   const metrics = useMetrics();
   const { byDay, summary } = useMetricPeriod(metric, from, to);
+  const { long } = info.scale;
   const series = { colourOf: () => info.colour, nameOf: () => (year ? `${info.label} (daily average)` : info.label) };
 
   const columns: Column[] = useMemo(() => {
@@ -56,11 +56,11 @@ export function MetricCard({ metric, period, from, to, today }: { metric: LogMet
       ) : (
         <>
           <p className="log-quiet type">
-            Average {formatMinutes(summary.average ?? 0)} over {summary.days} {summary.days === 1 ? 'day' : 'days'}
-            {summary.days > 1 && summary.low && summary.high && ` · least ${formatMinutes(summary.low.minutes)}, most ${formatMinutes(summary.high.minutes)}`}
+            Average {long(summary.average ?? 0)} over {summary.days} {summary.days === 1 ? 'day' : 'days'}
+            {summary.days > 1 && summary.low && summary.high && ` · lowest ${long(summary.low.minutes)}, highest ${long(summary.high.minutes)}`}
           </p>
-          <ColumnChart columns={columns} series={series} label={`${info.label} per ${year ? 'month, daily average' : 'day'}`} />
-          <ChartTable columns={columns} ids={[metric]} series={series} caption={`${info.label} per ${year ? 'month' : 'day'}`} />
+          <ColumnChart columns={columns} series={series} scale={info.scale} label={`${info.label} per ${year ? 'month, daily average' : 'day'}`} />
+          <ChartTable columns={columns} ids={[metric]} series={series} scale={info.scale} caption={`${info.label} per ${year ? 'month' : 'day'}`} />
         </>
       )}
     </section>

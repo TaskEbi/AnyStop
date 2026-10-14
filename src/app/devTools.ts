@@ -55,7 +55,7 @@ function clearFake() {
   return { removed: items.length };
 }
 
-/** Months of made-up Daily Log entries over the existing topics (plus sleep and screen time), to look at the charts with. */
+/** Months of made-up Daily Log entries over the existing topics (plus sleep, sleep scores and screen time), to look at the charts with. */
 function fakeLog(days = 180) {
   const st = data.get();
   const tops = [...st.log_topics.values()].filter((t) => !t.parent_id && !t.archived_at && !t.deleted_at);
@@ -79,7 +79,10 @@ function fakeLog(days = 180) {
     const row = (metric: LogDayMetric['metric'], minutes: number): LogDayMetric => ({
       id: metricId(metric, date), date, metric, minutes, created_at: t, updated_at: t, deleted_at: null,
     });
-    if (Math.random() < 0.85) metrics.push(row('sleep', 15 * (24 + Math.floor(Math.random() * 14))));
+    if (Math.random() < 0.85) {
+      metrics.push(row('sleep', 15 * (24 + Math.floor(Math.random() * 14))));
+      metrics.push(row('sleep_score', 55 + Math.floor(Math.random() * 41)));
+    }
     if (Math.random() < 0.75) metrics.push(row('screen', 15 * Math.floor(Math.random() * 24)));
   }
   commit('log_entries', entries);

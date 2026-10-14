@@ -1,4 +1,4 @@
-import type { LogEntry, LogTopic } from '../../data/types';
+import type { LogEntry, LogMetric, LogTopic } from '../../data/types';
 import { isDate } from './dates';
 import { MAX_ENTRY_MINUTES } from './duration';
 
@@ -6,6 +6,10 @@ export const MAX_NOTE = 1000;
 export const MAX_TOPIC_NAME = 60;
 /** A week has 168 hours; a weekly goal can't ask for more. */
 export const MAX_GOAL_MINUTES = 7 * 24 * 60;
+
+export const MAX_SLEEP_SCORE = 100;
+/** The highest value a day's metric can hold: 24 hours, or a score of 100. */
+export const metricMax = (metric: LogMetric) => (metric === 'sleep_score' ? MAX_SLEEP_SCORE : MAX_ENTRY_MINUTES);
 
 export type EntryDraft = Pick<LogEntry, 'date' | 'topic_id' | 'subcategory_id' | 'minutes' | 'note'>;
 

@@ -4,6 +4,7 @@ import { metricId } from './logActions';
 import { uuid } from '../lib/random';
 import { commit, commitSettings, currentSession, data, liveConnections, liveItems, liveRooms } from './store';
 import { isDate } from '../features/daily-log/dates';
+import { metricMax } from '../features/daily-log/validate';
 import { LOG_METRICS, type Connection, type Item, type LogDayMetric, type LogEntry, type LogGoal, type LogTopic, type Room, type Settings } from './types';
 
 /** Version 2 adds the Daily Log; version 1 exports (cabinet only) still import. */
@@ -20,7 +21,7 @@ interface Backup {
   log_topics?: LogTopic[];
   log_entries?: LogEntry[];
   log_goals?: LogGoal[];
-  /** Sleep and screen time; absent from exports made before they existed. */
+  /** Sleep, sleep score and screen time; absent from exports made before they existed. */
   log_metrics?: LogDayMetric[];
 }
 
@@ -47,7 +48,7 @@ export function validLog(b: Pick<Backup, 'log_topics' | 'log_entries' | 'log_goa
     (g) => isId(g?.id) && okIds.has(g.topic_id) && isDate(g.week_start) && (g.minutes === null || minutesOk(g.minutes, 10080)),
   );
   const metrics = (Array.isArray(b.log_metrics) ? b.log_metrics : []).filter(
-    (m) => isId(m?.id) && isDate(m.date) && LOG_METRICS.includes(m.metric) && Number.isInteger(m.minutes) && m.minutes >= 0 && m.minutes <= 1440,
+    (m) => isId(m?.id) && isDate(m.date) && LOG_METRICS.includes(m.metric) && Number.isInteger(m.minutes) && m.minutes >= 0 && m.minutes <= metricMax(m.metric),
   );
   return { topics: ok, entries, goals, metrics };
 }
