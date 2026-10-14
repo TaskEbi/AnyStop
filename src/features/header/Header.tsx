@@ -1,11 +1,15 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { updateSettings } from '../../data/actions';
 import { clearExamples, hasExamples } from '../../data/seed';
 import { data, liveItems } from '../../data/store';
-import { setFilters, setView, toast, ui } from '../../data/ui';
+import { setFilters, setLogView, setSection, setView, toast, ui, type LogView, type Section } from '../../data/ui';
 import { DESIGNS, PALETTES, type Theme, type ViewName } from '../../data/types';
 import { useStore } from '../../lib/createStore';
 import { plural } from '../../lib/format';
+import { supabase } from '../../lib/supabase';
+import { formatMinutes } from '../daily-log/duration';
+import { inRange, sumMinutes } from '../daily-log/stats';
+import { useToday } from '../daily-log/useLog';
 import { Icon, type IconName } from '../../ui/Icon';
 import { InlineConfirm } from '../../ui/InlineConfirm';
 import { DESIGN_INFO, PALETTE_INFO } from '../../ui/labels';
@@ -20,7 +24,41 @@ const VIEWS: { id: ViewName; label: string; icon: IconName; ready: boolean }[] =
   { id: 'mind', label: 'Mind Map 3D', icon: 'orbit', ready: true },
 ];
 
+const LOG_VIEWS: { id: LogView; label: string; icon: IconName }[] = [
+  { id: 'today', label: 'Today', icon: 'clock' },
+  { id: 'history', label: 'History', icon: 'list' },
+  { id: 'stats', label: 'Stats', icon: 'chart' },
+];
+
+const SECTIONS: { id: Section; label: string; icon: IconName }[] = [
+  { id: 'cabinet', label: 'Cabinet', icon: 'shelves' },
+  { id: 'log', label: 'Daily Log', icon: 'clock' },
+];
+
+/** The big switch between the museum and the Daily Log. */
+function SectionSwitch() {
+  const section = useStore(ui, (s) => s.section);
+  return (
+    <nav className="section-switch" aria-label="Section">
+      {SECTIONS.map((s) => (
+        <button key={s.id} type="button" className="section-switch__btn" aria-current={section === s.id ? 'page' : undefined} onClick={() => setSection(s.id)}>
+          <Icon name={s.icon} size={16} />
+          <span>{s.label}</span>
+        </button>
+      ))}
+    </nav>
+  );
+}
+
+function LogSubtitle() {
+  const today = useToday();
+  const entries = useStore(data, (s) => s.log_entries);
+  const total = useMemo(() => sumMinutes(inRange(entries.values(), today, today)), [entries, today]);
+  return <p className="museum-name__sub type">Daily Log · {formatMinutes(total)} today</p>;
+}
+
 function MuseumName() {
+  const section = useStore(ui, (s) => s.section);
   const name = useStore(data, (s) => s.settings.museum_name);
   const count = useStore(data, (s) => liveItems(s.items).length);
   const [editing, setEditing] = useState(false);
@@ -63,7 +101,7 @@ function MuseumName() {
           </button>
         </h1>
       )}
-      <p className="museum-name__sub type">A cabinet of {plural(count, 'curiosity', 'curiosities')}</p>
+      {section === 'log' ? <LogSubtitle /> : <p className="museum-name__sub type">A cabinet of {plural(count, 'curiosity', 'curiosities')}</p>}
     </div>
   );
 }
@@ -154,7 +192,30 @@ function DesignPicker() {
   );
 }
 
+/** Sign out of this device. Unsynced changes stay on the device and go up after the next sign-in. */
+function Account() {
+  const pending = useStore(data, (s) => s.sync.pending);
+  const synced = useStore(data, (s) => s.mode === 'synced');
+  if (!supabase || !synced) return null;
+  return (
+    <div className="menu__group">
+      <span className="menu__label type">Login</span>
+      <button type="button" className="menu__item" onClick={() => ui.set({ passwordOpen: true })} popoverTarget="main-menu" popoverTargetAction="hide">
+        Change password
+      </button>
+      <InlineConfirm
+        label="Sign out"
+        className="menu__item"
+        message={pending ? `${plural(pending, 'change')} still waiting to sync will go up after you sign back in. Sign out?` : 'Sign out on this device?'}
+        confirmLabel="Sign out"
+        onConfirm={() => void supabase!.auth.signOut()}
+      />
+    </div>
+  );
+}
+
 function Menu() {
+  const section = useStore(ui, (s) => s.section);
   const theme = useStore(data, (s) => s.settings.theme);
   const examples = useStore(data, (s) => (s.items.size ? hasExamples() : false));
   return (
@@ -166,9 +227,15 @@ function Menu() {
         <button type="button" className="menu__item" onClick={() => ui.set({ commandOpen: true })} popoverTarget="main-menu" popoverTargetAction="hide">
           <Icon name="search" size={15} /> Jump to… <kbd className="menu__kbd type">{isMac ? '⌘K' : 'Ctrl K'}</kbd>
         </button>
-        <button type="button" className="menu__item" onClick={() => ui.set({ roomsOpen: true })} popoverTarget="main-menu" popoverTargetAction="hide">
-          Manage rooms
-        </button>
+        {section === 'log' ? (
+          <button type="button" className="menu__item" onClick={() => ui.set({ logTopicsOpen: true })} popoverTarget="main-menu" popoverTargetAction="hide">
+            Daily Log topics and time zone
+          </button>
+        ) : (
+          <button type="button" className="menu__item" onClick={() => ui.set({ roomsOpen: true })} popoverTarget="main-menu" popoverTargetAction="hide">
+            Manage rooms
+          </button>
+        )}
         <div className="menu__group" role="radiogroup" aria-label="Theme">
           <span className="menu__label type">Lighting</span>
           {THEMES.map((t) => (
@@ -197,8 +264,9 @@ function Menu() {
             />
           </div>
         )}
+        <Account />
         <p className="menu__keys type">
-          N add · / search · R wander · Esc close · 1 2 3 4 views · ← → step through exhibits
+          {section === 'log' ? 'Esc close · Ctrl/⌘ K jump anywhere' : 'N add · / search · R wander · Esc close · 1 2 3 4 views · ← → step through exhibits'}
         </p>
       </div>
     </>
@@ -206,13 +274,39 @@ function Menu() {
 }
 
 export function Header({ filterCount }: { filterCount: number }) {
+  const section = useStore(ui, (s) => s.section);
   const view = useStore(ui, (s) => s.view);
+  const logView = useStore(ui, (s) => s.logView);
   const q = useStore(ui, (s) => s.filters.q);
+
+  if (section === 'log') {
+    return (
+      <header className="app-header app-header--log">
+        <div className="app-header__top">
+          <MuseumName />
+          <SectionSwitch />
+          <nav className="view-tabs" aria-label="Daily Log views">
+            {LOG_VIEWS.map((v) => (
+              <button key={v.id} type="button" className="view-tab" aria-current={logView === v.id ? 'page' : undefined} onClick={() => setLogView(v.id)}>
+                <Icon name={v.icon} size={16} />
+                <span>{v.label}</span>
+              </button>
+            ))}
+          </nav>
+          <div className="app-header__tools">
+            <SyncBadge />
+            <Menu />
+          </div>
+        </div>
+      </header>
+    );
+  }
 
   return (
     <header className="app-header">
       <div className="app-header__top">
         <MuseumName />
+        <SectionSwitch />
         <nav className="view-tabs" aria-label="Views">
           {VIEWS.map((v) => (
             <button

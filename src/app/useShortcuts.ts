@@ -21,6 +21,8 @@ export function useShortcuts() {
       }
       if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.altKey || isTyping(e.target)) return;
       if (document.querySelector('dialog:modal') || !data.get().ready) return;
+      // These keys all act on the cabinet; the Daily Log has its own form to type into.
+      if (ui.get().section !== 'cabinet') return;
       switch (e.key) {
         case 'n':
         case 'N':

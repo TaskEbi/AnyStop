@@ -29,6 +29,12 @@ export const ICON_PATHS = {
   dice: 'M5 5h14v14H5zM9 9h.01M15 15h.01M15 9h.01M9 15h.01M12 12h.01',
   cloud: 'M7 18h10a4 4 0 0 0 .5-7.97A6 6 0 0 0 6 9.5 4.25 4.25 0 0 0 7 18',
   offline: 'M7 18h10a4 4 0 0 0 .5-7.97A6 6 0 0 0 6 9.5 4.25 4.25 0 0 0 7 18M4 4l16 16',
+  left: 'M15 5l-7 7 7 7',
+  right: 'M9 5l7 7-7 7',
+  clock: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18M12 7v5l3 2',
+  chart: 'M4 20h16M7 16v-5M12 16V6M17 16v-8',
+  calendar: 'M4 6h16v14H4zM4 10h16M8 3v4M16 3v4',
+  list: 'M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01',
 } as const;
 
 export type IconName = keyof typeof ICON_PATHS;

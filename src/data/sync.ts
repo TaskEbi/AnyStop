@@ -8,14 +8,11 @@ import {
   setSyncState,
 } from './store';
 import { uploadPendingPhotos } from '../lib/photos';
-import { DEFAULT_SETTINGS, type RecordOf, type Settings, type TableName } from './types';
-
-/** Push order matters: rooms before the items that use them, items before strings. */
-const TABLES: TableName[] = ['rooms', 'items', 'connections'];
+import { DEFAULT_SETTINGS, TABLES, type RecordOf, type Settings, type TableName } from './types';
 const PAGE = 1000;
 /** Re-read a few seconds before the cursor in case two writes committed out of order. */
 const CURSOR_OVERLAP_MS = 5000;
-/** Every row belongs to the one shared cabinet (see the no_login migration). */
+/** Every row belongs to the one shared cabinet (see the no_login migration); signing in decides who may reach it. */
 const SHARED_OWNER = '00000000-0000-0000-0000-000000000000';
 
 /** Fields the server owns; never sent from the client. */
@@ -89,10 +86,10 @@ export function startSync(sb: SupabaseClient): SyncHandle {
 
     const settingsRev = s.outbox.settings;
     if (settingsRev) {
-      const { museum_name, default_view, theme, palette, design, examples_seeded } = data.get().settings;
+      const { museum_name, default_view, theme, palette, design, examples_seeded, log_timezone } = data.get().settings;
       const { error } = await sb
         .from('settings')
-        .upsert({ owner_id: SHARED_OWNER, museum_name, default_view, theme, palette, design, examples_seeded });
+        .upsert({ owner_id: SHARED_OWNER, museum_name, default_view, theme, palette, design, examples_seeded, log_timezone });
       if (error) {
         if (isNetworkError(error)) throw error;
         problem = `Settings couldn't be saved (${error.message}).`;
@@ -126,7 +123,7 @@ export function startSync(sb: SupabaseClient): SyncHandle {
     if (error) throw error;
     const r = rows[0] as Settings | undefined;
     if (r) {
-      const { museum_name, default_view, theme, palette, design, examples_seeded, updated_at } = r;
+      const { museum_name, default_view, theme, palette, design, examples_seeded, log_timezone, updated_at } = r;
       applyRemoteSettings({
         ...DEFAULT_SETTINGS,
         museum_name,
@@ -135,6 +132,7 @@ export function startSync(sb: SupabaseClient): SyncHandle {
         palette: palette ?? DEFAULT_SETTINGS.palette,
         design: design ?? DEFAULT_SETTINGS.design,
         examples_seeded,
+        log_timezone: log_timezone ?? DEFAULT_SETTINGS.log_timezone,
         updated_at,
       });
     }

@@ -1,8 +1,11 @@
-/** Tiny promise wrapper around IndexedDB: three record stores plus a key/value "meta" store. */
+/** Tiny promise wrapper around IndexedDB: one store per record table plus key/value "meta" and "blobs" stores. */
+import { TABLES, type TableName } from './types';
 
-const STORES = ['rooms', 'items', 'connections', 'meta', 'blobs'] as const;
+const STORES = [...TABLES, 'meta', 'blobs'] as const;
+/** 2 → 3 adds the Daily Log stores. Upgrades only ever add missing stores, so nothing is lost. */
+const VERSION = 3;
 
-type RecordStore = 'rooms' | 'items' | 'connections';
+type RecordStore = TableName;
 
 export interface LocalDb {
   getAll<T>(store: RecordStore): Promise<T[]>;
@@ -30,7 +33,7 @@ function done(tx: IDBTransaction): Promise<void> {
 }
 
 export async function openLocalDb(name: string): Promise<LocalDb> {
-  const open = indexedDB.open(name, 2);
+  const open = indexedDB.open(name, VERSION);
   open.onupgradeneeded = () => {
     const db = open.result;
     for (const s of STORES) {
@@ -38,6 +41,11 @@ export async function openLocalDb(name: string): Promise<LocalDb> {
     }
   };
   const db = await req(open);
+  // A newer version of the app opened in another tab wants to upgrade: step aside and reload into it.
+  db.onversionchange = () => {
+    db.close();
+    location.reload();
+  };
 
   return {
     async getAll<T>(store: RecordStore) {

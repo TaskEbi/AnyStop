@@ -1,6 +1,8 @@
 // Dev-only helpers (window.curioDev) for the 1,000-item performance check.
 import { commit, data, liveConnections, liveItems, liveRooms } from '../data/store';
-import { KINDS, ROOM_COLORS, type Connection, type Item, type Room } from '../data/types';
+import { KINDS, ROOM_COLORS, type Connection, type Item, type LogEntry, type Room } from '../data/types';
+import { addDays } from '../features/daily-log/dates';
+import { logToday } from '../data/logActions';
 import { uuid } from '../lib/random';
 
 const TAG = 'perf-test';
@@ -53,4 +55,26 @@ function clearFake() {
   return { removed: items.length };
 }
 
-(window as unknown as { curioDev: unknown }).curioDev = { fake, clearFake };
+/** Months of made-up Daily Log entries over the existing topics, to look at the charts with. */
+function fakeLog(days = 180) {
+  const st = data.get();
+  const tops = [...st.log_topics.values()].filter((t) => !t.parent_id && !t.archived_at && !t.deleted_at);
+  const today = logToday();
+  const t = new Date().toISOString();
+  const entries: LogEntry[] = [];
+  for (let d = 0; d < days; d++) {
+    const date = addDays(today, -d);
+    for (const topic of tops) {
+      if (Math.random() < 0.45) continue;
+      const subs = [...st.log_topics.values()].filter((s) => s.parent_id === topic.id && !s.archived_at);
+      entries.push({
+        id: uuid(), date, topic_id: topic.id, subcategory_id: subs.length && Math.random() < 0.7 ? pick(subs).id : null,
+        minutes: 15 * (1 + Math.floor(Math.random() * 6)), note: null, created_at: t, updated_at: t, deleted_at: null,
+      });
+    }
+  }
+  commit('log_entries', entries);
+  return { entries: entries.length };
+}
+
+(window as unknown as { curioDev: unknown }).curioDev = { fake, clearFake, fakeLog };

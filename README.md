@@ -2,7 +2,9 @@
 
 A private internet museum: save links, videos, articles, papers, photos, music, quotes and notes, then browse them on scrapbook shelves, a collage corkboard or a string map. Built in phases from the spec in `SPEC.md`. **Phases 1–5 are done.** Phase 6 (Claude-suggested connections) is optional and not started.
 
-React 19 + Vite + TypeScript PWA, with Supabase for sync, storage and link previews. There is no login.
+It also has a **Daily Log**: a separate section for recording time spent on schoolwork, violin, sports and anything else, with weekly goals, stats and charts.
+
+React 19 + Vite + TypeScript PWA, with Supabase for sync, storage, link previews and a username + password login.
 
 ## Run it
 
@@ -27,7 +29,9 @@ With no `.env.local` the app runs in **local-only mode**: everything stays in th
    npx supabase link --project-ref <your-project-ref>
    npm run db:push          # applies every file in supabase/migrations
    npx supabase functions deploy preview --use-api
+   npx supabase functions deploy setup-login --use-api --no-verify-jwt
    ```
+4. Open the app. The first time, it asks you to **choose a username and password**; that becomes the one login for the cabinet (the `setup-login` function only works while no login exists).
 
 ### Deploy (Vercel)
 
@@ -35,7 +39,13 @@ With no `.env.local` the app runs in **local-only mode**: everything stays in th
 
 ## Privacy
 
-**The cabinet is open.** There is no sign-in: every device that opens the app shares one cabinet, and the publishable key in the app's JavaScript can read, change and delete every exhibit and photo. Anyone who finds the deployed URL can do the same, so keep it to yourself. Photos live in the `photos` bucket and are shown through short-lived signed URLs. The preview function refuses private and internal addresses.
+**Sign in to open it.** The app opens on a login screen: username + password, which Safari and the home-screen app can remember. Behind it the cabinet and Daily Log are one shared collection that only the **member** may read or change. Row-level security checks `public.is_member()` on every table and on the `photos` bucket, and the `members` table holds exactly one row. The publishable key on its own can't read anything; it can only ask whether setup is still needed.
+
+- Usernames are stored as `<username>@any-stop.vercel.app` in Supabase Auth, because Supabase signs in with an email. No mail is ever sent there.
+- **Forgot the password?** In the Supabase dashboard, delete the user under Authentication → Users (the `members` row goes with it). The next visit asks you to choose a new login. Your data is untouched.
+- **Signing out** keeps this device's copy, and any changes not yet synced, for the next sign-in.
+- Signing in the first time on a device needs the internet. After that the app opens offline.
+- Photos are shown through short-lived signed URLs. The preview function refuses private and internal addresses.
 
 ## How it works
 
@@ -57,6 +67,25 @@ With no `.env.local` the app runs in **local-only mode**: everything stays in th
 - **Mind Map 3D.** Rooms are planets on a wide ring and each room's exhibits form a cloud around it, drawn on canvas with real perspective. By day it looks like a star chart on paper; at night it's a sky with glowing stars. Colours come from the theme tokens. Selecting a star shows a placard where you can **follow its strings** from one exhibit to the next, and **Tour** follows the strings on its own. Hidden stars swing round to face you, and the camera remembers its position between views. 60 fps with 1,000 exhibits, using pre-rendered sprites and no React work per frame.
 - **Colour schemes.** Kraft, Reading room, Blueprint, Pressed rose, White cube and Observatory, each with a daylight and a night version (`src/styles/palettes.css`). The scheme syncs as `settings.palette`.
 - **Collage.** DOM cards on a transformed layer with viewport culling. Far zoom switches to lightweight blocks. Positions sync through `collage_pos`.
+
+## Daily Log
+
+Switch between **Cabinet** and **Daily Log** at the top. The app reopens in whichever section you used last, which is handy for the phone's home-screen icon.
+
+- **Today**: pick a topic (and optionally a subcategory), enter hours and minutes or tap 15 min / 30 min / 45 min / 1 hr, add a note if you like, then **Log**. The form keeps the topic for the next entry. **Again** chips refill a recent combination. Step back through days with ‹ › or pick a date (no future days).
+- **History**: a week at a time (or a custom range), grouped by day, filterable by topic and subcategory. Edit, delete (with Undo) or add a backdated entry.
+- **Stats**: week / month / year totals, daily average, days with time logged, biggest day, then:
+  - a day-by-day stacked chart (month-by-month for a year)
+  - topic breakdowns with subcategories
+  - weekly goals
+  - a six-month calendar heatmap
+  - week-by-week trends
+
+  Every chart has a "Show as a table" view.
+- **Weekly goals** are set per topic on the current week. They repeat each week until changed or removed. Changing one never rewrites earlier weeks' targets.
+- **Topics** (☰ → Daily Log topics): add, rename, recolour, reorder, archive and restore topics and one level of subcategories. Archived ones keep all their history. The time zone that decides "today" and week boundaries lives here too (default Asia/Singapore). Dates are stored as calendar days, so changing it never moves past entries.
+- Everything is derived from the entries themselves (no stored totals), saved locally first and synced like the cabinet. Export/import includes the log; older exports still import.
+- In dev, `curioDev.fakeLog(180)` fills six months with made-up entries over your topics, to try the charts.
 
 ## Using it
 
@@ -95,7 +124,8 @@ src/data/                   types, local store + outbox, sync, filters, actions,
 src/ui/                     Sheet, Tape, Stamp, Icon, InlineConfirm, Toasts
 src/features/               capture, filters, header, shelves (+8 card styles), drawer,
                             rooms, backoffice, map (String Map), mind (Mind Map 3D), collage,
-                            canvas (shared), command (Ctrl/⌘ K palette)
+                            canvas (shared), command (Ctrl/⌘ K palette), auth (login),
+                            daily-log (Today / History / Stats, charts, date + stats helpers)
 src/app/                    App shell, session wiring, shortcuts, capture, share, theme
 src/sw.ts                   service worker: offline shell, image cache, share target
 ```

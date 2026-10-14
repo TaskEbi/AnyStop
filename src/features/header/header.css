@@ -332,3 +332,55 @@
   font-size: 0.68rem;
   color: var(--ink-faint);
 }
+
+/* Cabinet / Daily Log: a two-way switch beside the name */
+.section-switch {
+  display: inline-flex;
+  padding: 3px;
+  border-radius: 999px;
+  background: rgb(var(--wash) / 0.18);
+}
+.section-switch__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 34px;
+  padding: 0.2rem 0.85rem;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--desk-ink);
+  font-family: var(--font-type);
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+.section-switch__btn:hover {
+  background: rgb(var(--wash) / 0.25);
+}
+.section-switch__btn[aria-current='page'] {
+  background: var(--ink);
+  color: var(--paper);
+  box-shadow: 0 1px 3px rgb(60 40 20 / 0.25);
+}
+.app-header--log .view-tabs {
+  margin-left: 0;
+}
+@media (max-width: 720px) {
+  .section-switch {
+    order: 2;
+  }
+  .app-header__tools {
+    order: 2;
+  }
+}
+@media (max-width: 480px) {
+  .section-switch__btn {
+    padding-inline: 0.6rem;
+  }
+  .section-switch__btn svg {
+    display: none;
+  }
+  .museum-name__button {
+    font-size: 1.6rem;
+  }
+}

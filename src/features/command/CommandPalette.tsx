@@ -2,7 +2,7 @@ import { useMemo, useRef, useState, type KeyboardEvent as RKeyboardEvent } from 
 import { updateSettings } from '../../data/actions';
 import { EMPTY_FILTERS } from '../../data/filter';
 import { allTags, data, liveItems, liveRooms } from '../../data/store';
-import { flyTo, openAddSheet, setFilters, setView, ui } from '../../data/ui';
+import { flyTo, openAddSheet, setFilters, setLogView, setSection, setView, ui } from '../../data/ui';
 import { DESIGNS, PALETTES, type Kind } from '../../data/types';
 import { useStore } from '../../lib/createStore';
 import { accession } from '../../lib/format';
@@ -46,7 +46,10 @@ export function CommandPalette() {
     return [
       { id: 'do:add', label: 'Add an exhibit', keywords: 'new acquire save', hint: 'N', group: 'Do', icon: 'plus', run: () => openAddSheet() },
       { id: 'do:surprise', label: 'Surprise me', keywords: 'random wander', hint: 'R', group: 'Do', icon: 'dice', run: surprise },
-      ...views.map(([v, label, icon, key]): Entry => ({ id: `view:${v}`, label, keywords: 'view switch', hint: key, group: 'Go to', icon, run: () => setView(v) })),
+      { id: 'log:today', label: 'Daily Log: log time', keywords: 'today track practice schoolwork violin sports', group: 'Go to', icon: 'clock', run: () => setLogView('today') },
+      { id: 'log:stats', label: 'Daily Log: stats and goals', keywords: 'charts statistics weekly goals overview', group: 'Go to', icon: 'chart', run: () => setLogView('stats') },
+      { id: 'log:history', label: 'Daily Log: history', keywords: 'past entries week', group: 'Go to', icon: 'list', run: () => setLogView('history') },
+      ...views.map(([v, label, icon, key]): Entry => ({ id: `view:${v}`, label, keywords: 'view switch cabinet', hint: key, group: 'Go to', icon, run: () => setView(v) })),
       { id: 'do:clear', label: 'Clear all filters', keywords: 'reset show everything', group: 'Do', icon: 'filter', run: () => ui.set((s) => ({ ...s, filters: { ...EMPTY_FILTERS, sort: s.filters.sort } })) },
       { id: 'do:favourites', label: 'Show favourites', keywords: 'star', group: 'Do', icon: 'star', run: () => setFilters({ favourites: true }) },
       { id: 'do:light', label: 'Lighting: daylight', keywords: 'theme light mode', group: 'Do', icon: 'sun', run: () => updateSettings({ theme: 'light' }) },
@@ -55,6 +58,7 @@ export function CommandPalette() {
       ...PALETTES.map((p): Entry => ({ id: `palette:${p}`, label: `Colours: ${PALETTE_INFO[p].label}`, keywords: 'palette theme scheme', group: 'Do', icon: 'collage', run: () => updateSettings({ palette: p }) })),
       ...DESIGNS.map((d): Entry => ({ id: `design:${d}`, label: `Design: ${DESIGN_INFO[d].label}`, keywords: `layout style look ${DESIGN_INFO[d].blurb}`, group: 'Do', icon: 'shelves', run: () => updateSettings({ design: d }) })),
       { id: 'do:rooms', label: 'Manage rooms', keywords: 'rename colour reorder', group: 'Do', icon: 'shelves', run: () => ui.set({ roomsOpen: true }) },
+      { id: 'log:topics', label: 'Daily Log topics', keywords: 'subcategories goals time zone', group: 'Do', icon: 'clock', run: () => (setLogView(ui.get().logView), ui.set({ logTopicsOpen: true })) },
       { id: 'do:backoffice', label: 'Back office: export, import, bookmarklet', keywords: 'backup zip phone install', group: 'Do', icon: 'menu', run: () => ui.set({ backOfficeOpen: true }) },
       ...rooms.map((r): Entry => ({ id: `room:${r.id}`, label: r.name, keywords: 'room', hint: 'room', group: 'Rooms', icon: 'shelves', run: () => setFilters({ room: r.id }) })),
       ...tags.slice(0, 200).map((t): Entry => ({ id: `tag:${t}`, label: `#${t}`, keywords: 'tag', group: 'Tags', icon: 'filter', run: () => setFilters({ tag: t }) })),
@@ -89,6 +93,8 @@ export function CommandPalette() {
   function run(e: Entry | undefined) {
     if (!e) return;
     close();
+    // Anything about exhibits, rooms, tags or cabinet views brings the cabinet back first.
+    if (e.group === 'Exhibits' || /^(do:(add|surprise|clear|favourites|rooms)|view:|room:|tag:)/.test(e.id)) setSection('cabinet');
     // Let the dialog close first so focus and the next view settle cleanly.
     requestAnimationFrame(e.run);
   }

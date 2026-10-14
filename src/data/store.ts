@@ -2,8 +2,12 @@ import { createStore } from '../lib/createStore';
 import { openLocalDb, type LocalDb } from './idb';
 import {
   DEFAULT_SETTINGS,
+  TABLES,
   type Connection,
   type Item,
+  type LogEntry,
+  type LogGoal,
+  type LogTopic,
   type RecordOf,
   type Room,
   type Settings,
@@ -18,6 +22,9 @@ export interface DataState {
   items: Map<string, Item>;
   rooms: Map<string, Room>;
   connections: Map<string, Connection>;
+  log_topics: Map<string, LogTopic>;
+  log_entries: Map<string, LogEntry>;
+  log_goals: Map<string, LogGoal>;
   settings: Settings;
   sync: { status: SyncStatus; pending: number; error: string | null };
 }
@@ -28,6 +35,9 @@ export const data = createStore<DataState>({
   items: new Map(),
   rooms: new Map(),
   connections: new Map(),
+  log_topics: new Map(),
+  log_entries: new Map(),
+  log_goals: new Map(),
   settings: DEFAULT_SETTINGS,
   sync: { status: 'local', pending: 0, error: null },
 });
@@ -35,15 +45,13 @@ export const data = createStore<DataState>({
 // ─── outbox: which local records still need pushing ─────────────────────────
 
 /** id → revision. A push only clears an entry if the revision hasn't moved on meanwhile. */
-export interface Outbox {
-  rooms: Record<string, number>;
-  items: Record<string, number>;
-  connections: Record<string, number>;
-  settings: number;
-  rev: number;
-}
+export type Outbox = Record<TableName, Record<string, number>> & { settings: number; rev: number };
 
-const emptyOutbox = (): Outbox => ({ rooms: {}, items: {}, connections: {}, settings: 0, rev: 0 });
+const emptyOutbox = (): Outbox => ({
+  ...(Object.fromEntries(TABLES.map((t) => [t, {}])) as Record<TableName, Record<string, number>>),
+  settings: 0,
+  rev: 0,
+});
 
 interface Session {
   db: LocalDb;
@@ -60,7 +68,7 @@ export function currentSession(): Session | null {
 }
 
 function countPending(o: Outbox): number {
-  return Object.keys(o.rooms).length + Object.keys(o.items).length + Object.keys(o.connections).length + (o.settings ? 1 : 0);
+  return TABLES.reduce((n, t) => n + Object.keys(o[t]).length, 0) + (o.settings ? 1 : 0);
 }
 
 function persistOutbox() {
@@ -85,15 +93,13 @@ export function clearOutboxEntries(table: TableName | 'settings', revs: Record<s
 
 // ─── writing records ────────────────────────────────────────────────────────
 
-const stateKey = { rooms: 'rooms', items: 'items', connections: 'connections' } as const;
-
 /** Save records changed on this device: memory now, IndexedDB + outbox right after. */
 export function commit<T extends TableName>(table: T, records: RecordOf<T>[]) {
   if (!records.length) return;
   data.set((st) => {
-    const next = new Map(st[stateKey[table]] as Map<string, RecordOf<T>>);
+    const next = new Map(st[table] as Map<string, RecordOf<T>>);
     for (const r of records) next.set(r.id, r);
-    return { ...st, [stateKey[table]]: next };
+    return { ...st, [table]: next };
   });
   if (!session) return;
   void session.db.putMany(table, records);
@@ -123,7 +129,7 @@ export function applyRemote<T extends TableName>(table: T, rows: RecordOf<T>[]) 
   const dirty = session.outbox[table];
   const stored: RecordOf<T>[] = [];
   data.set((st) => {
-    const next = new Map(st[stateKey[table]] as Map<string, RecordOf<T>>);
+    const next = new Map(st[table] as Map<string, RecordOf<T>>);
     for (const row of rows) {
       const local = next.get(row.id);
       let merged: RecordOf<T> = row;
@@ -136,7 +142,7 @@ export function applyRemote<T extends TableName>(table: T, rows: RecordOf<T>[]) 
       next.set(row.id, merged);
       stored.push(merged);
     }
-    return { ...st, [stateKey[table]]: next };
+    return { ...st, [table]: next };
   });
   void session.db.putMany(table, stored);
 }
@@ -157,20 +163,18 @@ export function setSyncState(patch: Partial<DataState['sync']>) {
 export async function openSession(opts: { cloud: boolean; onLocalChange: () => void }) {
   const dbName = opts.cloud ? 'curio-cloud' : 'curio-local';
   const db = await openLocalDb(dbName);
-  const [items, rooms, connections, settings, outbox] = await Promise.all([
-    db.getAll<Item>('items'),
-    db.getAll<Room>('rooms'),
-    db.getAll<Connection>('connections'),
+  const [tables, settings, outbox] = await Promise.all([
+    Promise.all(TABLES.map((t) => db.getAll<{ id: string }>(t))),
     db.getMeta<Settings>('settings'),
     db.getMeta<Outbox>('outbox'),
   ]);
-  session = { db, cloud: opts.cloud, dbName, outbox: outbox ?? emptyOutbox(), onLocalChange: opts.onLocalChange };
+  const maps = Object.fromEntries(TABLES.map((t, i) => [t, new Map(tables[i].map((r) => [r.id, r]))]));
+  // Outboxes saved before the Daily Log existed lack its tables.
+  session = { db, cloud: opts.cloud, dbName, outbox: { ...emptyOutbox(), ...outbox }, onLocalChange: opts.onLocalChange };
   data.set({
+    ...(maps as Pick<DataState, TableName>),
     ready: true,
     mode: opts.cloud ? 'synced' : 'local',
-    items: new Map(items.map((r) => [r.id, r])),
-    rooms: new Map(rooms.map((r) => [r.id, r])),
-    connections: new Map(connections.map((r) => [r.id, r])),
     settings: { ...DEFAULT_SETTINGS, ...settings },
     sync: { status: opts.cloud ? 'idle' : 'local', pending: countPending(session.outbox), error: null },
   });
@@ -183,10 +187,8 @@ export function closeSession(): string | null {
   session.db.close();
   session = null;
   data.set({
+    ...(Object.fromEntries(TABLES.map((t) => [t, new Map()])) as Pick<DataState, TableName>),
     ready: false,
-    items: new Map(),
-    rooms: new Map(),
-    connections: new Map(),
     settings: DEFAULT_SETTINGS,
     sync: { status: 'local', pending: 0, error: null },
   });

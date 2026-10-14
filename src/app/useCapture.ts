@@ -44,7 +44,8 @@ export function useCapture(): boolean {
       const types = e.dataTransfer?.types ?? [];
       return types.includes('Files') || types.includes('text/uri-list') || types.includes('text/plain');
     };
-    const blocked = () => !!document.querySelector('dialog:modal') || !data.get().ready;
+    // Pasting or dropping only captures into the cabinet, never while the Daily Log is showing.
+    const blocked = () => !!document.querySelector('dialog:modal') || !data.get().ready || ui.get().section !== 'cabinet';
 
     function onPaste(e: ClipboardEvent) {
       if (isTyping(e.target) || blocked()) return;

@@ -25,6 +25,10 @@ import { takeShare } from './share';
 import { enrichBacklog } from '../data/enrich';
 import { BackOffice } from '../features/backoffice/BackOffice';
 import { CommandPalette } from '../features/command/CommandPalette';
+import { DailyLog } from '../features/daily-log/DailyLog';
+import { EntrySheet } from '../features/daily-log/EntrySheet';
+import { TopicsSheet } from '../features/daily-log/TopicsSheet';
+import { PasswordSheet } from '../features/auth/PasswordSheet';
 
 /** First visit to an empty cabinet: lay out the examples (only once). */
 function maybeSeed() {
@@ -80,6 +84,10 @@ export function Museum({ cloud }: { cloud: boolean }) {
   const filterSheetOpen = useStore(ui, (s) => s.filterSheetOpen);
   const backOfficeOpen = useStore(ui, (s) => s.backOfficeOpen);
   const commandOpen = useStore(ui, (s) => s.commandOpen);
+  const section = useStore(ui, (s) => s.section);
+  const logTopicsOpen = useStore(ui, (s) => s.logTopicsOpen);
+  const logSheet = useStore(ui, (s) => s.logSheet);
+  const passwordOpen = useStore(ui, (s) => s.passwordOpen);
 
   const items = liveItems(itemsMap);
   const rooms = liveRooms(roomsMap);
@@ -91,6 +99,27 @@ export function Museum({ cloud }: { cloud: boolean }) {
   const filterCount = activeFilterCount(filters);
 
   if (!ready) return <p className="loading hand">Opening the cabinet…</p>;
+
+  const shared = (
+    <>
+      {commandOpen && <CommandPalette />}
+      {passwordOpen && <PasswordSheet />}
+      <Toasts />
+    </>
+  );
+
+  // The Daily Log replaces the cabinet's body; the cabinet's view and filters wait in `ui` for its return.
+  if (section === 'log') {
+    return (
+      <div className="app">
+        <Header filterCount={filterCount} />
+        <DailyLog />
+        {logTopicsOpen && <TopicsSheet />}
+        {logSheet && <EntrySheet key={logSheet.editId ?? `new:${logSheet.date ?? ''}`} editId={logSheet.editId} date={logSheet.date} />}
+        {shared}
+      </div>
+    );
+  }
 
   const filtersPanel = <Filters counts={counts} rooms={rooms} tags={tags} />;
 
@@ -123,9 +152,8 @@ export function Museum({ cloud }: { cloud: boolean }) {
         </div>
       )}
       {openItemId && <DetailDrawer id={openItemId} sequence={sequence} />}
-      {commandOpen && <CommandPalette />}
       {sheet && <AddSheet key={sheet.editId ?? 'new'} draft={sheet.draft} editId={sheet.editId} file={sheet.file} />}
-      <Toasts />
+      {shared}
     </div>
   );
 }

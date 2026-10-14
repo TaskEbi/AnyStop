@@ -50,7 +50,7 @@ function PhoneApp() {
 }
 
 function Backups() {
-  const counts = useStore(data, (s) => s.items.size);
+  const counts = useStore(data, (s) => s.items.size + s.log_entries.size + s.log_topics.size);
   const [busy, setBusy] = useState<string | null>(null);
 
   async function doExport() {
@@ -70,7 +70,8 @@ function Backups() {
     setBusy('Unpacking…');
     try {
       const r = await importCollection(file);
-      toast(`Imported ${plural(r.items, 'exhibit')}, ${plural(r.rooms, 'room')}, ${plural(r.connections, 'string')}, ${plural(r.photos, 'photo')}`);
+      const log = r.logEntries || r.logTopics ? `, ${plural(r.logEntries, 'log entry', 'log entries')}` : '';
+      toast(`Imported ${plural(r.items, 'exhibit')}, ${plural(r.rooms, 'room')}, ${plural(r.connections, 'string')}, ${plural(r.photos, 'photo')}${log}`);
     } catch (e) {
       toast(`Import failed: ${(e as Error).message}`);
     } finally {
@@ -82,7 +83,7 @@ function Backups() {
     <section className="office__section">
       <h3 className="office__heading hand">Safety net</h3>
       <p>
-        Export everything (exhibits, rooms, strings, settings and a folder of photos) as one zip. Importing it later merges by id, so it
+        Export everything (exhibits, rooms, strings, settings, your Daily Log and a folder of photos) as one zip. Importing it later merges by id, so it
         restores rather than duplicates.
       </p>
       <div className="office__actions">
