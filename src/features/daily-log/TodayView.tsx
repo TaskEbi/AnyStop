@@ -3,6 +3,7 @@ import { ui } from '../../data/ui';
 import { useStore } from '../../lib/createStore';
 import { Icon } from '../../ui/Icon';
 import { addDays, longDay, relativeDay } from './dates';
+import { DayMetrics } from './DayMetrics';
 import { formatMinutes } from './duration';
 import { EntryForm } from './EntryForm';
 import { EntryList } from './EntryList';
@@ -12,7 +13,7 @@ import { useEntries, useToday } from './useLog';
 
 const DAY_MINUTES = 24 * 60;
 
-/** Day navigation, the entry form, then that day's totals and entries. */
+/** Day navigation, sleep and screen time, the entry form, then that day's totals and entries. */
 export function TodayView() {
   const today = useToday();
   const picked = useStore(ui, (s) => s.logDate);
@@ -50,6 +51,8 @@ export function TodayView() {
           </button>
         )}
       </nav>
+
+      <DayMetrics date={date} today={today} />
 
       <section className="log-card" aria-label="Log time">
         <EntryForm today={today} date={date} onDate={setDate} stayOpen />

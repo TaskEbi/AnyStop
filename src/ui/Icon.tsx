@@ -11,6 +11,7 @@ export const ICON_PATHS = {
   quote: 'M7 11h4v6H5v-4c0-3 1-5 4-6M17 11h4v6h-6v-4c0-3 1-5 4-6',
   note: 'M5 4h14v10l-6 6H5zM13 20v-6h6',
   plus: 'M12 5v14M5 12h14',
+  minus: 'M5 12h14',
   search: 'M10.5 17a6.5 6.5 0 1 0 0-13 6.5 6.5 0 0 0 0 13M15.5 15.5 20 20',
   close: 'M6 6l12 12M18 6 6 18',
   menu: 'M5 7h14M5 12h14M5 17h14',
@@ -35,6 +36,7 @@ export const ICON_PATHS = {
   chart: 'M4 20h16M7 16v-5M12 16V6M17 16v-8',
   calendar: 'M4 6h16v14H4zM4 10h16M8 3v4M16 3v4',
   list: 'M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01',
+  screen: 'M7 3h10v18H7zM11 18h2',
 } as const;
 
 export type IconName = keyof typeof ICON_PATHS;

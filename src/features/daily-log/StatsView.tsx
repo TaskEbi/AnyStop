@@ -15,6 +15,7 @@ import {
 } from './dates';
 import { formatMinutes } from './duration';
 import { GoalCards } from './GoalCards';
+import { MetricCard, useMetricPeriod } from './MetricStats';
 import { dayBuckets, inRange, monthBuckets, periodSummary, topicTotals, topLevel, weekBuckets, type Bucket } from './stats';
 import { TopicBars } from './TopicBars';
 import { topicColour, topicName, useEntries, useToday, useTopics } from './useLog';
@@ -56,7 +57,7 @@ function Tile({ label, value, sub, hero }: { label: string; value: string; sub?:
   );
 }
 
-/** Totals, charts, topic breakdowns and weekly goals for a week, month or year. */
+/** Totals, charts, topic breakdowns, weekly goals, sleep and screen time for a week, month or year. */
 export function StatsView() {
   const today = useToday();
   const topics = useTopics();
@@ -68,6 +69,9 @@ export function StatsView() {
   const current = anchorFor(period, today);
   const { from, to } = periodRange(period, anchor);
   const isCurrent = anchor === current;
+
+  const sleep = useMetricPeriod('sleep', from, to).summary;
+  const screen = useMetricPeriod('screen', from, to).summary;
 
   const inPeriod = useMemo(() => inRange(entries.values(), from, to), [entries, from, to]);
   const summary = useMemo(() => periodSummary([...entries.values()], from, to, today), [entries, from, to, today]);
@@ -186,6 +190,8 @@ export function StatsView() {
           sub={top ? formatMinutes(top.minutes) : undefined}
         />
         {summary.best && <Tile label="Biggest day" value={formatMinutes(summary.best.minutes)} sub={shortDay(summary.best.date, today)} />}
+        {sleep.average != null && <Tile label="Average sleep" value={formatMinutes(sleep.average)} sub={`over ${sleep.days} ${sleep.days === 1 ? 'night' : 'nights'}`} />}
+        {screen.average != null && <Tile label="Average screen time" value={formatMinutes(screen.average)} sub={`over ${screen.days} ${screen.days === 1 ? 'day' : 'days'}`} />}
       </div>
 
       <section className="log-card" aria-labelledby="chart-title">
@@ -230,6 +236,11 @@ export function StatsView() {
             </div>
           )}
         </section>
+      </div>
+
+      <div className="log-grid">
+        <MetricCard metric="sleep" period={period} from={from} to={to} today={today} />
+        <MetricCard metric="screen" period={period} from={from} to={to} today={today} />
       </div>
 
       <section className="log-card" aria-labelledby="heat-title">

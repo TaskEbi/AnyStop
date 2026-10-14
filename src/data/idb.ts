@@ -2,8 +2,8 @@
 import { TABLES, type TableName } from './types';
 
 const STORES = [...TABLES, 'meta', 'blobs'] as const;
-/** 2 → 3 adds the Daily Log stores. Upgrades only ever add missing stores, so nothing is lost. */
-const VERSION = 3;
+/** 2 → 3 adds the Daily Log stores, 3 → 4 sleep and screen time. Upgrades only ever add missing stores, so nothing is lost. */
+const VERSION = 4;
 
 type RecordStore = TableName;
 

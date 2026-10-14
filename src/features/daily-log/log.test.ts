@@ -1,10 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import type { LogEntry, LogGoal, LogTopic } from '../../data/types';
+import type { LogDayMetric, LogEntry, LogGoal, LogTopic } from '../../data/types';
 import { validLog } from '../../data/backup';
-import { goalId } from '../../data/logActions';
+import { goalId, metricId } from '../../data/logActions';
 import { addDays, addMonths, daysBetween, monthEnd, rangeLabel, todayIn, weekStart } from './dates';
 import { formatMinutes, parseDuration, splitMinutes } from './duration';
-import { dayBuckets, goalFor, goalProgress, heatLevel, inRange, monthBuckets, periodSummary, sumMinutes, topicTotals, weekBuckets } from './stats';
+import {
+  dayBuckets, goalFor, goalProgress, heatLevel, inRange, metricByDay, metricMonthly, metricSummary, monthBuckets, periodSummary, sumMinutes, topicTotals, weekBuckets,
+} from './stats';
 import { checkEntry, checkTopicName } from './validate';
 
 const T = '2026-10-14T00:00:00Z';
@@ -18,6 +20,10 @@ const entry = (date: string, topic_id: string, minutes: number, subcategory_id: 
 });
 const goal = (topic_id: string, week_start: string, minutes: number | null, extra: Partial<LogGoal> = {}): LogGoal => ({
   id: `${topic_id}:${week_start}`, topic_id, week_start, minutes, created_at: T, updated_at: T, deleted_at: null, ...extra,
+});
+
+const metric = (date: string, kind: LogDayMetric['metric'], minutes: number, extra: Partial<LogDayMetric> = {}): LogDayMetric => ({
+  id: `${kind}:${date}`, date, metric: kind, minutes, created_at: T, updated_at: T, deleted_at: null, ...extra,
 });
 
 const school = topic('school', 'Schoolwork');
@@ -195,6 +201,46 @@ describe('validation', () => {
   });
 });
 
+describe('sleep and screen time', () => {
+  const rows = [
+    metric('2026-10-12', 'sleep', 480),
+    metric('2026-10-13', 'sleep', 420),
+    metric('2026-10-14', 'sleep', 450),
+    metric('2026-10-14', 'screen', 0),
+    metric('2026-10-15', 'screen', 120),
+    metric('2026-10-11', 'sleep', 600, { deleted_at: T }),
+    metric('2026-09-30', 'sleep', 360),
+  ];
+
+  it('picks one metric in a range, skipping cleared days', () => {
+    const sleep = metricByDay(rows, 'sleep', '2026-10-11', '2026-10-14');
+    expect([...sleep.entries()].sort()).toEqual([['2026-10-12', 480], ['2026-10-13', 420], ['2026-10-14', 450]]);
+    expect(metricByDay(rows, 'screen', '2026-10-12', '2026-10-14').get('2026-10-14')).toBe(0);
+  });
+
+  it('averages over the days that have a value; a logged zero counts, a blank day does not', () => {
+    expect(metricSummary(metricByDay(rows, 'sleep', '2026-10-12', '2026-10-18'))).toEqual({
+      days: 3, average: 450, low: { date: '2026-10-13', minutes: 420 }, high: { date: '2026-10-12', minutes: 480 },
+    });
+    expect(metricSummary(metricByDay(rows, 'screen', '2026-10-12', '2026-10-18')).average).toBe(60);
+    expect(metricSummary(new Map())).toEqual({ days: 0, average: null, low: null, high: null });
+  });
+
+  it('gives each month its own average', () => {
+    const months = metricMonthly(rows, 'sleep', '2026');
+    expect(months).toHaveLength(12);
+    expect(months[8]).toEqual({ key: '2026-09-01', average: 360, days: 1 });
+    expect(months[9]).toEqual({ key: '2026-10-01', average: 450, days: 3 });
+    expect(months[10]).toEqual({ key: '2026-11-01', average: null, days: 0 });
+  });
+
+  it('names one row per metric per day', () => {
+    expect(metricId('sleep', '2026-10-14')).toBe(metricId('sleep', '2026-10-14'));
+    expect(metricId('sleep', '2026-10-14')).not.toBe(metricId('screen', '2026-10-14'));
+    expect(metricId('sleep', '2026-10-14')).not.toBe(metricId('sleep', '2026-10-15'));
+  });
+});
+
 describe('backup', () => {
   it('keeps well-formed Daily Log records and drops broken references', () => {
     const deep = topic('deep', 'Deep', 'maths');
@@ -208,13 +254,21 @@ describe('backup', () => {
         entry('2026-10-14', 'violin', 0), // no time
       ],
       log_goals: [goal('school', '2026-10-12', 180), goal('ghost', '2026-10-12', 60)],
+      log_metrics: [
+        metric('2026-10-14', 'sleep', 450),
+        metric('2026-10-14', 'screen', 0),
+        metric('2026-10-14', 'steps' as LogDayMetric['metric'], 30), // not a metric
+        metric('2026-10-14', 'sleep', 1441), // more than a day
+        metric('2026-10-14', 'sleep', 7.5), // not whole minutes
+      ],
     });
     expect(out.topics.map((t) => t.id)).toEqual(['school', 'maths', 'violin']);
     expect(out.entries).toHaveLength(1);
     expect(out.goals).toHaveLength(1);
+    expect(out.metrics.map((m) => m.minutes)).toEqual([450, 0]);
   });
 
   it('treats an old cabinet-only backup as having no log at all', () => {
-    expect(validLog({})).toEqual({ topics: [], entries: [], goals: [] });
+    expect(validLog({})).toEqual({ topics: [], entries: [], goals: [], metrics: [] });
   });
 });

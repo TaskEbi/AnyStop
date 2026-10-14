@@ -3,7 +3,7 @@
  * totals are stored. A topic's total counts its direct entries and its subcategories'
  * entries exactly once. Archived topics still count; deleted entries never do.
  */
-import type { LogEntry, LogGoal, LogTopic } from '../../data/types';
+import type { LogDayMetric, LogEntry, LogGoal, LogMetric, LogTopic } from '../../data/types';
 import { addDays, addMonths, daysBetween, weekStart as mondayOf } from './dates';
 
 export const sumMinutes = (entries: LogEntry[]) => entries.reduce((n, e) => n + e.minutes, 0);
@@ -143,6 +143,46 @@ export function goalProgress(actual: number, target: number): GoalProgress {
     extra: Math.max(0, actual - target),
     reached: actual >= target,
   };
+}
+
+// ─── sleep and screen time ───────────────────────────────────────────────────
+
+/** date → minutes for one metric, from `from` to `to` inclusive. Days without a value are absent. */
+export function metricByDay(metrics: Iterable<LogDayMetric>, metric: LogMetric, from: string, to: string): Map<string, number> {
+  const out = new Map<string, number>();
+  for (const m of metrics) if (!m.deleted_at && m.metric === metric && m.date >= from && m.date <= to) out.set(m.date, m.minutes);
+  return out;
+}
+
+export interface MetricSummary {
+  /** Days that have a value; the average is over these only, so a blank day isn't a zero. */
+  days: number;
+  average: number | null;
+  low: { date: string; minutes: number } | null;
+  high: { date: string; minutes: number } | null;
+}
+
+export function metricSummary(byDay: Map<string, number>): MetricSummary {
+  let total = 0;
+  let low: MetricSummary['low'] = null;
+  let high: MetricSummary['high'] = null;
+  for (const [date, minutes] of byDay) {
+    total += minutes;
+    if (!low || minutes < low.minutes) low = { date, minutes };
+    if (!high || minutes > high.minutes) high = { date, minutes };
+  }
+  return { days: byDay.size, average: byDay.size ? Math.round(total / byDay.size) : null, low, high };
+}
+
+/** Each month of `year`: the average over the days that have a value (null when none do). */
+export function metricMonthly(metrics: Iterable<LogDayMetric>, metric: LogMetric, year: string): { key: string; average: number | null; days: number }[] {
+  const byDay = metricByDay(metrics, metric, `${year}-01-01`, `${year}-12-31`);
+  return Array.from({ length: 12 }, (_, i) => {
+    const key = addMonths(`${year}-01-01`, i);
+    const inMonth = new Map([...byDay].filter(([d]) => d.slice(0, 7) === key.slice(0, 7)));
+    const { average, days } = metricSummary(inMonth);
+    return { key, average, days };
+  });
 }
 
 // ─── topics ─────────────────────────────────────────────────────────────────

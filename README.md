@@ -73,6 +73,7 @@ With no `.env.local` the app runs in **local-only mode**: everything stays in th
 Switch between **Cabinet** and **Daily Log** at the top. The app reopens in whichever section you used last, which is handy for the phone's home-screen icon.
 
 - **Today**: pick a topic (and optionally a subcategory), enter hours and minutes or tap 15 min / 30 min / 45 min / 1 hr, add a note if you like, then **Log**. The form keeps the topic for the next entry. **Again** chips refill a recent combination. Step back through days with ‹ › or pick a date (no future days).
+- **Sleep and screen time**: two counters at the top of Today. Type hours and minutes or tap − / + (15 min steps; + on an empty sleep counter starts at 8 hr). Each is one number per day, set rather than added up, so changing it replaces the old value; **Clear** removes it (with Undo). Sleep counts on the morning you wake, so "last night" belongs to today. A 7-day average shows underneath once there are two days to average.
 - **History**: a week at a time (or a custom range), grouped by day, filterable by topic and subcategory. Edit, delete (with Undo) or add a backdated entry.
 - **Stats**: week / month / year totals, daily average, days with time logged, biggest day, then:
   - a day-by-day stacked chart (month-by-month for a year)
@@ -80,12 +81,13 @@ Switch between **Cabinet** and **Daily Log** at the top. The app reopens in whic
   - weekly goals
   - a six-month calendar heatmap
   - week-by-week trends
+  - sleep and screen time, day by day (each month's daily average over a year), with their averages in the tiles. Averages only count days that have a value.
 
   Every chart has a "Show as a table" view.
 - **Weekly goals** are set per topic on the current week. They repeat each week until changed or removed. Changing one never rewrites earlier weeks' targets.
 - **Topics** (☰ → Daily Log topics): add, rename, recolour, reorder, archive and restore topics and one level of subcategories. Archived ones keep all their history. The time zone that decides "today" and week boundaries lives here too (default Asia/Singapore). Dates are stored as calendar days, so changing it never moves past entries.
 - Everything is derived from the entries themselves (no stored totals), saved locally first and synced like the cabinet. Export/import includes the log; older exports still import.
-- In dev, `curioDev.fakeLog(180)` fills six months with made-up entries over your topics, to try the charts.
+- In dev, `curioDev.fakeLog(180)` fills six months with made-up entries over your topics (plus sleep and screen time), to try the charts.
 
 ## Using it
 

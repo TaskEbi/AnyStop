@@ -5,6 +5,7 @@ import {
   TABLES,
   type Connection,
   type Item,
+  type LogDayMetric,
   type LogEntry,
   type LogGoal,
   type LogTopic,
@@ -25,6 +26,7 @@ export interface DataState {
   log_topics: Map<string, LogTopic>;
   log_entries: Map<string, LogEntry>;
   log_goals: Map<string, LogGoal>;
+  log_metrics: Map<string, LogDayMetric>;
   settings: Settings;
   sync: { status: SyncStatus; pending: number; error: string | null };
 }
@@ -38,6 +40,7 @@ export const data = createStore<DataState>({
   log_topics: new Map(),
   log_entries: new Map(),
   log_goals: new Map(),
+  log_metrics: new Map(),
   settings: DEFAULT_SETTINGS,
   sync: { status: 'local', pending: 0, error: null },
 });
@@ -169,7 +172,7 @@ export async function openSession(opts: { cloud: boolean; onLocalChange: () => v
     db.getMeta<Outbox>('outbox'),
   ]);
   const maps = Object.fromEntries(TABLES.map((t, i) => [t, new Map(tables[i].map((r) => [r.id, r]))]));
-  // Outboxes saved before the Daily Log existed lack its tables.
+  // Outboxes saved before the Daily Log (or its sleep / screen time) existed lack those tables.
   session = { db, cloud: opts.cloud, dbName, outbox: { ...emptyOutbox(), ...outbox }, onLocalChange: opts.onLocalChange };
   data.set({
     ...(maps as Pick<DataState, TableName>),

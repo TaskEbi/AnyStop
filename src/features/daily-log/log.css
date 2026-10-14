@@ -217,6 +217,56 @@
   opacity: 0.7;
 }
 
+/* ── sleep and screen time ────────────────────────────────────────────────── */
+
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 360px), 1fr));
+  gap: 0.9rem 1.5rem;
+}
+.metric {
+  display: grid;
+  grid-template-columns: 1.75rem 1fr;
+  align-items: center;
+  gap: 0.3rem 0.6rem;
+}
+.metric__icon {
+  grid-row: 1 / span 2;
+  align-self: start;
+  padding-top: 0.1rem;
+}
+.metric__head,
+.metric__controls,
+.metric__error {
+  grid-column: 2;
+}
+.metric__head {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+.metric__title {
+  display: grid;
+}
+.metric__label {
+  font-weight: 600;
+}
+.metric__sub {
+  font-size: 0.72rem;
+  color: var(--ink-faint);
+}
+.metric__controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.5rem;
+}
+.metric__step {
+  min-width: 40px;
+  min-height: 40px;
+}
+
 /* ── totals ───────────────────────────────────────────────────────────────── */
 
 .day-total {

@@ -1,8 +1,8 @@
 // Dev-only helpers (window.curioDev) for the 1,000-item performance check.
 import { commit, data, liveConnections, liveItems, liveRooms } from '../data/store';
-import { KINDS, ROOM_COLORS, type Connection, type Item, type LogEntry, type Room } from '../data/types';
+import { KINDS, ROOM_COLORS, type Connection, type Item, type LogDayMetric, type LogEntry, type Room } from '../data/types';
 import { addDays } from '../features/daily-log/dates';
-import { logToday } from '../data/logActions';
+import { logToday, metricId } from '../data/logActions';
 import { uuid } from '../lib/random';
 
 const TAG = 'perf-test';
@@ -55,7 +55,7 @@ function clearFake() {
   return { removed: items.length };
 }
 
-/** Months of made-up Daily Log entries over the existing topics, to look at the charts with. */
+/** Months of made-up Daily Log entries over the existing topics (plus sleep and screen time), to look at the charts with. */
 function fakeLog(days = 180) {
   const st = data.get();
   const tops = [...st.log_topics.values()].filter((t) => !t.parent_id && !t.archived_at && !t.deleted_at);
@@ -73,8 +73,18 @@ function fakeLog(days = 180) {
       });
     }
   }
+  const metrics: LogDayMetric[] = [];
+  for (let d = 0; d < days; d++) {
+    const date = addDays(today, -d);
+    const row = (metric: LogDayMetric['metric'], minutes: number): LogDayMetric => ({
+      id: metricId(metric, date), date, metric, minutes, created_at: t, updated_at: t, deleted_at: null,
+    });
+    if (Math.random() < 0.85) metrics.push(row('sleep', 15 * (24 + Math.floor(Math.random() * 14))));
+    if (Math.random() < 0.75) metrics.push(row('screen', 15 * Math.floor(Math.random() * 24)));
+  }
   commit('log_entries', entries);
-  return { entries: entries.length };
+  commit('log_metrics', metrics);
+  return { entries: entries.length, metrics: metrics.length };
 }
 
 (window as unknown as { curioDev: unknown }).curioDev = { fake, clearFake, fakeLog };

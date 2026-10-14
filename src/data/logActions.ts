@@ -4,7 +4,8 @@ import { todayIn } from '../features/daily-log/dates';
 import { childrenOf, topLevel } from '../features/daily-log/stats';
 import { checkEntry, checkTopicName, MAX_GOAL_MINUTES, type EntryDraft } from '../features/daily-log/validate';
 import { commit, commitSettings, data } from './store';
-import { ROOM_COLORS, type LogEntry, type LogGoal, type LogTopic, type RoomColor } from './types';
+import { MAX_ENTRY_MINUTES } from '../features/daily-log/duration';
+import { ROOM_COLORS, type LogDayMetric, type LogEntry, type LogGoal, type LogMetric, type LogTopic, type RoomColor } from './types';
 
 const now = () => new Date().toISOString();
 
@@ -148,14 +149,17 @@ export function restoreEntry(id: string, deletedAt: string) {
 
 // ─── weekly goals ───────────────────────────────────────────────────────────
 
+/** A stable uuid-shaped id for a pair of keys, so every device names the same logical row alike. */
+function pairId(a: string, b: string): string {
+  const hex = [0, 1, 2, 3].map((i) => hash(`${a}|${b}|${i}`).toString(16).padStart(8, '0')).join('');
+  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-4${hex.slice(13, 16)}-a${hex.slice(17, 20)}-${hex.slice(20, 32)}`;
+}
+
 /**
  * One revision per topic per week, so its id is derived from the pair: two devices editing
  * the same week's goal write the same row, and the later write wins.
  */
-export function goalId(topicId: string, weekStart: string): string {
-  const hex = [0, 1, 2, 3].map((i) => hash(`${topicId}|${weekStart}|${i}`).toString(16).padStart(8, '0')).join('');
-  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-4${hex.slice(13, 16)}-a${hex.slice(17, 20)}-${hex.slice(20, 32)}`;
-}
+export const goalId = (topicId: string, weekStart: string) => pairId(topicId, weekStart);
 
 /** Set (or with null, remove) a topic's weekly goal from the week starting `monday` onwards. */
 export function setGoal(topicId: string, minutes: number | null, monday: string): string | null {
@@ -167,6 +171,30 @@ export function setGoal(topicId: string, minutes: number | null, monday: string)
     ? { ...existing, minutes, deleted_at: null, updated_at: t }
     : { id, topic_id: topicId, week_start: monday, minutes, created_at: t, updated_at: t, deleted_at: null };
   commit('log_goals', [goal]);
+  return null;
+}
+
+// ─── sleep and screen time ──────────────────────────────────────────────────
+
+/** One row per metric per day, named by the pair, so a second device's change replaces rather than duplicates. */
+export const metricId = (metric: LogMetric, date: string) => pairId(`metric:${metric}`, date);
+
+/** Set a day's sleep or screen time (0 – 24 hr), or clear it with null. */
+export function setMetric(metric: LogMetric, date: string, minutes: number | null): string | null {
+  if (date > logToday()) return "That day hasn't happened yet.";
+  if (minutes != null && (!Number.isInteger(minutes) || minutes < 0 || minutes > MAX_ENTRY_MINUTES)) return 'Enter between 0 and 24 hours.';
+  const id = metricId(metric, date);
+  const existing = data.get().log_metrics.get(id);
+  const t = now();
+  if (minutes == null) {
+    if (existing && !existing.deleted_at) commit('log_metrics', [{ ...existing, deleted_at: t, updated_at: t }]);
+    return null;
+  }
+  if (existing && !existing.deleted_at && existing.minutes === minutes) return null;
+  const row: LogDayMetric = existing
+    ? { ...existing, minutes, deleted_at: null, updated_at: t }
+    : { id, date, metric, minutes, created_at: t, updated_at: t, deleted_at: null };
+  commit('log_metrics', [row]);
   return null;
 }
 

@@ -1,9 +1,10 @@
 import { strFromU8, strToU8, unzipSync, zipSync, type Zippable } from 'fflate';
 import { photoBlob } from '../lib/photos';
+import { metricId } from './logActions';
 import { uuid } from '../lib/random';
 import { commit, commitSettings, currentSession, data, liveConnections, liveItems, liveRooms } from './store';
 import { isDate } from '../features/daily-log/dates';
-import type { Connection, Item, LogEntry, LogGoal, LogTopic, Room, Settings } from './types';
+import { LOG_METRICS, type Connection, type Item, type LogDayMetric, type LogEntry, type LogGoal, type LogTopic, type Room, type Settings } from './types';
 
 /** Version 2 adds the Daily Log; version 1 exports (cabinet only) still import. */
 interface Backup {
@@ -19,6 +20,8 @@ interface Backup {
   log_topics?: LogTopic[];
   log_entries?: LogEntry[];
   log_goals?: LogGoal[];
+  /** Sleep and screen time; absent from exports made before they existed. */
+  log_metrics?: LogDayMetric[];
 }
 
 const live = <T extends { deleted_at: string | null }>(m: Map<string, T>) => [...m.values()].filter((r) => !r.deleted_at);
@@ -26,7 +29,7 @@ const isId = (v: unknown): v is string => typeof v === 'string' && v.length > 0 
 const minutesOk = (v: unknown, max: number) => Number.isInteger(v) && (v as number) >= 1 && (v as number) <= max;
 
 /** Keep only well-formed Daily Log records, and entries whose topic/subcategory pair holds together. */
-export function validLog(b: Pick<Backup, 'log_topics' | 'log_entries' | 'log_goals'>) {
+export function validLog(b: Pick<Backup, 'log_topics' | 'log_entries' | 'log_goals' | 'log_metrics'>) {
   const topics = (Array.isArray(b.log_topics) ? b.log_topics : []).filter(
     (t) => isId(t?.id) && typeof t.name === 'string' && t.name.trim() && (t.parent_id === null || isId(t.parent_id)),
   );
@@ -43,7 +46,10 @@ export function validLog(b: Pick<Backup, 'log_topics' | 'log_entries' | 'log_goa
   const goals = (Array.isArray(b.log_goals) ? b.log_goals : []).filter(
     (g) => isId(g?.id) && okIds.has(g.topic_id) && isDate(g.week_start) && (g.minutes === null || minutesOk(g.minutes, 10080)),
   );
-  return { topics: ok, entries, goals };
+  const metrics = (Array.isArray(b.log_metrics) ? b.log_metrics : []).filter(
+    (m) => isId(m?.id) && isDate(m.date) && LOG_METRICS.includes(m.metric) && Number.isInteger(m.minutes) && m.minutes >= 0 && m.minutes <= 1440,
+  );
+  return { topics: ok, entries, goals, metrics };
 }
 
 const extFor = (type: string) => (type.includes('png') ? 'png' : type.includes('webp') ? 'webp' : type.includes('gif') ? 'gif' : 'jpg');
@@ -77,6 +83,7 @@ export async function exportCollection(onProgress?: (done: number, total: number
     log_topics: live(st.log_topics),
     log_entries: live(st.log_entries),
     log_goals: live(st.log_goals),
+    log_metrics: live(st.log_metrics),
   };
   files['curio.json'] = strToU8(JSON.stringify(backup, null, 2));
   return new Blob([zipSync(files)], { type: 'application/zip' });
@@ -135,6 +142,9 @@ export async function importCollection(
   commit('log_topics', log.topics.map(revive));
   commit('log_entries', log.entries.map((e) => revive({ ...e, note: e.note ? String(e.note).slice(0, 1000) : null })));
   commit('log_goals', log.goals.map(revive));
+  // Re-derive ids from metric + day, so a value always lands on that day's one row.
+  const metrics = new Map(log.metrics.map((m) => [metricId(m.metric, m.date), revive({ ...m, id: metricId(m.metric, m.date) })]));
+  commit('log_metrics', [...metrics.values()]);
   if (backup.settings?.museum_name) commitSettings({ museum_name: backup.settings.museum_name, examples_seeded: true });
   if (typeof backup.settings?.log_timezone === 'string' && backup.settings.log_timezone) commitSettings({ log_timezone: backup.settings.log_timezone });
   return {

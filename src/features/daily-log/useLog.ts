@@ -31,6 +31,7 @@ export function useToday(): string {
 export const useTopics = () => useStore(data, (s) => s.log_topics);
 export const useEntries = () => useStore(data, (s) => s.log_entries);
 export const useGoals = () => useStore(data, (s) => s.log_goals);
+export const useMetrics = () => useStore(data, (s) => s.log_metrics);
 
 /** The topic's colour as a CSS value (subcategories wear their topic's). */
 export function topicColour(topics: Map<string, LogTopic>, id: string | null | undefined): string {

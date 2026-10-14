@@ -24,15 +24,15 @@ const WHOLE = /^\s*\d+\s*$/;
 
 /**
  * Read the hours and minutes fields. Each must be blank or a whole number; minutes 0–59;
- * the total 1 min – 24 hr. Returns the minutes, or a message saying what's wrong.
+ * the total 1 min (or `min`) – 24 hr. Returns the minutes, or a message saying what's wrong.
  */
-export function parseDuration(hours: string, minutes: string, max = MAX_ENTRY_MINUTES): { minutes: number } | { error: string } {
+export function parseDuration(hours: string, minutes: string, max = MAX_ENTRY_MINUTES, min = 1): { minutes: number } | { error: string } {
   const h = hours.trim() === '' ? 0 : WHOLE.test(hours) ? Number(hours) : NaN;
   const m = minutes.trim() === '' ? 0 : WHOLE.test(minutes) ? Number(minutes) : NaN;
   if (Number.isNaN(h) || Number.isNaN(m)) return { error: 'Use whole numbers for hours and minutes.' };
   if (m > 59) return { error: 'Minutes go from 0 to 59.' };
   const total = h * 60 + m;
-  if (total < 1) return { error: 'Enter how long, at least 1 minute.' };
+  if (total < min) return { error: 'Enter how long, at least 1 minute.' };
   if (total > max) return { error: `That's more than ${formatMinutes(max)}.` };
   return { minutes: total };
 }

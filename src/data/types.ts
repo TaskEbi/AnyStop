@@ -121,6 +121,24 @@ export interface LogGoal {
   deleted_at: string | null;
 }
 
+export const LOG_METRICS = ['sleep', 'screen'] as const;
+/** Sleep (the night before `date`, counted on the morning you wake) and screen time that day. */
+export type LogMetric = (typeof LOG_METRICS)[number];
+
+/**
+ * One day's sleep or screen time. Unlike entries these aren't added up: there is one row per
+ * metric per day, and setting it again replaces the number. Clearing it soft-deletes the row.
+ */
+export interface LogDayMetric {
+  id: string;
+  date: string;
+  metric: LogMetric;
+  minutes: number;
+  created_at: string;
+  updated_at: string;
+  deleted_at: string | null;
+}
+
 export interface Settings {
   museum_name: string;
   default_view: ViewName;
@@ -140,11 +158,12 @@ interface Records {
   log_topics: LogTopic;
   log_entries: LogEntry;
   log_goals: LogGoal;
+  log_metrics: LogDayMetric;
 }
 export type TableName = keyof Records;
 export type RecordOf<T extends TableName> = Records[T];
 /** Push order matters: rooms before the items that use them, items before strings, topics before entries. */
-export const TABLES: TableName[] = ['rooms', 'items', 'connections', 'log_topics', 'log_entries', 'log_goals'];
+export const TABLES: TableName[] = ['rooms', 'items', 'connections', 'log_topics', 'log_entries', 'log_goals', 'log_metrics'];
 
 export const DEFAULT_SETTINGS: Settings = {
   museum_name: 'Curio Cabinet',
