@@ -9,11 +9,11 @@ export interface Toast {
   action?: { label: string; run: () => void };
 }
 
-export type Section = 'cabinet' | 'log';
+export type Section = 'cabinet' | 'log' | 'road';
 export type LogView = 'today' | 'history' | 'stats';
 
 export interface UiState {
-  /** The cabinet, or the Daily Log. Each keeps its own view and filters while the other is shown. */
+  /** The cabinet, the Daily Log or Road to IOI. Each keeps its own view and filters while another is shown. */
   section: Section;
   view: ViewName;
   filters: Filters;
@@ -61,9 +61,21 @@ function remember(key: string, value: string) {
   }
 }
 
+/** A link straight to a section: any-stop.vercel.app/#road. The hash is cleared so a reload follows the remembered section. */
+function linkedSection(): Section | null {
+  try {
+    if (location.hash !== '#road') return null;
+    history.replaceState(null, '', location.pathname + location.search);
+    remember(SECTION_KEY, 'road');
+    return 'road';
+  } catch {
+    return null;
+  }
+}
+
 export const ui = createStore<UiState>({
-  // Reopen where I left off, so the phone app can go straight back to the log.
-  section: remembered<Section>(SECTION_KEY, ['cabinet', 'log'], 'cabinet'),
+  // Reopen where I left off, so the phone app can go straight back to the log. A #road link (from DragonCode) opens Road to IOI.
+  section: linkedSection() ?? remembered<Section>(SECTION_KEY, ['cabinet', 'log', 'road'], 'cabinet'),
   view: 'shelves',
   filters: EMPTY_FILTERS,
   openItemId: null,

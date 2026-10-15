@@ -48,6 +48,7 @@ export function CommandPalette() {
       { id: 'do:surprise', label: 'Surprise me', keywords: 'random wander', hint: 'R', group: 'Do', icon: 'dice', run: surprise },
       { id: 'log:today', label: 'Daily Log: log time', keywords: 'today track practice schoolwork violin sports', group: 'Go to', icon: 'clock', run: () => setLogView('today') },
       { id: 'log:stats', label: 'Daily Log: stats and goals', keywords: 'charts statistics weekly goals overview', group: 'Go to', icon: 'chart', run: () => setLogView('stats') },
+      { id: 'road', label: 'Road to IOI', keywords: 'joi ioi training contest competitive programming dragoncode', group: 'Go to', icon: 'flag', run: () => setSection('road') },
       { id: 'log:history', label: 'Daily Log: history', keywords: 'past entries week', group: 'Go to', icon: 'list', run: () => setLogView('history') },
       ...views.map(([v, label, icon, key]): Entry => ({ id: `view:${v}`, label, keywords: 'view switch cabinet', hint: key, group: 'Go to', icon, run: () => setView(v) })),
       { id: 'do:clear', label: 'Clear all filters', keywords: 'reset show everything', group: 'Do', icon: 'filter', run: () => ui.set((s) => ({ ...s, filters: { ...EMPTY_FILTERS, sort: s.filters.sort } })) },

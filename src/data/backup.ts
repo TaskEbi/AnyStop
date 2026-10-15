@@ -5,7 +5,7 @@ import { uuid } from '../lib/random';
 import { commit, commitSettings, currentSession, data, liveConnections, liveItems, liveRooms } from './store';
 import { isDate } from '../features/daily-log/dates';
 import { metricMax } from '../features/daily-log/validate';
-import { LOG_METRICS, type Connection, type Item, type LogDayMetric, type LogEntry, type LogGoal, type LogTopic, type Room, type Settings } from './types';
+import { LOG_METRICS, normaliseRoad, type Connection, type Item, type LogDayMetric, type LogEntry, type LogGoal, type LogTopic, type Room, type Settings } from './types';
 
 /** Version 2 adds the Daily Log; version 1 exports (cabinet only) still import. */
 interface Backup {
@@ -71,12 +71,13 @@ export async function exportCollection(onProgress?: (done: number, total: number
     files[name] = [new Uint8Array(await blob.arrayBuffer()), { level: 0 }];
     photos[item.id] = name;
   }
-  const { museum_name, default_view, theme, palette, design, log_timezone } = st.settings;
+  const { museum_name, default_view, theme, palette, design, log_timezone, road } = st.settings;
   const backup: Backup = {
     app: 'curio-cabinet',
     version: 2,
     exported_at: new Date().toISOString(),
-    settings: { museum_name, default_view, theme, palette, design, log_timezone },
+    // The DragonCode link key stays out of the file: it is a password for that site.
+    settings: { museum_name, default_view, theme, palette, design, log_timezone, road: { ...road, dragon_key: '' } },
     rooms: liveRooms(st.rooms),
     items,
     connections: liveConnections(st.connections),
@@ -148,6 +149,11 @@ export async function importCollection(
   commit('log_metrics', [...metrics.values()]);
   if (backup.settings?.museum_name) commitSettings({ museum_name: backup.settings.museum_name, examples_seeded: true });
   if (typeof backup.settings?.log_timezone === 'string' && backup.settings.log_timezone) commitSettings({ log_timezone: backup.settings.log_timezone });
+  if (backup.settings?.road && typeof backup.settings.road === 'object') {
+    // Keep this device's DragonCode link; take the rest of the Road from the file.
+    const { dragon_key, dragon_url } = data.get().settings.road;
+    commitSettings({ road: { ...normaliseRoad(backup.settings.road), dragon_key, dragon_url } });
+  }
   return {
     items: items.length,
     rooms: rooms.length,

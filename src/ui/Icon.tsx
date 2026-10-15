@@ -37,6 +37,7 @@ export const ICON_PATHS = {
   calendar: 'M4 6h16v14H4zM4 10h16M8 3v4M16 3v4',
   list: 'M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01',
   screen: 'M7 3h10v18H7zM11 18h2',
+  flag: 'M5 21V4M5 4h11l-2 4 2 4H5',
 } as const;
 
 export type IconName = keyof typeof ICON_PATHS;

@@ -1,0 +1,566 @@
+/* ── Road to IOI: "Verdict" ─────────────────────────────────────────────────
+   A contest judge at night: black, monospace, AC green, attempt yellow. It keeps
+   this look whatever the colour scheme; the cabinet's tokens are re-pointed on
+   .app--road so the header and the sheets go dark with it. */
+
+.app--road,
+:root[data-section='road'] body {
+  --v-bg: #090b0a;
+  --v-fg: #eef3f0;
+  --v-dim: #7d8882;
+  --v-line: #232b27;
+  --v-ac: #2fd36b;
+  --v-ac-deep: #0f3a22;
+  --v-ac-edge: #1d6a3f;
+  --v-try: #f5c518;
+  --v-mono: 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, monospace;
+  --v-wide: 'Archivo', 'Arial Black', system-ui, sans-serif;
+  background: var(--v-bg);
+}
+
+.app--road {
+  --desk: #090b0a;
+  --desk-deep: #050706;
+  --desk-ink: #eef3f0;
+  --desk-ink-soft: #9aa69f;
+  --paper: #131816;
+  --paper-warm: #171d1a;
+  --paper-news: #1a201d;
+  --paper-edge: #26302b;
+  --ink: #eef3f0;
+  --ink-soft: #b9c4be;
+  --ink-faint: #7d8882;
+  --thread: #2fd36b;
+  --thread-soft: rgb(47 211 107 / 0.16);
+  --on-thread: #03140a;
+  --focus: #f5c518;
+  --panel: rgb(16 20 18 / 0.97);
+  --panel-line: rgb(238 243 240 / 0.12);
+  --backdrop: rgb(0 0 0 / 0.6);
+  --wash: 20 26 23;
+  --grain: none;
+  --fibres: none;
+  color: var(--v-fg);
+  color-scheme: dark;
+}
+
+.road {
+  display: grid;
+  gap: 1.15rem;
+  width: min(560px, 100%);
+  margin: 0 auto;
+  padding: 0.5rem clamp(16px, 4vw, 24px) calc(4rem + env(safe-area-inset-bottom));
+  font-family: var(--v-mono);
+  font-size: 0.95rem;
+  color: var(--v-fg);
+}
+/* :where keeps this at zero specificity, so each button's own class sets its type. */
+:where(.road) button {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+.road :focus-visible {
+  outline: 3px solid var(--v-try);
+  outline-offset: 2px;
+}
+
+.road__top {
+  display: flex;
+  justify-content: space-between;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid var(--v-line);
+  font-size: 0.75rem;
+  letter-spacing: 0.2em;
+  color: var(--v-dim);
+}
+.road__top b {
+  color: var(--v-fg);
+}
+.road-eye {
+  display: block;
+  margin: 0 0 0.45rem;
+  font-family: var(--v-mono);
+  font-size: 0.7rem;
+  font-weight: 400;
+  letter-spacing: 0.18em;
+  color: var(--v-dim);
+}
+
+/* why: asked once, then brought back on hard days */
+.road-why {
+  display: grid;
+  gap: 0.35rem;
+  padding: 1rem 1.1rem;
+  text-align: left;
+  background: transparent;
+  border: 1.5px solid var(--v-try);
+  border-radius: 4px;
+}
+.road-why--ask {
+  border-style: dashed;
+}
+.road-why .road-eye {
+  margin: 0;
+  color: var(--v-try);
+}
+.road-why__text {
+  font-family: var(--v-wide);
+  font-stretch: 105%;
+  font-weight: 800;
+  font-size: 1.25rem;
+  line-height: 1.25;
+  text-wrap: balance;
+}
+.road-why__hint {
+  font-size: 0.8rem;
+  color: var(--v-dim);
+}
+
+/* next contest and the clock */
+.road-contest__name {
+  margin: 0;
+  font-family: var(--v-wide);
+  font-stretch: 125%;
+  font-weight: 900;
+  font-size: clamp(1.55rem, 7vw, 2rem);
+  line-height: 1;
+  text-transform: uppercase;
+  text-wrap: balance;
+}
+.road-clock {
+  margin: 0.5rem 0 0;
+  font-weight: 800;
+  font-size: clamp(2.2rem, 11vw, 2.8rem);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--v-ac);
+  font-variant-numeric: tabular-nums;
+}
+.road-clock small {
+  margin: 0 0.4rem 0 0.05rem;
+  font-size: 0.95rem;
+  font-weight: 400;
+  color: var(--v-dim);
+}
+.road-clock--today {
+  font-family: var(--v-wide);
+  font-size: 1.8rem;
+}
+.road-contest__when {
+  margin: 0.4rem 0 0;
+  font-size: 0.78rem;
+  color: var(--v-dim);
+}
+.road-asked {
+  display: grid;
+  gap: 0.6rem;
+  margin-top: 0.6rem;
+}
+.road-asked p {
+  margin: 0;
+}
+.road-asked__btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.road-btn {
+  min-height: 44px;
+  padding: 0 1rem;
+  background: transparent;
+  border: 1px solid var(--v-line);
+  border-radius: 4px;
+}
+.road-btn--ac {
+  background: var(--v-ac);
+  border-color: var(--v-ac);
+  color: #03140a !important;
+  font-weight: 700;
+}
+
+/* the problemset */
+.road-set {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.road-set__item {
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr) auto;
+  gap: 0.75rem;
+  align-items: start;
+  padding: 0.8rem 0.85rem;
+  border: 1px solid var(--v-line);
+  border-radius: 4px;
+}
+.road-set__item b {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: 1.5px solid var(--v-ac);
+  border-radius: 3px;
+  color: var(--v-ac);
+}
+.road-set__item > span {
+  display: grid;
+  gap: 0.25rem;
+  min-width: 0;
+  padding-top: 0.25rem;
+  overflow-wrap: anywhere;
+}
+.road-set__item small {
+  font-size: 0.78rem;
+  color: var(--v-dim);
+}
+.road-set__item a {
+  justify-self: start;
+  font-size: 0.78rem;
+  color: var(--v-ac);
+  text-underline-offset: 3px;
+}
+.road-set__item em {
+  padding-top: 0.35rem;
+  font-style: normal;
+  font-size: 0.75rem;
+  color: var(--v-dim);
+}
+.road-set__item--ac {
+  border-color: var(--v-ac-edge);
+  background: var(--v-ac-deep);
+}
+.road-set__item--ac em {
+  color: var(--v-ac);
+  font-weight: 700;
+}
+.road-set__item--sub b {
+  border-color: var(--v-try);
+  color: var(--v-try);
+}
+
+/* the big buttons */
+.road-submit {
+  width: 100%;
+  min-height: 60px;
+  border: 0;
+  border-radius: 4px;
+  background: var(--v-ac);
+  color: #03140a !important;
+  font-family: var(--v-wide) !important;
+  font-stretch: 120%;
+  font-weight: 900;
+  font-size: 1.15rem;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  transition: transform 0.12s, filter 0.12s;
+}
+.road-submit:hover {
+  filter: brightness(1.08);
+}
+.road-submit:active {
+  transform: scale(0.98);
+}
+.road-submit:disabled {
+  opacity: 0.6;
+}
+.road-low {
+  min-height: 46px;
+  margin-top: -0.4rem;
+  background: transparent;
+  border: 1px dashed #3b4641;
+  border-radius: 4px;
+  color: var(--v-dim);
+  font-size: 0.85rem;
+}
+.road-low[aria-pressed='true'] {
+  border-color: var(--v-try);
+  color: var(--v-try);
+}
+
+/* the last seven days */
+.road-week {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 5px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.road-week__day {
+  display: grid;
+  place-items: center;
+  height: 38px;
+  border: 1px solid var(--v-line);
+  border-radius: 3px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #47524c;
+}
+.road-week__day--ac {
+  background: var(--v-ac-deep);
+  border-color: var(--v-ac-edge);
+  color: var(--v-ac);
+}
+.road-week__day--now {
+  border: 1.5px dashed var(--v-try);
+  color: var(--v-try);
+  animation: road-pulse 1.6s ease-in-out infinite;
+}
+.road-week__label {
+  margin: 0.5rem 0 0;
+  font-size: 0.8rem;
+  color: var(--v-dim);
+}
+.road-week__label b {
+  color: var(--v-fg);
+}
+
+/* a note from the past */
+.road-proof {
+  margin: 0;
+  padding: 0.9rem 1rem;
+  border-left: 3px solid var(--v-ac);
+  background: #0f1412;
+}
+.road-proof blockquote {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+/* standings: the five stages as problems A to E */
+.road-standings {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.road-cell {
+  display: grid;
+  justify-items: center;
+  gap: 0.1rem;
+  width: 100%;
+  min-height: 72px;
+  padding: 0.45rem 0.2rem;
+  background: transparent;
+  border: 1px solid var(--v-line);
+  border-radius: 4px;
+  color: #56625b !important;
+}
+.road-cell__letter {
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+}
+.road-cell__name {
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+.road-cell__state {
+  min-height: 1em;
+  font-size: 0.68rem;
+}
+.road-cell--try {
+  border: 1.5px solid var(--v-try);
+  background: #2a2408;
+  color: var(--v-try) !important;
+}
+.road-cell--ac {
+  border-color: var(--v-ac-edge);
+  background: var(--v-ac-deep);
+  color: var(--v-ac) !important;
+}
+
+/* footer: why, the DragonCode link, settings */
+.road-foot {
+  display: grid;
+  gap: 0.5rem;
+  padding-top: 0.8rem;
+  border-top: 1px solid var(--v-line);
+  font-size: 0.78rem;
+  color: var(--v-dim);
+}
+.road-foot__why {
+  padding: 0;
+  background: none;
+  border: 0;
+  text-align: left;
+  font-style: italic;
+  color: var(--v-dim) !important;
+}
+.road-foot__line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.75rem;
+  margin: 0;
+}
+.road-foot__error {
+  margin: 0;
+  color: var(--v-try);
+}
+.road-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--v-ac);
+}
+.road-dot--warn {
+  background: var(--v-try);
+}
+.road-link {
+  min-height: 32px;
+  padding: 0;
+  background: none;
+  border: 0;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  color: var(--v-fg) !important;
+}
+
+/* the verdict */
+.road-stamp {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 1.1rem;
+  padding: 1rem max(16px, env(safe-area-inset-right)) 1rem max(16px, env(safe-area-inset-left));
+  background: rgb(5 8 6 / 0.88);
+  border: 0;
+  animation: road-fade 0.2s ease-out;
+}
+.road-stamp__mark {
+  padding: 0.05em 0.25em 0.12em;
+  border: 7px solid var(--v-ac);
+  border-radius: 10px;
+  font-family: var(--v-wide);
+  font-stretch: 125%;
+  font-weight: 900;
+  font-size: clamp(5rem, 30vw, 8rem);
+  line-height: 0.9;
+  color: var(--v-ac);
+  transform: rotate(-8deg);
+  animation: road-slam 0.42s cubic-bezier(0.2, 1.6, 0.4, 1) both;
+}
+.road-stamp__meta {
+  display: grid;
+  gap: 0.35rem;
+  max-width: 30ch;
+  text-align: center;
+  font-family: var(--v-mono);
+  font-size: 0.85rem;
+  color: var(--v-fg);
+  animation: road-fade 0.3s 0.35s both;
+}
+.road-stamp__meta b {
+  font-size: 1rem;
+  color: var(--v-ac);
+}
+
+/* sheets on the Road */
+.road-sheet {
+  font-family: var(--v-mono);
+}
+.road-sheet .sheet__title {
+  font-family: var(--v-wide);
+  font-stretch: 115%;
+  font-weight: 900;
+  font-size: 1.35rem;
+  text-transform: uppercase;
+}
+.road-sheet .input {
+  font-family: var(--v-mono);
+}
+.road-form {
+  display: grid;
+  gap: 1rem;
+}
+.road-form__group {
+  display: grid;
+  gap: 0.55rem;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.road-form__row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr));
+  gap: 0.75rem;
+}
+.road-form__check {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+  min-height: 44px;
+}
+.road-form__check input {
+  width: 22px;
+  height: 22px;
+  accent-color: var(--v-ac);
+}
+.road-form__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  align-items: center;
+}
+.road-form__hint {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--ink-faint);
+}
+.road-form__error {
+  margin: 0;
+  color: var(--v-try);
+}
+.road-form__ok {
+  margin: 0;
+  color: var(--v-ac);
+}
+.road-dur {
+  display: flex;
+  gap: 0.75rem;
+}
+.road-dur__field {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.road-dur__field .input {
+  width: 4.5rem;
+  font-size: 1.2rem;
+  text-align: center;
+}
+
+@keyframes road-pulse {
+  50% {
+    opacity: 0.45;
+  }
+}
+@keyframes road-fade {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes road-slam {
+  from {
+    transform: rotate(-8deg) scale(2.2);
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .road-week__day--now,
+  .road-stamp,
+  .road-stamp__mark,
+  .road-stamp__meta {
+    animation: none;
+  }
+}

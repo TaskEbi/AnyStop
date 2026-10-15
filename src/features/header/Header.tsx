@@ -33,6 +33,7 @@ const LOG_VIEWS: { id: LogView; label: string; icon: IconName }[] = [
 const SECTIONS: { id: Section; label: string; icon: IconName }[] = [
   { id: 'cabinet', label: 'Cabinet', icon: 'shelves' },
   { id: 'log', label: 'Daily Log', icon: 'clock' },
+  { id: 'road', label: 'Road to IOI', icon: 'flag' },
 ];
 
 /** The big switch between the museum and the Daily Log. */
@@ -101,7 +102,13 @@ function MuseumName() {
           </button>
         </h1>
       )}
-      {section === 'log' ? <LogSubtitle /> : <p className="museum-name__sub type">A cabinet of {plural(count, 'curiosity', 'curiosities')}</p>}
+      {section === 'log' ? (
+        <LogSubtitle />
+      ) : section === 'road' ? (
+        <p className="museum-name__sub type">One more problem. One step closer.</p>
+      ) : (
+        <p className="museum-name__sub type">A cabinet of {plural(count, 'curiosity', 'curiosities')}</p>
+      )}
     </div>
   );
 }
@@ -231,11 +238,11 @@ function Menu() {
           <button type="button" className="menu__item" onClick={() => ui.set({ logTopicsOpen: true })} popoverTarget="main-menu" popoverTargetAction="hide">
             Daily Log topics and time zone
           </button>
-        ) : (
+        ) : section === 'cabinet' ? (
           <button type="button" className="menu__item" onClick={() => ui.set({ roomsOpen: true })} popoverTarget="main-menu" popoverTargetAction="hide">
             Manage rooms
           </button>
-        )}
+        ) : null}
         <div className="menu__group" role="radiogroup" aria-label="Theme">
           <span className="menu__label type">Lighting</span>
           {THEMES.map((t) => (
@@ -278,6 +285,21 @@ export function Header({ filterCount }: { filterCount: number }) {
   const view = useStore(ui, (s) => s.view);
   const logView = useStore(ui, (s) => s.logView);
   const q = useStore(ui, (s) => s.filters.q);
+
+  if (section === 'road') {
+    return (
+      <header className="app-header app-header--road">
+        <div className="app-header__top">
+          <MuseumName />
+          <SectionSwitch />
+          <div className="app-header__tools">
+            <SyncBadge />
+            <Menu />
+          </div>
+        </div>
+      </header>
+    );
+  }
 
   if (section === 'log') {
     return (

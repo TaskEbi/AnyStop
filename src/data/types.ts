@@ -143,6 +143,71 @@ export interface LogDayMetric {
   deleted_at: string | null;
 }
 
+/** The five stages of the Road to IOI page, in order. */
+export const ROAD_STAGES = ['joi1', 'joi2', 'final', 'camp', 'ioi'] as const;
+export type RoadStageId = (typeof ROAD_STAGES)[number];
+
+export interface RoadStage {
+  /** Contest day (YYYY-MM-DD), or null until known; DragonCode's targets fill a missing one. */
+  date: string | null;
+  /** Start time in Japan time (HH:MM), or null. */
+  time: string | null;
+  target: string;
+  /** Why this stage matters, in my words. */
+  reason: string;
+  /** The day I qualified (cleared the stage), or null. */
+  cleared_on: string | null;
+  /** A line about the moment, written once it is cleared. */
+  memory: string;
+}
+
+/** Road to IOI: my training arc. Training days come from a Daily Log topic and from DragonCode. */
+export interface RoadSettings {
+  /** "Why do I want this?", in one sentence. */
+  why: string;
+  /** The Daily Log topic whose entries count as training (sessions saved on the page go there too). */
+  topic_id: string | null;
+  /** DragonCode's address and the read-only link key from its Settings. Empty when not linked. */
+  dragon_url: string;
+  dragon_key: string;
+  stages: Record<RoadStageId, RoadStage>;
+}
+
+const stage = (date: string | null = null, time: string | null = null): RoadStage => ({ date, time, target: '', reason: '', cleared_on: null, memory: '' });
+
+export const DEFAULT_DRAGON_URL = 'https://dragon-academy-sigma.vercel.app';
+
+export const DEFAULT_ROAD: RoadSettings = {
+  why: '',
+  topic_id: null,
+  dragon_url: DEFAULT_DRAGON_URL,
+  dragon_key: '',
+  // JOI 2027 qualifier dates from the official schedule (ioi-jp.org/joi-2027/tournament_info); the rest are set on the page.
+  stages: { joi1: stage('2026-10-25', '14:00'), joi2: stage('2026-11-29', '13:00'), final: stage(), camp: stage(), ioi: stage() },
+};
+
+/** Fill in anything an older or partial copy is missing, so the page can trust the shape. */
+export function normaliseRoad(raw: unknown): RoadSettings {
+  const r = (raw && typeof raw === 'object' ? raw : {}) as Partial<RoadSettings>;
+  const str = (v: unknown, fallback = '') => (typeof v === 'string' ? v : fallback);
+  const orNull = (v: unknown) => (typeof v === 'string' && v ? v : null);
+  const stages = {} as Record<RoadStageId, RoadStage>;
+  for (const id of ROAD_STAGES) {
+    const given = (r.stages?.[id] ?? null) as Partial<RoadStage> | null;
+    const base = DEFAULT_ROAD.stages[id];
+    stages[id] = given
+      ? { date: orNull(given.date), time: orNull(given.time), target: str(given.target), reason: str(given.reason), cleared_on: orNull(given.cleared_on), memory: str(given.memory) }
+      : { ...base };
+  }
+  return {
+    why: str(r.why),
+    topic_id: orNull(r.topic_id),
+    dragon_url: str(r.dragon_url, DEFAULT_DRAGON_URL) || DEFAULT_DRAGON_URL,
+    dragon_key: str(r.dragon_key),
+    stages,
+  };
+}
+
 export interface Settings {
   museum_name: string;
   default_view: ViewName;
@@ -152,6 +217,7 @@ export interface Settings {
   examples_seeded: boolean;
   /** IANA zone that decides what "today" and week boundaries mean in the Daily Log. */
   log_timezone: string;
+  road: RoadSettings;
   updated_at: string;
 }
 
@@ -177,5 +243,6 @@ export const DEFAULT_SETTINGS: Settings = {
   design: 'cabinet',
   examples_seeded: false,
   log_timezone: 'Asia/Singapore',
+  road: DEFAULT_ROAD,
   updated_at: new Date(0).toISOString(),
 };

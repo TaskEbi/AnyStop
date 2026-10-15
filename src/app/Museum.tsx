@@ -29,6 +29,7 @@ import { DailyLog } from '../features/daily-log/DailyLog';
 import { EntrySheet } from '../features/daily-log/EntrySheet';
 import { TopicsSheet } from '../features/daily-log/TopicsSheet';
 import { PasswordSheet } from '../features/auth/PasswordSheet';
+import { Road } from '../features/road/Road';
 
 /** First visit to an empty cabinet: lay out the examples (only once). */
 function maybeSeed() {
@@ -107,6 +108,16 @@ export function Museum({ cloud }: { cloud: boolean }) {
       <Toasts />
     </>
   );
+
+  if (section === 'road') {
+    return (
+      <div className="app app--road">
+        <Header filterCount={filterCount} />
+        <Road />
+        {shared}
+      </div>
+    );
+  }
 
   // The Daily Log replaces the cabinet's body; the cabinet's view and filters wait in `ui` for its return.
   if (section === 'log') {

@@ -70,7 +70,7 @@ With no `.env.local` the app runs in **local-only mode**: everything stays in th
 
 ## Daily Log
 
-Switch between **Cabinet** and **Daily Log** at the top. The app reopens in whichever section you used last, which is handy for the phone's home-screen icon.
+Switch between **Cabinet**, **Daily Log** and **Road to IOI** at the top. The app reopens in whichever section you used last, which is handy for the phone's home-screen icon.
 
 - **Today**: pick a topic (and optionally a subcategory), enter hours and minutes or tap 15 min / 30 min / 45 min / 1 hr, add a note if you like, then **Log**. The form keeps the topic for the next entry. **Again** chips refill a recent combination. Step back through days with ‹ › or pick a date (no future days).
 - **Sleep and screen time**: two counters at the top of Today. Type hours and minutes or tap − / + (15 min steps; + on an empty sleep counter starts at 8 hr). Under sleep there's a **sleep score** out of 100 (from a watch or sleep app, say), typed in and saved the same way. Each is one number per day, set rather than added up, so changing it replaces the old value; **Clear** removes it (with Undo). Sleep counts on the morning you wake, so "last night" belongs to today. A 7-day average shows underneath once there are two days to average.
@@ -88,6 +88,17 @@ Switch between **Cabinet** and **Daily Log** at the top. The app reopens in whic
 - **Topics** (☰ → Daily Log topics): add, rename, recolour, reorder, archive and restore topics and one level of subcategories. Archived ones keep all their history. The time zone that decides "today" and week boundaries lives here too (default Asia/Singapore). Dates are stored as calendar days, so changing it never moves past entries.
 - Everything is derived from the entries themselves (no stored totals), saved locally first and synced like the cabinet. Export/import includes the log; older exports still import.
 - In dev, `curioDev.fakeLog(180)` fills six months with made-up entries over your topics (plus sleep, sleep scores and screen time), to try the charts.
+
+## Road to IOI
+
+The third section (or `any-stop.vercel.app/#road`, which DragonCode links to): a training arc towards JOI → Spring Camp → IOI in a contest-judge design.
+
+- **Next contest** with a live countdown. The five stages (A–E: JOI First Round, Second Round, Final Round, Spring Camp, IOI) open as cards: date and time (Japan time), target, why it matters, and once cleared, the day and a line about the moment. A stage with no date takes it from DragonCode's targets. The two JOI qualifier dates are set from the official schedule; the rest are yours to fill in.
+- **Today's problemset**: A, one problem that makes you think; B, the top of DragonCode's upsolve queue (or "upsolve yesterday's hardest mistake"). **Low-energy day** swaps them for one ten-minute subtask, and the page offers it by itself after three quiet days, with your own "why" sentence on top.
+- **Submit session** saves minutes and "What clicked today?" as a Daily Log entry in the topic you pick (it suggests "Competitive programming"), then stamps AC. The last seven days count a day as trained if that topic or DragonCode has anything on it: weekly consistency, no streak to break.
+- **From your past self**: one old "what clicked" note (from here or a DragonCode reflection) each day.
+- **DragonCode link**: paste the key from DragonCode → Settings → Road to IOI link (Road → Settings). The page reads DragonCode's read-only `/api/road` summary and keeps the last copy on the device for offline. The key syncs with the settings (member-only) and is left out of exports. DragonCode serves it only once `ROAD_LINK_SECRET` is set there.
+- Settings live in `settings.road` (migration `20261018120000_road_to_ioi.sql`).
 
 ## Using it
 

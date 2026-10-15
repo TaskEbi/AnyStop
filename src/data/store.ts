@@ -2,6 +2,7 @@ import { createStore } from '../lib/createStore';
 import { openLocalDb, type LocalDb } from './idb';
 import {
   DEFAULT_SETTINGS,
+  normaliseRoad,
   TABLES,
   type Connection,
   type Item,
@@ -178,7 +179,7 @@ export async function openSession(opts: { cloud: boolean; onLocalChange: () => v
     ...(maps as Pick<DataState, TableName>),
     ready: true,
     mode: opts.cloud ? 'synced' : 'local',
-    settings: { ...DEFAULT_SETTINGS, ...settings },
+    settings: { ...DEFAULT_SETTINGS, ...settings, road: normaliseRoad(settings?.road) },
     sync: { status: opts.cloud ? 'idle' : 'local', pending: countPending(session.outbox), error: null },
   });
   return session;
