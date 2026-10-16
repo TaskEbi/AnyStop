@@ -1,58 +1,65 @@
-/* ── Road to IOI: "Verdict" ─────────────────────────────────────────────────
-   A contest judge at night: black, monospace, AC green, attempt yellow. It keeps
+/* ── Road to IOI: "Thousand Gates" ──────────────────────────────────────────
+   A shrine path at night: a great vermilion torii framing the countdown, the
+   stages as small gates up the hill, lantern light for "you are here". It keeps
    this look whatever the colour scheme; the cabinet's tokens are re-pointed on
    .app--road so the header and the sheets go dark with it. */
 
 .app--road,
 :root[data-section='road'] body {
-  --v-bg: #090b0a;
-  --v-fg: #eef3f0;
-  --v-dim: #7d8882;
-  --v-line: #232b27;
-  --v-ac: #2fd36b;
-  --v-ac-deep: #0f3a22;
-  --v-ac-edge: #1d6a3f;
-  --v-try: #f5c518;
-  --v-mono: 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, monospace;
-  --v-wide: 'Archivo', 'Arial Black', system-ui, sans-serif;
-  background: var(--v-bg);
+  --g-night: #11141c;
+  --g-card: #1a1e28;
+  --g-line: #2c3140;
+  --g-dim: #4a4f5c;
+  --g-text: #f4ede1;
+  --g-soft: #aba396;
+  --g-softer: #cfc6b8;
+  --g-vermilion: #e04a23;
+  --g-vermilion-hi: #ff6a3d;
+  --g-lantern: #ffb65c;
+  --g-gold: #e9c46a;
+  --g-on-vermilion: #fff7ec;
+  --g-mincho: 'Shippori Mincho B1', 'Hiragino Mincho ProN', 'Yu Mincho', Georgia, serif;
+  --g-gothic: 'Zen Kaku Gothic New', 'Hiragino Sans', 'Yu Gothic', system-ui, sans-serif;
+  --g-hand: 'Klee One', 'Kalam', cursive;
+  background: var(--g-night);
 }
 
 .app--road {
-  --desk: #090b0a;
-  --desk-deep: #050706;
-  --desk-ink: #eef3f0;
-  --desk-ink-soft: #9aa69f;
-  --paper: #131816;
-  --paper-warm: #171d1a;
-  --paper-news: #1a201d;
-  --paper-edge: #26302b;
-  --ink: #eef3f0;
-  --ink-soft: #b9c4be;
-  --ink-faint: #7d8882;
-  --thread: #2fd36b;
-  --thread-soft: rgb(47 211 107 / 0.16);
-  --on-thread: #03140a;
-  --focus: #f5c518;
-  --panel: rgb(16 20 18 / 0.97);
-  --panel-line: rgb(238 243 240 / 0.12);
+  --desk: #11141c;
+  --desk-deep: #0b0d13;
+  --desk-ink: #f4ede1;
+  --desk-ink-soft: #aba396;
+  --paper: #1e2330;
+  --paper-warm: #232937;
+  --paper-news: #232937;
+  --paper-edge: #2c3140;
+  --ink: #f4ede1;
+  --ink-soft: #cfc6b8;
+  --ink-faint: #aba396;
+  --thread: #e04a23;
+  --thread-soft: rgb(224 74 35 / 0.18);
+  --on-thread: #fff7ec;
+  --focus: #ffb65c;
+  --panel: rgb(26 30 40 / 0.98);
+  --panel-line: rgb(244 237 225 / 0.12);
   --backdrop: rgb(0 0 0 / 0.6);
-  --wash: 20 26 23;
+  --wash: 40 46 60;
   --grain: none;
   --fibres: none;
-  color: var(--v-fg);
+  color: var(--g-text);
   color-scheme: dark;
 }
 
 .road {
+  --road-gutter: clamp(16px, 4vw, 24px);
   display: grid;
-  gap: 1.15rem;
+  gap: 14px;
   width: min(560px, 100%);
   margin: 0 auto;
-  padding: 0.5rem clamp(16px, 4vw, 24px) calc(4rem + env(safe-area-inset-bottom));
-  font-family: var(--v-mono);
-  font-size: 0.95rem;
-  color: var(--v-fg);
+  padding: 0.25rem var(--road-gutter) calc(4rem + env(safe-area-inset-bottom));
+  font-family: var(--g-gothic);
+  font-size: 1rem;
+  color: var(--g-text);
 }
 /* :where keeps this at zero specificity, so each button's own class sets its type. */
 :where(.road) button {
@@ -61,337 +68,621 @@
   cursor: pointer;
 }
 .road :focus-visible {
-  outline: 3px solid var(--v-try);
+  outline: 3px solid var(--g-lantern);
   outline-offset: 2px;
 }
-
-.road__top {
-  display: flex;
-  justify-content: space-between;
-  padding-bottom: 0.6rem;
-  border-bottom: 1px solid var(--v-line);
-  font-size: 0.75rem;
-  letter-spacing: 0.2em;
-  color: var(--v-dim);
-}
-.road__top b {
-  color: var(--v-fg);
+.road a {
+  color: var(--g-lantern);
+  text-underline-offset: 3px;
 }
 .road-eye {
-  display: block;
-  margin: 0 0 0.45rem;
-  font-family: var(--v-mono);
-  font-size: 0.7rem;
-  font-weight: 400;
-  letter-spacing: 0.18em;
-  color: var(--v-dim);
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: var(--g-soft);
 }
 
-/* why: asked once, then brought back on hard days */
-.road-why {
+/* ── the great torii ───────────────────────────────────────────────────── */
+.gates-hero {
   display: grid;
-  gap: 0.35rem;
-  padding: 1rem 1.1rem;
-  text-align: left;
-  background: transparent;
-  border: 1.5px solid var(--v-try);
-  border-radius: 4px;
+  gap: 0.5rem;
 }
-.road-why--ask {
-  border-style: dashed;
+.gates-hero__scene {
+  position: relative;
+  width: calc(100% + 2 * var(--road-gutter));
+  margin: 0 calc(-1 * var(--road-gutter)) 2.6rem;
 }
-.road-why .road-eye {
-  margin: 0;
-  color: var(--v-try);
+@media (min-width: 520px) {
+  .gates-hero__scene {
+    width: min(100%, 460px);
+    margin-inline: auto;
+  }
 }
-.road-why__text {
-  font-family: var(--v-wide);
-  font-stretch: 105%;
+.gates-scene {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.gates-scene__label {
+  font-family: var(--g-gothic);
+  font-size: 10px;
+  font-weight: 700;
+  fill: var(--g-soft);
+}
+.gates-scene__label--now {
+  fill: var(--g-lantern);
+  font-size: 11px;
+}
+.gates-scene__label--cleared {
+  fill: var(--g-text);
+}
+.gates-scene__label--ioi {
+  fill: var(--g-gold);
+}
+.gates-scene__plaque {
+  font-family: var(--g-mincho);
+  font-size: 28px;
   font-weight: 800;
-  font-size: 1.25rem;
+  fill: var(--g-gold);
+}
+.gates-scene__glow {
+  opacity: 0.45;
+  animation: lantern 3.2s ease-in-out infinite;
+}
+
+/* the sign between the pillars */
+.gates-sign {
+  position: absolute;
+  left: 22.5%;
+  width: 55%;
+  top: 74%;
+  display: grid;
+  justify-items: center;
+  gap: 0.3rem;
+  text-align: center;
+}
+.gates-sign__count {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 0.2rem;
+  margin: 0;
+  font-family: var(--g-mincho);
+  font-weight: 700;
+  line-height: 0.9;
+}
+.gates-sign__count span {
+  font-size: clamp(1.1rem, 5vw, 1.4rem);
+}
+.gates-sign__count span:last-child {
+  font-size: clamp(1.6rem, 8vw, 2.1rem);
+  font-weight: 800;
+}
+.gates-sign__count b {
+  font-size: clamp(3.6rem, 21vw, 5.4rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+.gates-sign__count--long b {
+  font-size: clamp(2.8rem, 15vw, 4rem);
+}
+.gates-sign__count--today {
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+}
+.gates-sign__count--today b {
+  font-size: clamp(2.8rem, 15vw, 3.8rem);
+  color: var(--g-lantern);
+}
+.gates-sign__count--today span {
+  font-family: var(--g-gothic);
+  font-size: 0.95rem;
+}
+.gates-sign__name {
+  margin: 0.2rem 0 0;
+  font-family: var(--g-mincho);
+  font-size: clamp(0.95rem, 4.4vw, 1.1rem);
+  font-weight: 700;
   line-height: 1.25;
   text-wrap: balance;
 }
-.road-why__hint {
-  font-size: 0.8rem;
-  color: var(--v-dim);
-}
-
-/* next contest and the clock */
-.road-contest__name {
+.gates-sign__when {
   margin: 0;
-  font-family: var(--v-wide);
-  font-stretch: 125%;
-  font-weight: 900;
-  font-size: clamp(1.55rem, 7vw, 2rem);
-  line-height: 1;
-  text-transform: uppercase;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  color: var(--g-soft);
   text-wrap: balance;
 }
-.road-clock {
-  margin: 0.5rem 0 0;
-  font-weight: 800;
-  font-size: clamp(2.2rem, 11vw, 2.8rem);
-  line-height: 1;
-  letter-spacing: -0.02em;
-  color: var(--v-ac);
-  font-variant-numeric: tabular-nums;
-}
-.road-clock small {
-  margin: 0 0.4rem 0 0.05rem;
-  font-size: 0.95rem;
-  font-weight: 400;
-  color: var(--v-dim);
-}
-.road-clock--today {
-  font-family: var(--v-wide);
-  font-size: 1.8rem;
-}
-.road-contest__when {
-  margin: 0.4rem 0 0;
-  font-size: 0.78rem;
-  color: var(--v-dim);
-}
-.road-asked {
+.gates-sign__btns {
   display: grid;
-  gap: 0.6rem;
-  margin-top: 0.6rem;
+  gap: 0.4rem;
+  width: 100%;
+  margin-top: 0.3rem;
 }
-.road-asked p {
-  margin: 0;
-}
-.road-asked__btns {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-.road-btn {
+.gates-btn {
   min-height: 44px;
-  padding: 0 1rem;
-  background: transparent;
-  border: 1px solid var(--v-line);
-  border-radius: 4px;
-}
-.road-btn--ac {
-  background: var(--v-ac);
-  border-color: var(--v-ac);
-  color: #03140a !important;
+  padding: 0 0.8rem;
+  border: 1px solid var(--g-line);
+  border-radius: 10px;
+  background: var(--g-card);
+  font-size: 0.9rem;
   font-weight: 700;
 }
+.gates-btn--main {
+  border-color: transparent;
+  background: var(--g-vermilion);
+  color: var(--g-on-vermilion) !important;
+}
 
-/* the problemset */
-.road-set {
-  display: grid;
+/* ── cards ─────────────────────────────────────────────────────────────── */
+.gates-card {
+  position: relative;
+  padding: 16px;
+  border: 1px solid var(--g-line);
+  border-radius: 14px;
+  background: var(--g-card);
+}
+.gates-card__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
   gap: 0.5rem;
+  flex-wrap: wrap;
+}
+.gates-card__head > span {
+  font-size: 0.82rem;
+  color: var(--g-soft);
+}
+.gates-card__sub {
+  margin: 0.35rem 0 0;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: var(--g-soft);
+}
+.gates-title {
   margin: 0;
+  font-family: var(--g-mincho);
+  font-size: 1.3rem;
+  font-weight: 800;
+}
+.gates-title--big {
+  font-size: 1.55rem;
+}
+.gates-title small {
+  margin-left: 0.3rem;
+  font-size: 0.6em;
+  font-weight: 700;
+  color: var(--g-soft);
+}
+
+/* every day trained, one gate */
+.torii--solid {
+  fill: var(--g-vermilion);
+}
+.torii--outline {
+  fill: none;
+  stroke: var(--g-dim);
+  stroke-width: 2;
+}
+.torii--open {
+  fill: none;
+  stroke: var(--g-lantern);
+  stroke-width: 2;
+  stroke-dasharray: 3 3;
+}
+.torii--new {
+  fill: var(--g-vermilion-hi);
+  filter: drop-shadow(0 0 6px rgb(255 182 92 / 0.9));
+}
+.gates-path__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 7px 8px;
+  margin-top: 14px;
+}
+.gates-path__more {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--g-soft);
+}
+
+/* today */
+.gates-today {
+  margin-top: 6px;
+  padding-top: 22px;
+}
+.gates-today__beam {
+  position: absolute;
+  left: -8px;
+  top: -9px;
+  width: calc(100% + 16px);
+  height: 18px;
+  fill: var(--g-vermilion);
+}
+.gates-tasks {
+  margin: 10px 0 4px;
   padding: 0;
   list-style: none;
 }
-.road-set__item {
+.gates-tasks li {
   display: grid;
-  grid-template-columns: 30px minmax(0, 1fr) auto;
-  gap: 0.75rem;
-  align-items: start;
-  padding: 0.8rem 0.85rem;
-  border: 1px solid var(--v-line);
-  border-radius: 4px;
+  grid-template-columns: 34px minmax(0, 1fr);
+  gap: 12px;
+  padding: 14px 0;
+  border-top: 1px solid var(--g-line);
 }
-.road-set__item b {
-  display: grid;
-  place-items: center;
-  width: 30px;
-  height: 30px;
-  border: 1.5px solid var(--v-ac);
-  border-radius: 3px;
-  color: var(--v-ac);
+.gates-tasks__num {
+  font-family: var(--g-mincho);
+  font-size: 1.75rem;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--g-vermilion);
 }
-.road-set__item > span {
+.gates-tasks--done .gates-tasks__num {
+  color: var(--g-gold);
+}
+.gates-tasks__body {
   display: grid;
-  gap: 0.25rem;
+  gap: 6px;
   min-width: 0;
-  padding-top: 0.25rem;
   overflow-wrap: anywhere;
 }
-.road-set__item small {
-  font-size: 0.78rem;
-  color: var(--v-dim);
+.gates-tasks__title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  line-height: 1.35;
 }
-.road-set__item a {
-  justify-self: start;
-  font-size: 0.78rem;
-  color: var(--v-ac);
-  text-underline-offset: 3px;
-}
-.road-set__item em {
-  padding-top: 0.35rem;
+.gates-tasks__title em {
   font-style: normal;
-  font-size: 0.75rem;
-  color: var(--v-dim);
+  color: var(--g-gold);
 }
-.road-set__item--ac {
-  border-color: var(--v-ac-edge);
-  background: var(--v-ac-deep);
+.gates-tasks small {
+  font-size: 0.88rem;
+  color: var(--g-soft);
 }
-.road-set__item--ac em {
-  color: var(--v-ac);
+.gates-tasks a {
+  justify-self: start;
+  font-size: 0.82rem;
   font-weight: 700;
 }
-.road-set__item--sub b {
-  border-color: var(--v-try);
-  color: var(--v-try);
-}
-
-/* the big buttons */
-.road-submit {
+.gates-raise {
   width: 100%;
   min-height: 60px;
   border: 0;
-  border-radius: 4px;
-  background: var(--v-ac);
-  color: #03140a !important;
-  font-family: var(--v-wide) !important;
-  font-stretch: 120%;
-  font-weight: 900;
-  font-size: 1.15rem;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
+  border-radius: 10px;
+  background: var(--g-vermilion);
+  color: var(--g-on-vermilion) !important;
+  font-family: var(--g-mincho) !important;
+  font-size: 1.2rem;
+  font-weight: 800;
   transition: transform 0.12s, filter 0.12s;
 }
-.road-submit:hover {
+.gates-raise:hover {
   filter: brightness(1.08);
 }
-.road-submit:active {
+.gates-raise:active {
   transform: scale(0.98);
 }
-.road-submit:disabled {
+.gates-raise:disabled {
   opacity: 0.6;
 }
-.road-low {
-  min-height: 46px;
-  margin-top: -0.4rem;
+.gates-low {
+  width: 100%;
+  min-height: 44px;
+  margin-top: 4px;
+  border: 0;
   background: transparent;
-  border: 1px dashed #3b4641;
-  border-radius: 4px;
-  color: var(--v-dim);
-  font-size: 0.85rem;
+  color: var(--g-soft) !important;
+  font-size: 0.88rem;
+  text-decoration: underline;
+  text-underline-offset: 4px;
 }
-.road-low[aria-pressed='true'] {
-  border-color: var(--v-try);
-  color: var(--v-try);
+.gates-low[aria-pressed='true'] {
+  color: var(--g-lantern) !important;
 }
 
-/* the last seven days */
-.road-week {
+/* this week */
+.gates-week {
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
-  gap: 5px;
+  gap: 4px;
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
+  text-align: center;
+}
+.gates-week__day {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--g-soft);
+}
+.gates-week__day--now {
+  color: var(--g-lantern);
+}
+
+/* the fortune slip: a note from my past self */
+.omikuji {
+  position: relative;
   margin: 0;
+  padding: 18px 20px 18px 70px;
+  background: var(--g-text);
+  color: #2b2320;
+  clip-path: polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 0 100%);
+}
+.omikuji__seal {
+  position: absolute;
+  left: 18px;
+  top: 18px;
+  width: 36px;
+  padding: 6px 0;
+  display: grid;
+  place-items: center;
+  background: #c8441f;
+  color: var(--g-on-vermilion);
+  writing-mode: vertical-rl;
+  font-family: var(--g-mincho);
+  font-size: 1.05rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+}
+.omikuji figcaption {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: #6b5a4e;
+}
+.omikuji blockquote {
+  margin: 8px 0 0;
+  font-family: var(--g-mincho);
+  font-size: 1.2rem;
+  font-weight: 700;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+.omikuji p {
+  margin: 8px 0 0;
+  font-size: 0.75rem;
+  color: #6b5a4e;
+}
+
+/* the climb: the five stages, summit first */
+.climb {
+  margin: 10px 0 0;
   padding: 0;
   list-style: none;
 }
-.road-week__day {
+.climb__step {
+  position: relative;
   display: grid;
-  place-items: center;
-  height: 38px;
-  border: 1px solid var(--v-line);
-  border-radius: 3px;
-  font-size: 0.72rem;
-  font-weight: 700;
-  color: #47524c;
+  grid-template-columns: 40px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 64px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  text-align: left;
 }
-.road-week__day--ac {
-  background: var(--v-ac-deep);
-  border-color: var(--v-ac-edge);
-  color: var(--v-ac);
+.climb__step::before {
+  content: '';
+  position: absolute;
+  left: 19px;
+  top: 0;
+  bottom: 0;
+  border-left: 2px dotted var(--g-dim);
 }
-.road-week__day--now {
-  border: 1.5px dashed var(--v-try);
-  color: var(--v-try);
-  animation: road-pulse 1.6s ease-in-out infinite;
+.climb li:first-child .climb__step::before {
+  top: 50%;
 }
-.road-week__label {
-  margin: 0.5rem 0 0;
+.climb li:last-child .climb__step::before {
+  bottom: 50%;
+}
+.climb__lantern {
+  position: relative;
+  justify-self: center;
+  width: 18px;
+  height: 18px;
+  box-sizing: border-box;
+  border: 2px solid var(--g-dim);
+  border-radius: 50%;
+  background: var(--g-line);
+}
+.climb__step--cleared .climb__lantern {
+  border-color: var(--g-vermilion);
+  background: var(--g-vermilion);
+}
+.climb__step--now .climb__lantern {
+  width: 20px;
+  height: 20px;
+  border: 0;
+  background: var(--g-lantern);
+  box-shadow:
+    0 0 0 6px rgb(255 182 92 / 0.18),
+    0 0 18px rgb(255 182 92 / 0.6);
+}
+.climb__step--ioi .climb__lantern {
+  border: 0;
+  width: 22px;
+  height: 22px;
+  background: var(--g-gold);
+}
+.climb__name {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.climb__name b {
+  font-family: var(--g-mincho);
+  font-size: 1.1rem;
+  font-weight: 800;
+}
+.climb__step--ioi .climb__name b {
+  color: var(--g-gold);
+}
+.climb__name small {
   font-size: 0.8rem;
-  color: var(--v-dim);
+  color: var(--g-soft);
 }
-.road-week__label b {
-  color: var(--v-fg);
+.climb__name .climb__here {
+  font-weight: 700;
+  color: var(--g-lantern);
+}
+.climb__date {
+  font-size: 0.8rem;
+  color: var(--g-softer);
+  text-align: right;
 }
 
-/* a note from the past */
-.road-proof {
-  margin: 0;
-  padding: 0.9rem 1rem;
-  border-left: 3px solid var(--v-ac);
-  background: #0f1412;
+/* side paths: the season's other contests */
+.side {
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
 }
-.road-proof blockquote {
-  margin: 0;
-  font-size: 0.95rem;
+.side__row {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 60px;
+  padding: 6px 0;
+  border: 0;
+  border-top: 1px solid var(--g-line);
+  background: transparent;
+  text-align: left;
+}
+.side__date {
+  display: grid;
+  justify-items: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--g-soft);
+}
+.side__date b {
+  font-family: var(--g-mincho);
+  font-size: 1.4rem;
+  line-height: 1;
+  color: var(--g-text);
+}
+.side__date small {
+  font-family: var(--g-mincho);
+  font-size: 1.4rem;
+  line-height: 1;
+  color: var(--g-dim);
+}
+.side__name {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.side__name b {
+  font-size: 1rem;
+  font-weight: 700;
+}
+.side__name small {
+  font-size: 0.78rem;
+  color: var(--g-soft);
+}
+.side__when {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--g-lantern);
+  text-align: right;
+}
+.side__when--approx {
+  font-weight: 500;
+  color: var(--g-soft);
+}
+.side--hidden .side__row {
+  opacity: 0.7;
+}
+.side__key {
+  margin: 10px 0 0;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--g-soft);
+}
+
+/* ── the ema: my why on a wooden plaque ────────────────────────────────── */
+.ema {
+  position: relative;
+  justify-self: center;
+  width: min(300px, 100%);
+  margin-top: 26px;
+  padding: 0;
+  border: 0;
+  background: none;
+}
+.ema__cord {
+  position: absolute;
+  z-index: 1;
+  left: calc(50% - 1.5px);
+  top: -26px;
+  width: 3px;
+  height: 56px;
+  border-radius: 2px;
+  background: #c8441f;
+}
+.ema__board {
+  position: relative;
+  display: grid;
+  gap: 8px;
+  padding: 50px 22px 24px;
+  background-color: #e2c08d;
+  background-image: repeating-linear-gradient(90deg, rgb(120 80 40 / 0.1) 0 2px, transparent 2px 11px);
+  clip-path: polygon(0 26%, 50% 0, 100% 26%, 100% 100%, 0 100%);
+  transform: rotate(-2deg);
+  color: #3a2414;
+  text-align: center;
+}
+.ema__hole {
+  position: absolute;
+  left: calc(50% - 6px);
+  top: 22px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--g-night);
+}
+.ema__label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: #6b4a2b;
+}
+.ema__text {
+  font-family: var(--g-hand);
+  font-size: 1.3rem;
+  font-weight: 600;
   line-height: 1.45;
   overflow-wrap: anywhere;
 }
-
-/* standings: the five stages as problems A to E */
-.road-standings {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 6px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
+.ema--ask .ema__text {
+  font-size: 1.15rem;
 }
-.road-cell {
-  display: grid;
-  justify-items: center;
-  gap: 0.1rem;
-  width: 100%;
-  min-height: 72px;
-  padding: 0.45rem 0.2rem;
-  background: transparent;
-  border: 1px solid var(--v-line);
-  border-radius: 4px;
-  color: #56625b !important;
-}
-.road-cell__letter {
-  font-size: 0.7rem;
-  letter-spacing: 0.1em;
-}
-.road-cell__name {
-  font-weight: 700;
-  font-size: 0.85rem;
-}
-.road-cell__state {
-  min-height: 1em;
-  font-size: 0.68rem;
-}
-.road-cell--try {
-  border: 1.5px solid var(--v-try);
-  background: #2a2408;
-  color: var(--v-try) !important;
-}
-.road-cell--ac {
-  border-color: var(--v-ac-edge);
-  background: var(--v-ac-deep);
-  color: var(--v-ac) !important;
+.ema__hint {
+  font-size: 0.78rem;
+  color: #6b4a2b;
 }
 
-/* footer: why, the DragonCode link, settings */
+/* ── footer: the DragonCode link, settings ─────────────────────────────── */
 .road-foot {
   display: grid;
   gap: 0.5rem;
+  margin-top: 6px;
   padding-top: 0.8rem;
-  border-top: 1px solid var(--v-line);
-  font-size: 0.78rem;
-  color: var(--v-dim);
-}
-.road-foot__why {
-  padding: 0;
-  background: none;
-  border: 0;
-  text-align: left;
-  font-style: italic;
-  color: var(--v-dim) !important;
+  border-top: 1px solid var(--g-line);
+  font-size: 0.82rem;
+  color: var(--g-soft);
 }
 .road-foot__line {
   display: flex;
@@ -402,82 +693,105 @@
 }
 .road-foot__error {
   margin: 0;
-  color: var(--v-try);
+  color: var(--g-lantern);
 }
 .road-dot {
-  width: 7px;
-  height: 7px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
-  background: var(--v-ac);
+  background: #6fcf97;
 }
 .road-dot--warn {
-  background: var(--v-try);
+  background: var(--g-lantern);
 }
 .road-link {
-  min-height: 32px;
+  min-height: 36px;
   padding: 0;
   background: none;
   border: 0;
   text-decoration: underline;
   text-underline-offset: 3px;
-  color: var(--v-fg) !important;
+  color: var(--g-text) !important;
 }
 
-/* the verdict */
-.road-stamp {
+/* ── a gate is raised ──────────────────────────────────────────────────── */
+/* A slip at the bottom, like the app's toasts: the page stays in view, and a tap dismisses it. */
+.gates-raised {
   position: fixed;
-  inset: 0;
+  left: 50%;
+  bottom: max(16px, env(safe-area-inset-bottom));
+  translate: -50% 0;
   z-index: 50;
-  display: grid;
-  place-content: center;
-  justify-items: center;
-  gap: 1.1rem;
-  padding: 1rem max(16px, env(safe-area-inset-right)) 1rem max(16px, env(safe-area-inset-left));
-  background: rgb(5 8 6 / 0.88);
-  border: 0;
-  animation: road-fade 0.2s ease-out;
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  width: min(440px, calc(100vw - 32px));
+  padding: 0.7rem 1rem;
+  border: 1px solid rgb(255 182 92 / 0.35);
+  border-radius: 14px;
+  background: rgb(10 12 18);
+  box-shadow: 0 12px 32px rgb(0 0 0 / 0.5);
+  color: var(--g-text);
+  font-family: var(--g-gothic);
+  text-align: left;
+  animation: road-fade 0.25s ease-out;
 }
-.road-stamp__mark {
-  padding: 0.05em 0.25em 0.12em;
-  border: 7px solid var(--v-ac);
-  border-radius: 10px;
-  font-family: var(--v-wide);
-  font-stretch: 125%;
-  font-weight: 900;
-  font-size: clamp(5rem, 30vw, 8rem);
-  line-height: 0.9;
-  color: var(--v-ac);
-  transform: rotate(-8deg);
-  animation: road-slam 0.42s cubic-bezier(0.2, 1.6, 0.4, 1) both;
+.gates-raised__gate {
+  flex-shrink: 0;
+  fill: var(--g-vermilion-hi);
+  filter: drop-shadow(0 0 10px rgb(255 182 92 / 0.55));
+  animation: gate-rise 0.6s cubic-bezier(0.2, 1.2, 0.4, 1) both;
 }
-.road-stamp__meta {
+.gates-raised__text {
   display: grid;
-  gap: 0.35rem;
-  max-width: 30ch;
-  text-align: center;
-  font-family: var(--v-mono);
+  gap: 0.15rem;
+  min-width: 0;
+}
+.gates-raised__title {
+  font-family: var(--g-mincho);
+  font-size: 1.15rem;
+  font-weight: 800;
+}
+.gates-raised__meta {
   font-size: 0.85rem;
-  color: var(--v-fg);
-  animation: road-fade 0.3s 0.35s both;
+  color: var(--g-lantern);
 }
-.road-stamp__meta b {
-  font-size: 1rem;
-  color: var(--v-ac);
+.gates-raised__note {
+  overflow: hidden;
+  font-size: 0.8rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-/* sheets on the Road */
+/* ── sheets on the Road ────────────────────────────────────────────────── */
 .road-sheet {
-  font-family: var(--v-mono);
+  font-family: var(--g-gothic);
 }
 .road-sheet .sheet__title {
-  font-family: var(--v-wide);
-  font-stretch: 115%;
-  font-weight: 900;
+  font-family: var(--g-mincho);
   font-size: 1.35rem;
-  text-transform: uppercase;
+  font-weight: 800;
 }
 .road-sheet .input {
-  font-family: var(--v-mono);
+  font-family: var(--g-gothic);
+}
+.road-sheet .btn--primary {
+  background: var(--g-vermilion);
+  color: var(--g-on-vermilion);
+}
+.road-sheet .road-submit {
+  width: 100%;
+  min-height: 56px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--g-vermilion);
+  color: var(--g-on-vermilion);
+  font-family: var(--g-mincho);
+  font-size: 1.15rem;
+  font-weight: 800;
+}
+.road-sheet a {
+  color: var(--g-lantern);
 }
 .road-form {
   display: grid;
@@ -504,7 +818,7 @@
 .road-form__check input {
   width: 22px;
   height: 22px;
-  accent-color: var(--v-ac);
+  accent-color: var(--g-vermilion);
 }
 .road-form__actions {
   display: flex;
@@ -514,16 +828,17 @@
 }
 .road-form__hint {
   margin: 0;
-  font-size: 0.8rem;
+  font-size: 0.82rem;
+  line-height: 1.5;
   color: var(--ink-faint);
 }
 .road-form__error {
   margin: 0;
-  color: var(--v-try);
+  color: var(--g-lantern);
 }
 .road-form__ok {
   margin: 0;
-  color: var(--v-ac);
+  color: #6fcf97;
 }
 .road-dur {
   display: flex;
@@ -540,9 +855,9 @@
   text-align: center;
 }
 
-@keyframes road-pulse {
+@keyframes lantern {
   50% {
-    opacity: 0.45;
+    opacity: 0.7;
   }
 }
 @keyframes road-fade {
@@ -550,17 +865,16 @@
     opacity: 0;
   }
 }
-@keyframes road-slam {
+@keyframes gate-rise {
   from {
-    transform: rotate(-8deg) scale(2.2);
+    transform: translateY(40px) scale(0.6);
     opacity: 0;
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .road-week__day--now,
-  .road-stamp,
-  .road-stamp__mark,
-  .road-stamp__meta {
+  .gates-scene__glow,
+  .gates-raised,
+  .gates-raised__gate {
     animation: none;
   }
 }

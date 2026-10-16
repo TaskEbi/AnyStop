@@ -4,12 +4,13 @@ import { data } from '../../data/store';
 import { DEFAULT_DRAGON_URL, type RoadStageId } from '../../data/types';
 import { useStore } from '../../lib/createStore';
 import { Sheet } from '../../ui/Sheet';
-import { isDate, shortDay } from '../daily-log/dates';
+import { isDate, monthName, rangeLabel, shortDay } from '../daily-log/dates';
 import { formatMinutes, parseDuration } from '../daily-log/duration';
 import { topLevel } from '../daily-log/stats';
 import { useTopics } from '../daily-log/useLog';
 import { MAX_NOTE } from '../daily-log/validate';
 import { dragonBase, fetchDragon, forgetDragon, type DragonSummary } from './dragon';
+import { SEASON_EVENTS, seasonCalendar } from './calendar';
 import { STAGE_INFO, stageWhen } from './rules';
 import { setRoad } from './setRoad';
 
@@ -55,7 +56,7 @@ function TopicPicker({ id }: { id: string }) {
   );
 }
 
-/** "Submit session": minutes and what clicked, saved as a Daily Log entry. */
+/** "Log a session": minutes and what clicked, saved as a Daily Log entry. */
 export function SessionSheet({ today, linked, onClose, onSaved }: { today: string; linked: boolean; onClose: () => void; onSaved: (minutes: number, note: string) => void }) {
   const topicId = useStore(data, (s) => s.settings.road.topic_id);
   const topics = useTopics();
@@ -83,7 +84,7 @@ export function SessionSheet({ today, linked, onClose, onSaved }: { today: strin
   }
 
   return (
-    <Sheet title="Submit session" onClose={onClose} variant="bottom" className="road-sheet">
+    <Sheet title="Log a session" onClose={onClose} variant="bottom" className="road-sheet">
       <form className="road-form" onSubmit={submit}>
         {!usable && <TopicPicker id="road-session-topic" />}
         <fieldset className="road-form__group">
@@ -137,7 +138,7 @@ export function SessionSheet({ today, linked, onClose, onSaved }: { today: strin
           </p>
         )}
         <button type="submit" className="road-submit" disabled={busy}>
-          Submit ▸
+          Log it · raise a gate
         </button>
       </form>
     </Sheet>
@@ -147,9 +148,9 @@ export function SessionSheet({ today, linked, onClose, onSaved }: { today: strin
 /** A stage card: its date, target and reason, and once cleared, the day and the memory. */
 export function StageSheet({ id, today, dragonData, onClose }: { id: RoadStageId; today: string; dragonData: DragonSummary | null; onClose: () => void }) {
   const stage = useStore(data, (s) => s.settings.road.stages[id]);
-  const fromDragon = !stage.date ? stageWhen(id, stage, dragonData, today) : null;
-  const [date, setDate] = useState(stage.date ?? fromDragon?.date ?? '');
-  const [time, setTime] = useState(stage.time ?? fromDragon?.time ?? '');
+  const filled = !stage.date ? stageWhen(id, stage, dragonData, today) : null;
+  const [date, setDate] = useState(stage.date ?? filled?.date ?? '');
+  const [time, setTime] = useState(stage.time ?? filled?.time ?? '');
   const [target, setTarget] = useState(stage.target);
   const [reason, setReason] = useState(stage.reason);
   const [cleared, setCleared] = useState(!!stage.cleared_on);
@@ -174,7 +175,7 @@ export function StageSheet({ id, today, dragonData, onClose }: { id: RoadStageId
   }
 
   return (
-    <Sheet title={`${info.letter} · ${info.name}`} onClose={onClose} className="road-sheet">
+    <Sheet title={info.name} onClose={onClose} className="road-sheet">
       <form className="road-form" onSubmit={save}>
         <div className="road-form__row">
           <label className="field" htmlFor="road-stage-date">
@@ -186,7 +187,12 @@ export function StageSheet({ id, today, dragonData, onClose }: { id: RoadStageId
             <input id="road-stage-time" type="time" className="input" value={time} onChange={(e) => setTime(e.target.value)} disabled={!date} />
           </label>
         </div>
-        {fromDragon && <p className="road-form__hint">Filled in from your DragonCode targets. Save to keep it here.</p>}
+        {filled?.from === 'dragon' && <p className="road-form__hint">Filled in from your DragonCode targets. Save to keep it here.</p>}
+        {filled?.from === 'schedule' && (
+          <p className="road-form__hint">
+            From the published schedule{filled.until ? `, ${rangeLabel(filled.date, filled.until)}` : ''}. Save to keep it here, or change it.
+          </p>
+        )}
         <label className="field" htmlFor="road-stage-target">
           <span>My target</span>
           <input id="road-stage-target" className="input" maxLength={200} value={target} onChange={(e) => setTarget(e.target.value)} placeholder={id === 'ioi' ? 'A medal' : 'Qualify with room to spare'} />
@@ -222,6 +228,91 @@ export function StageSheet({ id, today, dragonData, onClose }: { id: RoadStageId
             Save {info.short}
           </button>
           {stage.cleared_on && <span className="road-form__hint">AC · {shortDay(stage.cleared_on)}</span>}
+        </div>
+      </form>
+    </Sheet>
+  );
+}
+
+/** One of the season's other contests: its exact day once announced, or hide it from the page. */
+export function EventSheet({ id, onClose }: { id: string; onClose: () => void }) {
+  const events = useStore(data, (s) => s.settings.road.events);
+  const event = SEASON_EVENTS.find((e) => e.id === id);
+  const entry = seasonCalendar(events).find((c) => c.event.id === id);
+  const [date, setDate] = useState(entry && !entry.approx ? entry.date : '');
+  const [time, setTime] = useState(entry?.time ?? '');
+  const [hidden, setHidden] = useState(entry?.hidden ?? false);
+  const [error, setError] = useState<string | null>(null);
+  if (!event || !entry) return null;
+
+  const write = (own: { date: string | null; time: string | null; hidden: boolean } | null) => {
+    const rest = { ...data.get().settings.road.events };
+    if (own && (own.date || own.hidden)) rest[id] = own;
+    else delete rest[id];
+    setRoad({ events: rest });
+  };
+
+  function save(e: React.FormEvent) {
+    e.preventDefault();
+    if (date && !isDate(date)) return setError('That date is not valid.');
+    if (time && !/^([01]\d|2[0-3]):[0-5]\d$/.test(time)) return setError('Use a time like 13:00.');
+    // Leaving the day empty keeps the built-in one (exact or a placeholder).
+    const builtIn = !date || (date === event!.date && !event!.approx && !time);
+    write({ date: builtIn ? null : date, time: builtIn ? null : time || null, hidden });
+    onClose();
+  }
+
+  return (
+    <Sheet title={event.name} onClose={onClose} className="road-sheet">
+      <form className="road-form" onSubmit={save}>
+        <p className="road-form__hint">
+          {event.where} ·{' '}
+          <a href={event.url} target="_blank" rel="noreferrer">
+            official site
+          </a>
+        </p>
+        <p className="road-form__hint">
+          {entry.mine
+            ? 'You set this date.'
+            : event.approx
+              ? `Rough date: around ${monthName(event.date, true)}. ${event.source}`
+              : event.source}
+        </p>
+        <div className="road-form__row">
+          <label className="field" htmlFor="road-event-date">
+            <span>Exact day</span>
+            <input id="road-event-date" type="date" className="input" value={date} onChange={(e) => setDate(e.target.value)} data-autofocus />
+          </label>
+          <label className="field" htmlFor="road-event-time">
+            <span>Starts ({event.zone.replace(/^.*\//, '').replace(/_/g, ' ')} time)</span>
+            <input id="road-event-time" type="time" className="input" value={time} onChange={(e) => setTime(e.target.value)} disabled={!date} />
+          </label>
+        </div>
+        <label className="road-form__check">
+          <input type="checkbox" checked={hidden} onChange={(e) => setHidden(e.target.checked)} />
+          <span>Not doing this one: hide it from my page</span>
+        </label>
+        {error && (
+          <p className="road-form__error" role="alert">
+            {error}
+          </p>
+        )}
+        <div className="road-form__actions">
+          <button type="submit" className="btn btn--primary">
+            Save
+          </button>
+          {entry.mine && (
+            <button
+              type="button"
+              className="btn"
+              onClick={() => {
+                write(hidden ? { date: null, time: null, hidden } : null);
+                onClose();
+              }}
+            >
+              Use the built-in date
+            </button>
+          )}
         </div>
       </form>
     </Sheet>

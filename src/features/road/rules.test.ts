@@ -2,7 +2,22 @@ import { describe, expect, it } from 'vitest';
 import { DEFAULT_ROAD, normaliseRoad, type LogEntry } from '../../data/types';
 import type { DragonSummary } from './dragon';
 import { isSummary } from './dragon';
-import { countdown, currentStage, isHardDay, lastSeven, proofNote, seasonYear, stageWhen, trainingByDay, upsolveLine, zonedInstant } from './rules';
+import { seasonCalendar, upcoming } from './calendar';
+import {
+  countdown,
+  currentStage,
+  daysUntil,
+  gatesThisSeason,
+  isHardDay,
+  lastSeven,
+  proofNote,
+  seasonStart,
+  seasonYear,
+  stageWhen,
+  trainingByDay,
+  upsolveLine,
+  zonedInstant,
+} from './rules';
 
 const TOPIC = 'topic-cp';
 const entry = (date: string, minutes: number, note: string | null = null, topic_id = TOPIC): LogEntry => ({
@@ -67,9 +82,9 @@ describe('stages', () => {
     });
     expect(stageWhen('joi2', road.stages.joi2, dragon, '2026-10-15')).toMatchObject({ date: '2026-11-29', from: 'road' });
     expect(stageWhen('final', road.stages.final, dragon, '2026-10-15')).toEqual({ date: '2027-02-14', time: null, zone: 'Asia/Tokyo', from: 'dragon' });
-    expect(stageWhen('camp', road.stages.camp, dragon, '2026-10-15')).toBeNull();
+    expect(stageWhen('camp', road.stages.camp, dragon, '2026-10-15')).toMatchObject({ date: '2027-03-20', until: '2027-03-24', from: 'schedule' });
     // "JOI" never counts as the IOI stage.
-    expect(stageWhen('ioi', road.stages.ioi, summary({ targets: [{ name: 'JOI qualifier', kind: 'primary', date: '2026-12-01', time: null, timezone: null }] }), '2026-10-15')).toBeNull();
+    expect(stageWhen('ioi', road.stages.ioi, summary({ targets: [{ name: 'JOI qualifier', kind: 'primary', date: '2026-12-01', time: null, timezone: null }] }), '2026-10-15')).toMatchObject({ date: '2027-09-12', from: 'schedule' });
   });
 
   it('the current stage is the first one not cleared', () => {
@@ -116,6 +131,41 @@ describe('training days', () => {
     expect(isHardDay(new Map([['2026-10-12', 30]]), today)).toBe(true);
     expect(isHardDay(new Map([['2026-10-13', 30]]), today)).toBe(false);
     expect(isHardDay(new Map([[today, 5]]), today)).toBe(false);
+  });
+});
+
+describe('gates and the season calendar', () => {
+  it('raises one gate for every training day since 1 September', () => {
+    const days = new Map([
+      ['2026-08-31', 30],
+      ['2026-09-01', 20],
+      ['2026-10-14', 45],
+      ['2026-10-15', 10],
+      ['2026-10-16', 60],
+    ]);
+    expect(seasonStart('2026-10-15')).toBe('2026-09-01');
+    expect(seasonStart('2027-03-01')).toBe('2026-09-01');
+    expect(gatesThisSeason(days, '2026-10-15')).toBe(3);
+  });
+
+  it('counts whole days to a date', () => {
+    expect(daysUntil('2026-10-25', '2026-10-16')).toBe(9);
+    expect(daysUntil('2026-10-16', '2026-10-16')).toBe(0);
+    expect(daysUntil('2026-10-15', '2026-10-16')).toBe(-1);
+  });
+
+  it('puts my exact dates over the placeholders, keeps hidden ones aside, and drops past contests', () => {
+    const road = normaliseRoad({ events: { 'noi-final': { date: '2027-03-06', time: '10:30' }, apio: { hidden: true }, junk: 'x' } });
+    expect(road.events).toEqual({ 'noi-final': { date: '2027-03-06', time: '10:30', hidden: false }, apio: { date: null, time: null, hidden: true } });
+    const cal = seasonCalendar(road.events);
+    const noi = cal.find((c) => c.event.id === 'noi-final')!;
+    expect(noi).toMatchObject({ date: '2027-03-06', time: '10:30', approx: false, mine: true });
+    expect(cal.find((c) => c.event.id === 'usaco-1')).toMatchObject({ approx: true, mine: false });
+    expect(cal.map((c) => c.date)).toEqual([...cal.map((c) => c.date)].sort());
+    const { shown, hidden } = upcoming(cal, '2027-02-01');
+    expect(hidden.map((c) => c.event.id)).toEqual(['apio']);
+    expect(shown.some((c) => c.event.id === 'usaco-1')).toBe(false);
+    expect(shown.some((c) => c.event.id === 'noi-final')).toBe(true);
   });
 });
 

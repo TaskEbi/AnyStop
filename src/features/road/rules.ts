@@ -2,14 +2,19 @@
 import { hash } from '../../lib/random';
 import { addDays } from '../daily-log/dates';
 import { ROAD_STAGES, type LogEntry, type RoadSettings, type RoadStage, type RoadStageId } from '../../data/types';
+import { STAGE_SCHEDULE } from './calendar';
 import type { DragonSummary } from './dragon';
 
-export const STAGE_INFO: Record<RoadStageId, { name: string; short: string; letter: string; match: RegExp }> = {
-  joi1: { name: 'JOI First Round', short: '1st', letter: 'A', match: /first (qualifier|round)|1st (qualifier|round)|一次予選/i },
-  joi2: { name: 'JOI Second Round', short: '2nd', letter: 'B', match: /second (qualifier|round)|2nd (qualifier|round)|二次予選/i },
-  final: { name: 'JOI Final Round', short: 'Final', letter: 'C', match: /final|本選/i },
-  camp: { name: 'Spring Camp', short: 'Camp', letter: 'D', match: /spring camp|春合宿/i },
-  ioi: { name: 'IOI', short: 'IOI', letter: 'E', match: /(^|[^J])IOI\b/ },
+/**
+ * The five stages. JOI renamed its later rounds for 2027: the 本選 is now the semifinal stage and the spring camp
+ * the final stage, so both the old and the new names match DragonCode targets.
+ */
+export const STAGE_INFO: Record<RoadStageId, { name: string; short: string; match: RegExp }> = {
+  joi1: { name: 'JOI First Round', short: '1st round', match: /first (qualifier|round)|1st (qualifier|round)|一次予選/i },
+  joi2: { name: 'JOI Second Round', short: '2nd round', match: /second (qualifier|round)|2nd (qualifier|round)|二次予選/i },
+  final: { name: 'JOI Semifinal', short: 'Semifinal', match: /semi-?final|セミファイナル|本選|final round/i },
+  camp: { name: 'JOI Final Stage', short: 'Final stage', match: /final stage|ファイナルステージ|spring camp|春合宿|春季/i },
+  ioi: { name: 'IOI', short: 'IOI', match: /(^|[^J])IOI\b/ },
 };
 
 /** JOI publishes its times in Japan time, so stage times are read in this zone. */
@@ -19,16 +24,40 @@ export interface StageWhen {
   date: string;
   time: string | null;
   zone: string;
-  /** Where the date came from: set on this page, or one of DragonCode's targets. */
-  from: 'road' | 'dragon';
+  /** The last day, when the published schedule spreads the stage over several days. */
+  until?: string;
+  /** Where the date came from: set on this page, one of DragonCode's targets, or the published schedule. */
+  from: 'road' | 'dragon' | 'schedule';
 }
 
-/** A stage's contest day: the one set here, otherwise a matching DragonCode target (nearest upcoming first). */
+/** A stage's contest day: the one set here, else a matching DragonCode target (nearest upcoming first), else the published schedule. */
 export function stageWhen(id: RoadStageId, stage: RoadStage, dragon: DragonSummary | null, today: string): StageWhen | null {
   if (stage.date) return { date: stage.date, time: stage.time, zone: STAGE_ZONE, from: 'road' };
   const matches = (dragon?.targets ?? []).filter((t) => STAGE_INFO[id].match.test(t.name)).sort((a, b) => a.date.localeCompare(b.date));
   const t = matches.find((x) => x.date >= today) ?? matches.at(-1);
-  return t ? { date: t.date, time: t.time, zone: t.timezone || STAGE_ZONE, from: 'dragon' } : null;
+  if (t) return { date: t.date, time: t.time, zone: t.timezone || STAGE_ZONE, from: 'dragon' };
+  const s = STAGE_SCHEDULE[id];
+  return s ? { date: s.date, time: s.time, zone: s.zone, until: s.until, from: 'schedule' } : null;
+}
+
+/** The first day of the season the page counts gates in: 1 September before the coming IOI summer. */
+export function seasonStart(today: string): string {
+  const [y, m] = today.split('-').map(Number);
+  return `${m >= 9 ? y : y - 1}-09-01`;
+}
+
+/** Gates raised this season: one for every day with training since the season started. */
+export function gatesThisSeason(trained: Map<string, number>, today: string): number {
+  const start = seasonStart(today);
+  let n = 0;
+  for (const [date, minutes] of trained) if (minutes > 0 && date >= start && date <= today) n++;
+  return n;
+}
+
+/** Whole days from today to a date (both YYYY-MM-DD), negative when it has passed. */
+export function daysUntil(date: string, today: string): number {
+  const at = (d: string) => Date.UTC(+d.slice(0, 4), +d.slice(5, 7) - 1, +d.slice(8, 10));
+  return Math.round((at(date) - at(today)) / 86_400_000);
 }
 
 /** The first stage not cleared yet (null once the IOI stage is cleared). */

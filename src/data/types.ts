@@ -171,6 +171,16 @@ export interface RoadSettings {
   dragon_url: string;
   dragon_key: string;
   stages: Record<RoadStageId, RoadStage>;
+  /** My own dates for the season's other contests (NOI, USACO, APIO), keyed by calendar id, over the built-in ones. */
+  events: Record<string, RoadEvent>;
+}
+
+/** A contest on the season calendar as I set it: an exact day replacing a rough one, or hidden from the page. */
+export interface RoadEvent {
+  date: string | null;
+  /** Start time (HH:MM) in the contest's own time zone, or null. */
+  time: string | null;
+  hidden: boolean;
 }
 
 const stage = (date: string | null = null, time: string | null = null): RoadStage => ({ date, time, target: '', reason: '', cleared_on: null, memory: '' });
@@ -183,7 +193,9 @@ export const DEFAULT_ROAD: RoadSettings = {
   dragon_url: DEFAULT_DRAGON_URL,
   dragon_key: '',
   // JOI 2027 qualifier dates from the official schedule (ioi-jp.org/joi-2027/tournament_info); the rest are set on the page.
+  // Later stages fall back to the published schedule in features/road/calendar.ts until a date is set here.
   stages: { joi1: stage('2026-10-25', '14:00'), joi2: stage('2026-11-29', '13:00'), final: stage(), camp: stage(), ioi: stage() },
+  events: {},
 };
 
 /** Fill in anything an older or partial copy is missing, so the page can trust the shape. */
@@ -199,12 +211,21 @@ export function normaliseRoad(raw: unknown): RoadSettings {
       ? { date: orNull(given.date), time: orNull(given.time), target: str(given.target), reason: str(given.reason), cleared_on: orNull(given.cleared_on), memory: str(given.memory) }
       : { ...base };
   }
+  const events: Record<string, RoadEvent> = {};
+  if (r.events && typeof r.events === 'object') {
+    for (const [id, raw] of Object.entries(r.events as Record<string, unknown>)) {
+      if (!raw || typeof raw !== 'object') continue;
+      const e = raw as Partial<RoadEvent>;
+      events[id] = { date: orNull(e.date), time: orNull(e.time), hidden: e.hidden === true };
+    }
+  }
   return {
     why: str(r.why),
     topic_id: orNull(r.topic_id),
     dragon_url: str(r.dragon_url, DEFAULT_DRAGON_URL) || DEFAULT_DRAGON_URL,
     dragon_key: str(r.dragon_key),
     stages,
+    events,
   };
 }
 
