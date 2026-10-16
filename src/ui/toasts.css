@@ -1,20 +1,31 @@
+/*
+ * Every box property is set here rather than left to the popover's built-in styles (inset: 0, fit-content
+ * sizes): where a browser let the box fill the screen, the grid stretched the one toast to full height.
+ */
 .toasts {
   position: fixed;
-  inset: auto auto max(16px, env(safe-area-inset-bottom)) 50%;
-  translate: -50% 0;
-  margin: 0;
+  top: auto;
+  right: 16px;
+  bottom: max(16px, env(safe-area-inset-bottom));
+  left: 16px;
+  width: auto;
+  max-width: 440px;
+  height: auto;
+  max-height: calc(100dvh - 32px);
+  margin: 0 auto;
   padding: 0;
   border: 0;
   background: transparent;
   overflow: visible;
   gap: 0.5rem;
-  width: min(440px, calc(100vw - 32px));
   pointer-events: none;
 }
 .toasts:popover-open {
   display: grid;
+  align-content: end;
 }
 .toast {
+  align-self: end;
   display: flex;
   align-items: center;
   gap: 0.75rem;
