@@ -30,6 +30,7 @@ import { EntrySheet } from '../features/daily-log/EntrySheet';
 import { TopicsSheet } from '../features/daily-log/TopicsSheet';
 import { PasswordSheet } from '../features/auth/PasswordSheet';
 import { Road } from '../features/road/Road';
+import { TodoSection } from '../features/todo/Todo';
 
 /** First visit to an empty cabinet: lay out the examples (only once). */
 function maybeSeed() {
@@ -114,6 +115,16 @@ export function Museum({ cloud }: { cloud: boolean }) {
       <div className="app app--road">
         <Header filterCount={filterCount} />
         <Road />
+        {shared}
+      </div>
+    );
+  }
+
+  if (section === 'todo') {
+    return (
+      <div className="app">
+        <Header filterCount={filterCount} />
+        <TodoSection />
         {shared}
       </div>
     );

@@ -70,7 +70,7 @@ With no `.env.local` the app runs in **local-only mode**: everything stays in th
 
 ## Daily Log
 
-Switch between **Cabinet**, **Daily Log** and **Road to IOI** at the top. The app reopens in whichever section you used last, which is handy for the phone's home-screen icon.
+Switch between **Cabinet**, **Daily Log**, **Road to IOI** and **To-do** at the top. The app reopens in whichever section you used last, which is handy for the phone's home-screen icon.
 
 - **Today**: pick a topic (and optionally a subcategory), enter hours and minutes or tap 15 min / 30 min / 45 min / 1 hr, add a note if you like, then **Log**. The form keeps the topic for the next entry. **Again** chips refill a recent combination. Step back through days with ‹ › or pick a date (no future days).
 - **Sleep and screen time**: two counters at the top of Today. Type hours and minutes or tap − / + (15 min steps; + on an empty sleep counter starts at 8 hr). Under sleep there's a **sleep score** out of 100 (from a watch or sleep app, say), typed in and saved the same way. Each is one number per day, set rather than added up, so changing it replaces the old value; **Clear** removes it (with Undo). Sleep counts on the morning you wake, so "last night" belongs to today. A 7-day average shows underneath once there are two days to average.
@@ -99,6 +99,14 @@ The third section (or `any-stop.vercel.app/#road`, which DragonCode links to): a
 - **From your past self**: one old "what clicked" note (from here or a DragonCode reflection) each day.
 - **DragonCode link**: paste the key from DragonCode → Settings → Road to IOI link (Road → Settings). The page reads DragonCode's read-only `/api/road` summary and keeps the last copy on the device for offline. The key syncs with the settings (member-only) and is left out of exports. DragonCode serves it only once `ROAD_LINK_SECRET` is set there.
 - Settings live in `settings.road` (migration `20261018120000_road_to_ioi.sql`).
+
+## To-do
+
+The fourth section, next to Road to IOI: a plain list of things you want to do.
+
+- **Add** a line, with an optional priority (High / Normal / Low) and an optional due day. Tick the circle to finish one; untick to bring it back. Edit or delete (with Undo) from the row.
+- **Show**: Open, Done or All (finished ones sink to the bottom of All). **Sort**: newest, oldest, priority, due date (undated last) or A to Z. Both are remembered on the device. **Clear finished** removes the done ones (with Undo).
+- Due days are calendar days like the Daily Log's; overdue ones turn red. Saved locally first and synced like everything else (table `todos`, migration `20261019120000_todos.sql`); exports include them.
 
 ## Using it
 

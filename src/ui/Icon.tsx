@@ -38,6 +38,7 @@ export const ICON_PATHS = {
   list: 'M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01',
   screen: 'M7 3h10v18H7zM11 18h2',
   flag: 'M5 21V4M5 4h11l-2 4 2 4H5',
+  check: 'M4.5 12.5l5 5L19.5 7',
 } as const;
 
 export type IconName = keyof typeof ICON_PATHS;

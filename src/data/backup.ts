@@ -5,7 +5,8 @@ import { uuid } from '../lib/random';
 import { commit, commitSettings, currentSession, data, liveConnections, liveItems, liveRooms } from './store';
 import { isDate } from '../features/daily-log/dates';
 import { metricMax } from '../features/daily-log/validate';
-import { LOG_METRICS, normaliseRoad, type Connection, type Item, type LogDayMetric, type LogEntry, type LogGoal, type LogTopic, type Room, type Settings } from './types';
+import { checkTodo } from '../features/todo/todos';
+import { LOG_METRICS, normaliseRoad, TODO_PRIORITIES, type Connection, type Item, type LogDayMetric, type LogEntry, type LogGoal, type LogTopic, type Room, type Settings, type Todo } from './types';
 
 /** Version 2 adds the Daily Log; version 1 exports (cabinet only) still import. */
 interface Backup {
@@ -23,6 +24,8 @@ interface Backup {
   log_goals?: LogGoal[];
   /** Sleep, sleep score and screen time; absent from exports made before they existed. */
   log_metrics?: LogDayMetric[];
+  /** The to-do list; absent from exports made before it existed. */
+  todos?: Todo[];
 }
 
 const live = <T extends { deleted_at: string | null }>(m: Map<string, T>) => [...m.values()].filter((r) => !r.deleted_at);
@@ -53,7 +56,18 @@ export function validLog(b: Pick<Backup, 'log_topics' | 'log_entries' | 'log_goa
   return { topics: ok, entries, goals, metrics };
 }
 
-const extFor = (type: string) => (type.includes('png') ? 'png' : type.includes('webp') ? 'webp' : type.includes('gif') ? 'gif' : 'jpg');
+/** Keep only well-formed to-dos, with their titles tidied the way new ones are. */
+export function validTodos(b: Pick<Backup, 'todos'>): Todo[] {
+  return (Array.isArray(b.todos) ? b.todos : []).flatMap((t) => {
+    if (!isId(t?.id) || typeof t.title !== 'string' || !TODO_PRIORITIES.includes(t.priority)) return [];
+    const checked = checkTodo(t.title, typeof t.due === 'string' ? t.due : null);
+    if ('error' in checked) return [];
+    const doneAt = typeof t.done_at === 'string' && !Number.isNaN(Date.parse(t.done_at)) ? t.done_at : null;
+    return [{ ...t, ...checked, done_at: doneAt }];
+  });
+}
+
+const extFor =(type: string) => (type.includes('png') ? 'png' : type.includes('webp') ? 'webp' : type.includes('gif') ? 'gif' : 'jpg');
 
 /** Everything (items, rooms, strings, settings, the Daily Log) plus a folder of photos, as one zip. */
 export async function exportCollection(onProgress?: (done: number, total: number) => void): Promise<Blob> {
@@ -86,6 +100,7 @@ export async function exportCollection(onProgress?: (done: number, total: number
     log_entries: live(st.log_entries),
     log_goals: live(st.log_goals),
     log_metrics: live(st.log_metrics),
+    todos: live(st.todos),
   };
   files['curio.json'] = strToU8(JSON.stringify(backup, null, 2));
   return new Blob([zipSync(files)], { type: 'application/zip' });
@@ -147,6 +162,7 @@ export async function importCollection(
   // Re-derive ids from metric + day, so a value always lands on that day's one row.
   const metrics = new Map(log.metrics.map((m) => [metricId(m.metric, m.date), revive({ ...m, id: metricId(m.metric, m.date) })]));
   commit('log_metrics', [...metrics.values()]);
+  commit('todos', validTodos(backup).map(revive));
   if (backup.settings?.museum_name) commitSettings({ museum_name: backup.settings.museum_name, examples_seeded: true });
   if (typeof backup.settings?.log_timezone === 'string' && backup.settings.log_timezone) commitSettings({ log_timezone: backup.settings.log_timezone });
   if (backup.settings?.road && typeof backup.settings.road === 'object') {

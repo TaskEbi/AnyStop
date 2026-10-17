@@ -10,6 +10,7 @@ import { supabase } from '../../lib/supabase';
 import { formatMinutes } from '../daily-log/duration';
 import { inRange, sumMinutes } from '../daily-log/stats';
 import { useToday } from '../daily-log/useLog';
+import { todoCounts } from '../todo/todos';
 import { Icon, type IconName } from '../../ui/Icon';
 import { InlineConfirm } from '../../ui/InlineConfirm';
 import { DESIGN_INFO, PALETTE_INFO } from '../../ui/labels';
@@ -34,9 +35,10 @@ const SECTIONS: { id: Section; label: string; icon: IconName }[] = [
   { id: 'cabinet', label: 'Cabinet', icon: 'shelves' },
   { id: 'log', label: 'Daily Log', icon: 'clock' },
   { id: 'road', label: 'Road to IOI', icon: 'flag' },
+  { id: 'todo', label: 'To-do', icon: 'check' },
 ];
 
-/** The big switch between the museum and the Daily Log. */
+/** The big switch between the cabinet, the Daily Log, Road to IOI and the to-do list. */
 function SectionSwitch() {
   const section = useStore(ui, (s) => s.section);
   return (
@@ -56,6 +58,11 @@ function LogSubtitle() {
   const entries = useStore(data, (s) => s.log_entries);
   const total = useMemo(() => sumMinutes(inRange(entries.values(), today, today)), [entries, today]);
   return <p className="museum-name__sub type">Daily Log · {formatMinutes(total)} today</p>;
+}
+
+function TodoSubtitle() {
+  const open = useStore(data, (s) => todoCounts(s.todos.values()).open);
+  return <p className="museum-name__sub type">To-do · {open ? `${open} to go` : 'all clear'}</p>;
 }
 
 function MuseumName() {
@@ -104,6 +111,8 @@ function MuseumName() {
       )}
       {section === 'log' ? (
         <LogSubtitle />
+      ) : section === 'todo' ? (
+        <TodoSubtitle />
       ) : section === 'road' ? (
         <p className="museum-name__sub type">One more problem. One step closer.</p>
       ) : (
@@ -273,7 +282,7 @@ function Menu() {
         )}
         <Account />
         <p className="menu__keys type">
-          {section === 'log' ? 'Esc close · Ctrl/⌘ K jump anywhere' : 'N add · / search · R wander · Esc close · 1 2 3 4 views · ← → step through exhibits'}
+          {section === 'cabinet' ? 'N add · / search · R wander · Esc close · 1 2 3 4 views · ← → step through exhibits' : 'Esc close · Ctrl/⌘ K jump anywhere'}
         </p>
       </div>
     </>
@@ -286,9 +295,9 @@ export function Header({ filterCount }: { filterCount: number }) {
   const logView = useStore(ui, (s) => s.logView);
   const q = useStore(ui, (s) => s.filters.q);
 
-  if (section === 'road') {
+  if (section === 'road' || section === 'todo') {
     return (
-      <header className="app-header app-header--road">
+      <header className={`app-header app-header--${section}`}>
         <div className="app-header__top">
           <MuseumName />
           <SectionSwitch />

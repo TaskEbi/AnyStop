@@ -143,6 +143,22 @@ export interface LogDayMetric {
   deleted_at: string | null;
 }
 
+export const TODO_PRIORITIES = ['high', 'normal', 'low'] as const;
+export type TodoPriority = (typeof TODO_PRIORITIES)[number];
+
+/** One thing I want to do. Finishing it stamps done_at; unticking clears it. */
+export interface Todo {
+  id: string;
+  title: string;
+  priority: TodoPriority;
+  /** Calendar date YYYY-MM-DD, or null when there is no deadline. */
+  due: string | null;
+  done_at: string | null;
+  created_at: string;
+  updated_at: string;
+  deleted_at: string | null;
+}
+
 /** The five stages of the Road to IOI page, in order. */
 export const ROAD_STAGES = ['joi1', 'joi2', 'final', 'camp', 'ioi'] as const;
 export type RoadStageId = (typeof ROAD_STAGES)[number];
@@ -250,11 +266,12 @@ interface Records {
   log_entries: LogEntry;
   log_goals: LogGoal;
   log_metrics: LogDayMetric;
+  todos: Todo;
 }
 export type TableName = keyof Records;
 export type RecordOf<T extends TableName> = Records[T];
 /** Push order matters: rooms before the items that use them, items before strings, topics before entries. */
-export const TABLES: TableName[] = ['rooms', 'items', 'connections', 'log_topics', 'log_entries', 'log_goals', 'log_metrics'];
+export const TABLES: TableName[] = ['rooms', 'items', 'connections', 'log_topics', 'log_entries', 'log_goals', 'log_metrics', 'todos'];
 
 export const DEFAULT_SETTINGS: Settings = {
   museum_name: 'Curio Cabinet',

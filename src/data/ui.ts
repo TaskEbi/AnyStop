@@ -2,6 +2,7 @@ import { createStore } from '../lib/createStore';
 import { EMPTY_FILTERS, type Filters } from './filter';
 import type { ItemDraft } from './actions';
 import type { ViewName } from './types';
+import { TODO_SHOWS, TODO_SORTS, type TodoShow, type TodoSort } from '../features/todo/todos';
 
 export interface Toast {
   id: number;
@@ -9,7 +10,8 @@ export interface Toast {
   action?: { label: string; run: () => void };
 }
 
-export type Section = 'cabinet' | 'log' | 'road';
+export type Section = 'cabinet' | 'log' | 'road' | 'todo';
+const SECTIONS = ['cabinet', 'log', 'road', 'todo'] as const;
 export type LogView = 'today' | 'history' | 'stats';
 
 export interface UiState {
@@ -39,10 +41,15 @@ export interface UiState {
   /** Entry sheet over History/Stats: edit an entry, or add one (optionally on a given day). */
   logSheet: { editId: string | null; date?: string } | null;
   passwordOpen: boolean;
+  /** To-do list: how it is ordered and which part is on show. Both are remembered on this device. */
+  todoSort: TodoSort;
+  todoShow: TodoShow;
 }
 
 const SECTION_KEY = 'curio-section';
 const LOG_VIEW_KEY = 'curio-log-view';
+const TODO_SORT_KEY = 'curio-todo-sort';
+const TODO_SHOW_KEY = 'curio-todo-show';
 
 function remembered<T extends string>(key: string, allowed: readonly T[], fallback: T): T {
   try {
@@ -75,7 +82,7 @@ function linkedSection(): Section | null {
 
 export const ui = createStore<UiState>({
   // Reopen where I left off, so the phone app can go straight back to the log. A #road link (from DragonCode) opens Road to IOI.
-  section: linkedSection() ?? remembered<Section>(SECTION_KEY, ['cabinet', 'log', 'road'], 'cabinet'),
+  section: linkedSection() ?? remembered<Section>(SECTION_KEY, SECTIONS, 'cabinet'),
   view: 'shelves',
   filters: EMPTY_FILTERS,
   openItemId: null,
@@ -92,6 +99,8 @@ export const ui = createStore<UiState>({
   logTopicsOpen: false,
   logSheet: null,
   passwordOpen: false,
+  todoSort: remembered<TodoSort>(TODO_SORT_KEY, TODO_SORTS, 'newest'),
+  todoShow: remembered<TodoShow>(TODO_SHOW_KEY, TODO_SHOWS, 'open'),
 });
 
 export function setSection(section: Section) {
@@ -103,6 +112,16 @@ export function setLogView(logView: LogView) {
   ui.set({ section: 'log', logView });
   remember(SECTION_KEY, 'log');
   remember(LOG_VIEW_KEY, logView);
+}
+
+export function setTodoSort(todoSort: TodoSort) {
+  ui.set({ todoSort });
+  remember(TODO_SORT_KEY, todoSort);
+}
+
+export function setTodoShow(todoShow: TodoShow) {
+  ui.set({ todoShow });
+  remember(TODO_SHOW_KEY, todoShow);
 }
 
 export function setFilters(patch: Partial<Filters>) {
